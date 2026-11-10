@@ -1365,7 +1365,7 @@ html:has(#landing-page-root),
 body:has(#landing-page-root),
 body.has-landing-page {
   overflow-y: auto !important;
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
   height: auto !important;
   min-height: 100% !important;
 }
@@ -1375,6 +1375,7 @@ body.has-landing-page #root {
   height: auto !important;
   min-height: 100% !important;
   overflow: visible !important;
+  overflow-x: clip !important;
 }
 
 /* Standalone phone windows can reach behind the notch and home indicator.

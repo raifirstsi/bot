@@ -231,48 +231,48 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       className="min-h-screen w-full bg-[#000000] text-[#ffffff] font-sans antialiased selection:bg-[#0099ff] selection:text-white"
     >
       {/* 1. TOP NAVIGATION - Framer Cinematic Style */}
-      <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#242424]/60">
-        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 w-full bg-[#000000]/90 backdrop-blur-md border-b border-[#242424]/60 transition-all">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
           {/* Logo trắng trên nền đen, hài hòa cân đối, tuyệt đối không chèn chữ */}
           <a href="/" className="flex items-center group py-1">
             <img
               src="/logo-white.png?v=3"
               alt="RAI²"
-              className="h-9 md:h-10 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
           </a>
 
           {/* 4 Menu ngắn gọn đúng yêu cầu */}
-          <nav className="flex items-center gap-6 md:gap-8">
+          <nav className="flex items-center gap-3 sm:gap-6 md:gap-8">
             <button
               onClick={() => scrollTo("triet-ly")}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Triết lý
             </button>
             <button
               onClick={() => scrollTo("tinh-nang")}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Tính năng
             </button>
             <button
               onClick={() => scrollTo("bang-gia")}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Bảng giá
             </button>
             {currentUser ? (
               <a
                 href="/app"
-                className="text-[14px] font-medium text-[#0099ff] hover:text-[#ffffff] transition-colors cursor-pointer"
+                className="text-[13px] sm:text-[14px] font-medium text-[#0099ff] hover:text-[#ffffff] transition-colors cursor-pointer"
               >
                 Vào Workspace
               </a>
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+                className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
               >
                 Đăng nhập
               </button>
@@ -665,7 +665,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             <img
               src="/logo-white.png?v=3"
               alt="RAI²"
-              className="h-8 md:h-9 w-auto object-contain opacity-90"
+              className="h-5 sm:h-6 md:h-7 w-auto object-contain opacity-85"
             />
           </div>
 
