@@ -96,6 +96,31 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
   const [isPaid, setIsPaid] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Mở khóa thanh cuộn hoàn toàn cho toàn trang khi Landing Page hiển thị
+  useEffect(() => {
+    document.body.classList.add("has-landing-page");
+    document.documentElement.style.overflowY = "auto";
+    document.body.style.overflowY = "auto";
+    document.body.style.height = "auto";
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.height = "auto";
+      root.style.minHeight = "100%";
+      root.style.overflow = "visible";
+    }
+    return () => {
+      document.body.classList.remove("has-landing-page");
+      document.documentElement.style.overflowY = "";
+      document.body.style.overflowY = "";
+      document.body.style.height = "";
+      if (root) {
+        root.style.height = "";
+        root.style.minHeight = "";
+        root.style.overflow = "";
+      }
+    };
+  }, []);
+
   // Polling kiểm tra thanh toán SePay
   useEffect(() => {
     if (!paymentData || isPaid) return;
@@ -162,16 +187,19 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] text-[#ffffff] font-sans antialiased selection:bg-[#0099ff] selection:text-white">
+    <div
+      id="landing-page-root"
+      className="min-h-screen w-full bg-[#000000] text-[#ffffff] font-sans antialiased selection:bg-[#0099ff] selection:text-white"
+    >
       {/* 1. TOP NAVIGATION - Framer Cinematic Style */}
       <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#242424]/60">
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo duy nhất trên nền đen, không chèn text */}
+          {/* Logo trắng trên nền đen, hài hòa cân đối, tuyệt đối không chèn chữ */}
           <a href="/" className="flex items-center group py-2">
             <img
               src="/logo-white.png"
-              alt="Logo"
-              className="h-8 md:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
+              alt="RAI²"
+              className="h-8 md:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
           </a>
 
@@ -179,35 +207,35 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           <nav className="flex items-center gap-6 md:gap-8">
             <button
               onClick={() => scrollTo("triet-ly")}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Triết lý
             </button>
             <button
               onClick={() => scrollTo("tinh-nang")}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Tính năng
             </button>
             <button
               onClick={() => scrollTo("bang-gia")}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Bảng giá
             </button>
             <button
               onClick={onAdminSignIn}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
             >
               Đăng nhập
             </button>
           </nav>
 
-          {/* Action Button: Filled White Pill */}
+          {/* Action Button: Bấm trực tiếp mở Popup Đăng ký 14 ngày */}
           <div className="hidden sm:block">
             <button
-              onClick={() => scrollTo("bang-gia")}
-              className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => handleCheckout(PLANS[0])}
+              className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               Dùng thử 14 ngày
             </button>
@@ -217,10 +245,10 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
       {/* 2. HERO SECTION - Editorial Framer Typographic Mass */}
       <section className="relative pt-24 pb-20 md:pt-36 md:pb-28 overflow-hidden">
-        {/* Subtle radial glow on edges */}
+        {/* Subtle radial glow on edges - pointer-events-none đảm bảo không chặn click */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#0099ff]/5 blur-[120px] pointer-events-none rounded-full" />
 
-        <div className="max-w-[1200px] mx-auto px-6 text-center relative z-10">
+        <div className="max-w-[1200px] mx-auto px-6 text-center relative z-20">
           {/* Tagline Announcement */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#242424] bg-[#080808] mb-8 hover:border-[#0099ff]/50 transition-colors">
             <span className="w-1.5 h-1.5 rounded-full bg-[#0099ff] animate-pulse" />
@@ -239,17 +267,17 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             Đa số các chủ doanh nghiệp đang rơi vào cái bẫy <strong className="text-white font-medium">"chắp vá AI"</strong> trên các quy trình cũ nát. Kết quả: AI khuếch đại sai lầm với tốc độ nhanh gấp 10 lần. Đã đến lúc trang bị một Hệ điều hành tự hành thực thụ cho đội ngũ 5–20 nhân sự.
           </p>
 
-          {/* CTA Buttons: Filled White Pill + Ghost Outline Pill */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* CTA Buttons: Bấm mở Popup trực tiếp */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-30">
             <button
               onClick={() => handleCheckout(PLANS[0])}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5 cursor-pointer"
             >
               Trải nghiệm 14 ngày miễn phí
             </button>
             <button
               onClick={() => scrollTo("triet-ly")}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 text-[#ffffff] text-[15px] font-medium hover:border-[#0099ff] hover:text-[#0099ff] transition-all"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 text-[#ffffff] text-[15px] font-medium hover:border-[#0099ff] hover:text-[#0099ff] transition-all cursor-pointer"
             >
               Khám phá triết lý RAI²
             </button>
@@ -534,7 +562,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
                 <button
                   onClick={() => handleCheckout(plan)}
-                  className={`w-full py-3 rounded-full text-[13px] font-medium transition-all ${
+                  className={`w-full py-3 rounded-full text-[13px] font-medium transition-all cursor-pointer ${
                     plan.popular
                       ? "bg-[#0099ff] text-white hover:bg-[#0088ee]"
                       : plan.tier === "trial"
@@ -566,21 +594,21 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       {/* 7. FOOTER - Minimalist Framer Aesthetic */}
       <footer className="py-16 border-t border-[#242424]/60 bg-[#000000]">
         <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Logo trắng trên nền đen, không chèn text */}
+          {/* Logo trắng trên nền đen, hài hòa cân đối, không chèn chữ */}
           <div className="flex items-center">
             <img
               src="/logo-white.png"
-              alt="Logo"
+              alt="RAI²"
               className="h-7 w-auto object-contain opacity-90"
             />
           </div>
 
           {/* Links */}
           <div className="flex items-center gap-8 text-[13px] text-[#8c8c8c]">
-            <button onClick={() => scrollTo("triet-ly")} className="hover:text-white transition-colors">Triết lý</button>
-            <button onClick={() => scrollTo("tinh-nang")} className="hover:text-white transition-colors">Tính năng</button>
-            <button onClick={() => scrollTo("bang-gia")} className="hover:text-white transition-colors">Bảng giá</button>
-            <button onClick={onAdminSignIn} className="hover:text-white transition-colors">Đăng nhập</button>
+            <button onClick={() => scrollTo("triet-ly")} className="hover:text-white transition-colors cursor-pointer">Triết lý</button>
+            <button onClick={() => scrollTo("tinh-nang")} className="hover:text-white transition-colors cursor-pointer">Tính năng</button>
+            <button onClick={() => scrollTo("bang-gia")} className="hover:text-white transition-colors cursor-pointer">Bảng giá</button>
+            <button onClick={onAdminSignIn} className="hover:text-white transition-colors cursor-pointer">Đăng nhập</button>
           </div>
 
           {/* Copyright */}
@@ -592,12 +620,12 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
       {/* 8. MODAL THANH TOÁN SEPAY & DÙNG THỬ */}
       {selectedPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
           <div className="relative w-full max-w-[480px] bg-[#111111] border border-[#242424] rounded-[20px] p-6 sm:p-8 shadow-2xl">
             {/* Nút đóng modal */}
             <button
               onClick={() => setSelectedPlan(null)}
-              className="absolute top-5 right-5 text-[#8c8c8c] hover:text-white transition-colors p-1"
+              className="absolute top-5 right-5 text-[#8c8c8c] hover:text-white transition-colors p-1 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -638,7 +666,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all"
+                    className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer"
                   >
                     Kích hoạt tài khoản ngay
                   </button>
@@ -669,7 +697,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                         setSelectedPlan(null);
                         onAdminSignIn();
                       }}
-                      className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all"
+                      className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer"
                     >
                       Truy cập hệ thống ngay
                     </button>
@@ -716,7 +744,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                           </span>
                           <button
                             onClick={() => copyToClipboard(paymentData.transferContent)}
-                            className="text-[#8c8c8c] hover:text-white"
+                            className="text-[#8c8c8c] hover:text-white cursor-pointer"
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </button>
@@ -737,7 +765,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                     </p>
                     <button
                       onClick={() => handleCheckout(selectedPlan)}
-                      className="px-6 py-2.5 rounded-full bg-white text-black text-[13px] font-medium"
+                      className="px-6 py-2.5 rounded-full bg-white text-black text-[13px] font-medium cursor-pointer"
                     >
                       Thử lại
                     </button>

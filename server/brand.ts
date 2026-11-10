@@ -39,11 +39,11 @@ export const brandSchema = z
 export type Brand = z.infer<typeof brandSchema>;
 
 export const DEFAULT_BRAND: Brand = {
-  name: "RAI² SI",
+  name: "RAI²",
   logo: "/logo-white.png",
   favicon: "/favicon.png",
-  tagline: "Retrofit AI Architecture",
-  supportUrl: "https://raifirst.si",
+  tagline: "ARTIFICIAL INTELLIGENCE + ACTUAL INTELLIGENCE",
+  supportUrl: "https://rai2.si",
 };
 
 export interface BrandStatus {

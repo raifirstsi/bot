@@ -45,6 +45,10 @@ async function chooseRoot(): Promise<React.ReactNode> {
     }
     return <PairPage initialCode={takePairingCodeFromLocation()} initialEmail={takeInvitedEmailFromLocation()} />;
   }
+  if (location.pathname === "/" || location.pathname === "") {
+    await pageLanguage;
+    return <RaiLandingPage onAdminSignIn={() => { location.href = "/pair"; }} />;
+  }
   const session = await readSessionState();
   if (session.kind === "unauthenticated") {
     await pageLanguage;
