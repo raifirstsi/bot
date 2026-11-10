@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Shield, Check, ArrowRight, X, QrCode, Sparkles, Terminal, Copy,
-  CheckCircle2, Users, Cpu, FileText, ChevronRight, Lock, Eye
+  CheckCircle2, Users, Cpu, FileText, ChevronRight, Lock, Eye, AlertTriangle, Zap
 } from "lucide-react";
 
 interface PlanOption {
@@ -96,124 +96,118 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
   const [isPaid, setIsPaid] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Polling payment check
+  // Polling kiểm tra thanh toán SePay
   useEffect(() => {
     if (!paymentData || isPaid) return;
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/subscription/check/${paymentData.code}`);
+        const res = await fetch(`/api/subscription/check?code=${paymentData.code}`);
         if (res.ok) {
-          const data = (await res.json()) as { status: string };
-          if (data.status === "paid") {
+          const data = await res.json();
+          if (data.paid) {
             setIsPaid(true);
             clearInterval(interval);
           }
         }
-      } catch {
-        // ignore polling errors
+      } catch (err) {
+        console.error("Lỗi polling kiểm tra hóa đơn:", err);
       }
-    }, 2500);
+    }, 3000);
     return () => clearInterval(interval);
   }, [paymentData, isPaid]);
 
-  const handleOpenPlan = (plan: PlanOption) => {
+  const handleCheckout = async (plan: PlanOption) => {
     setSelectedPlan(plan);
-    setPaymentData(null);
     setIsPaid(false);
-  };
-
-  const handleCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPlan) return;
+    setPaymentData(null);
+    if (plan.tier === "trial") {
+      return;
+    }
     setIsSubmitting(true);
     try {
-      if (selectedPlan.tier === "trial") {
-        // Free trial 14 days: simulate instant activation & auto-entry
-        setTimeout(() => {
-          setIsPaid(true);
-          setIsSubmitting(false);
-        }, 800);
-        return;
-      }
       const res = await fetch("/api/subscription/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: selectedPlan.tier, email }),
+        body: JSON.stringify({ tier: plan.tier, email: email || "customer@rai2.si" })
       });
       if (res.ok) {
-        const data = (await res.json()) as {
-          payment: {
-            qrUrl: string;
-            bankAccount: string;
-            bankName: string;
-            amount: number;
-            transferContent: string;
-          };
-          order: { code: string };
-        };
+        const data = await res.json();
         setPaymentData({
-          ...data.payment,
+          qrUrl: data.payment.qrUrl,
+          bankAccount: data.payment.bankAccount,
+          bankName: data.payment.bankName,
+          amount: data.payment.amount,
+          transferContent: data.payment.transferContent,
           code: data.order.code,
         });
       }
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi tạo đơn hàng thanh toán:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const copyContent = (text: string) => {
-    void navigator.clipboard.writeText(text);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#fafafa] font-sans antialiased selection:bg-[#ff8833]/30 selection:text-[#fafafa]">
-      {/* 1. Top Announcement Bar */}
-      <div className="w-full bg-[#171717] border-b border-[#262626] py-2 px-4 text-center">
-        <div className="mx-auto max-w-[1152px] flex items-center justify-center gap-2 text-[14px]">
-          <span className="font-semibold text-[#fafafa]">HỆ ĐIỀU HÀNH DOANH NGHIỆP RAI² FIRST OS</span>
-          <span className="text-[#737373]">·</span>
-          <span className="text-[#a1a1a1]">Bản Thiết Kế Giải Phóng Doanh Chủ Khỏi Chiếc Bẫy MeOS</span>
-          <a href="#dan-kennedy-letter" className="ml-2 inline-flex items-center text-[#ff8833] hover:underline font-medium">
-            Đọc lá thư mổ xẻ <ArrowRight className="ml-1 size-3.5" />
+    <div className="min-h-screen bg-[#000000] text-[#ffffff] font-sans antialiased selection:bg-[#0099ff] selection:text-white">
+      {/* 1. TOP NAVIGATION - Framer Cinematic Style */}
+      <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#242424]/60">
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Logo duy nhất trên nền đen, không chèn text */}
+          <a href="/" className="flex items-center group py-2">
+            <img
+              src="/logo-white.png"
+              alt="Logo"
+              className="h-8 md:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
+            />
           </a>
-        </div>
-      </div>
 
-      {/* 2. Floating Primary Navigation */}
-      <header className="sticky top-4 z-40 mx-auto max-w-[1152px] px-4 pt-2">
-        <div className="flex h-14 items-center justify-between rounded-[10px] border border-[#262626] bg-[#0a0a0a]/90 px-4 backdrop-blur-md shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
-          <div className="flex items-center gap-3">
-            <img src="/assets/rai-logo.png" alt="RAI²" className="h-8 w-auto object-contain" />
-            <div className="hidden sm:flex flex-col">
-              <span className="text-[15px] font-bold tracking-tight text-[#fafafa] leading-tight">RAI²</span>
-              <span className="text-[10px] tracking-wider text-[#737373] uppercase">Artificial + Actual Intelligence</span>
-            </div>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-6 text-[14px] font-medium text-[#a1a1a1]">
-            <a href="#dan-kennedy-letter" className="hover:text-[#fafafa] transition-colors">Lá Thư Gửi Sếp</a>
-            <a href="#seven-principles" className="hover:text-[#fafafa] transition-colors">7 Nguyên Tắc RAI²</a>
-            <a href="#architecture" className="hover:text-[#fafafa] transition-colors">Kiến Trúc OS</a>
-            <a href="#workforce" className="hover:text-[#fafafa] transition-colors">Đội Ngũ Nhân Sự Số</a>
-            <a href="#pricing" className="hover:text-[#fafafa] transition-colors text-[#fafafa]">Bảng Giá</a>
-          </nav>
-
-          <div className="flex items-center gap-2.5">
+          {/* 4 Menu ngắn gọn đúng yêu cầu */}
+          <nav className="flex items-center gap-6 md:gap-8">
             <button
-              type="button"
-              onClick={onAdminSignIn}
-              className="rounded-[8px] border border-[#262626] bg-[#171717] px-3.5 py-1.5 text-[13px] font-medium text-[#a1a1a1] hover:text-[#fafafa] hover:border-[#464646] transition-colors"
+              onClick={() => scrollTo("triet-ly")}
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
             >
-              Đăng nhập Admin
+              Triết lý
             </button>
             <button
-              type="button"
-              onClick={() => handleOpenPlan(PLANS[0]!)}
-              className="rounded-[8px] bg-[#e5e5e5] px-3.5 py-1.5 text-[13px] font-semibold text-[#171717] hover:bg-white transition-all shadow-[0_1px_0_0_rgba(255,255,255,0.8)_inset,0_-2px_6px_0_rgba(0,0,0,0.1)_inset]"
+              onClick={() => scrollTo("tinh-nang")}
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+            >
+              Tính năng
+            </button>
+            <button
+              onClick={() => scrollTo("bang-gia")}
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+            >
+              Bảng giá
+            </button>
+            <button
+              onClick={onAdminSignIn}
+              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors"
+            >
+              Đăng nhập
+            </button>
+          </nav>
+
+          {/* Action Button: Filled White Pill */}
+          <div className="hidden sm:block">
+            <button
+              onClick={() => scrollTo("bang-gia")}
+              className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Dùng thử 14 ngày
             </button>
@@ -221,539 +215,534 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
         </div>
       </header>
 
-      {/* 3. Hero Section (Graphite Asymmetric Layout) */}
-      <section className="relative mx-auto max-w-[1152px] px-4 pt-20 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#262626] bg-[#171717] px-3 py-1 text-[12px] font-medium text-[#ff8833]">
-              <Sparkles className="size-3.5 text-[#ff8833]" />
-              <span>DÀNH RIÊNG CHO DOANH CHỦ 5–20 NHÂN SỰ</span>
-            </div>
+      {/* 2. HERO SECTION - Editorial Framer Typographic Mass */}
+      <section className="relative pt-24 pb-20 md:pt-36 md:pb-28 overflow-hidden">
+        {/* Subtle radial glow on edges */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#0099ff]/5 blur-[120px] pointer-events-none rounded-full" />
 
-            <h1 className="text-[44px] md:text-[56px] font-medium leading-[1.05] tracking-[-1.5px] text-[#fafafa]">
-              Đừng Đốt Tiền Chắp Vá AI Lên Một Bộ Máy Đang Rách Nát.
-            </h1>
-
-            <p className="text-[18px] leading-[1.45] text-[#a1a1a1]">
-              Hầu hết doanh nghiệp đang rơi vào <strong className="text-[#fafafa]">“Cơn Ác Mộng AI First”</strong>: mỗi phòng mua 1 tài khoản ChatGPT Plus xé lẻ dữ liệu, nhân viên ỷ lại cỗ máy phỏng đoán internet, và không ai đứng ra chịu trách nhiệm P&L.
-            </p>
-
-            <div className="p-4 rounded-[10px] border border-[#262626] bg-[#171717]/60">
-              <p className="text-[15px] italic text-[#fafafa] leading-relaxed">
-                “Nếu hôm nay Bạn xây lại doanh nghiệp từ đầu, với năng lực AI đang có, Bạn có thiết kế bộ máy công ty theo cách cũ hay không?”
-              </p>
-              <span className="block mt-2 text-[12px] font-medium uppercase tracking-wider text-[#ff8833]">— Câu hỏi cốt tử của RAI² First OS</span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <button
-                type="button"
-                onClick={() => handleOpenPlan(PLANS[0]!)}
-                className="rounded-[8px] bg-[#e5e5e5] px-6 py-3.5 text-[15px] font-semibold text-[#171717] hover:bg-white transition-all shadow-[0_1px_0_0_rgba(255,255,255,0.8)_inset,0_-2px_6px_0_rgba(0,0,0,0.1)_inset]"
-              >
-                Kích Hoạt Dùng Thử 14 Ngày Miễn Phí
-              </button>
-              <a
-                href="#pricing"
-                className="rounded-[8px] border border-[#464646] bg-[#262626] px-6 py-3.5 text-[15px] font-medium text-[#fafafa] hover:border-[#737373] transition-colors"
-              >
-                Xem Bảng Giá 3 Gói
-              </a>
-            </div>
-
-            <div className="flex items-center gap-6 pt-2 text-[13px] text-[#737373]">
-              <span className="flex items-center gap-1.5"><Check className="size-4 text-[#ff8833]" /> 100% Mô hình BYOK an toàn</span>
-              <span className="flex items-center gap-1.5"><Check className="size-4 text-[#ff8833]" /> Không cần thẻ tín dụng</span>
-              <span className="flex items-center gap-1.5"><Check className="size-4 text-[#ff8833]" /> Quét SePay VietQR tức thì</span>
-            </div>
+        <div className="max-w-[1200px] mx-auto px-6 text-center relative z-10">
+          {/* Tagline Announcement */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#242424] bg-[#080808] mb-8 hover:border-[#0099ff]/50 transition-colors">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0099ff] animate-pulse" />
+            <span className="text-[12px] font-medium text-[#8c8c8c] tracking-wide uppercase">
+              Retrofit AI Architecture • RAI² First OS
+            </span>
           </div>
 
-          {/* Luminous Polygon & Terminal Lattice Graphic */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto w-full max-w-[420px] rounded-[10px] border border-[#262626] bg-[#0a0a0a] p-5 shadow-[0_0_12px_0_rgba(0,0,0,0.5)_inset]">
-              <div className="flex items-center justify-between border-b border-[#262626] pb-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="size-2.5 rounded-full bg-[#ff8833]" />
-                  <span className="font-mono text-[12px] text-[#a1a1a1]">rai2_enterprise_os.sys</span>
-                </div>
-                <span className="rounded bg-[#171717] px-2 py-0.5 font-mono text-[10px] text-[#737373]">STABLE · V1.0</span>
-              </div>
+          {/* Headline Display - GT Walsheim Editorial Style */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-medium tracking-[-0.04em] leading-[0.95] text-white max-w-[1050px] mx-auto mb-8">
+            Nếu hôm nay Bạn xây lại doanh nghiệp từ đầu, Bạn có tổ chức bộ máy theo cách cũ?
+          </h1>
 
-              <div className="space-y-3 font-mono text-[12px] leading-relaxed">
-                <p className="text-[#a1a1a1]">
-                  <span className="text-[#ff8833]">$</span> init rai2 --responsibility-mode=CAIO
-                </p>
-                <div className="p-3 rounded-[6px] bg-[#171717] border border-[#262626] space-y-1.5 text-[11px]">
-                  <p className="text-[#ffb931]">✓ Audit MeOS: Phá vỡ bẫy người sáng lập</p>
-                  <p className="text-[#a1a1a1]">✓ Single Source of Truth: Thư viện ngữ cảnh kết nối</p>
-                  <p className="text-[#a1a1a1]">✓ 4 Nhân Sự Số: @NghienCuu, @NoiDung, @VanHanh, @DieuHanh</p>
-                  <p className="text-emerald-400">✓ Security Sandbox: Linux Container Isolation READY</p>
-                </div>
-                <div className="border-t border-[#262626] pt-3 text-[11px] text-[#737373]">
-                  RAI² = Responsibility AI × (Artificial Intelligence + Actual Intelligence)
-                </div>
-              </div>
-
-              {/* Decorative luminous border accent */}
-              <div className="absolute -inset-px rounded-[11px] pointer-events-none border border-[#ff8833]/20" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Dan Kennedy Direct-Response Letter: Mổ Xẻ Chiếc Bẫy MeOS & Cơn Ác Mộng AI First */}
-      <section id="dan-kennedy-letter" className="mx-auto max-w-[880px] px-4 py-20 border-t border-[#262626]">
-        <div className="rounded-[10px] border border-[#262626] bg-[#171717]/40 p-8 md:p-12 relative overflow-hidden">
-          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-[#ff8833] via-white to-[#2e73fc]" />
-
-          <span className="block text-[12px] font-bold tracking-widest uppercase text-[#ff8833] mb-3">
-            LÁ THƯ TÂM CAN TỪ CỐ VẤN TÁI THIẾT KẾ DOANH NGHIỆP RAI MAN
-          </span>
-
-          <h2 className="text-[28px] md:text-[36px] font-medium leading-[1.2] text-[#fafafa] mb-6">
-            Gửi người Chủ Doanh Nghiệp 5–20 Nhân Sự Đang Mở Mắt Ra Là Lo Tiền Nhà, Tiền Lương Và Ngập Đầu Trong Việc!
-          </h2>
-
-          <div className="space-y-5 text-[16px] leading-[1.65] text-[#a1a1a1]">
-            <p className="text-[#fafafa] font-medium">
-              Bạn có nhận ra mình đang mắc kẹt trong chính cơ nghiệp mà mình đổ máu dựng nên?
-            </p>
-            <p>
-              Phiên bản đầu tiên của hệ điều hành công ty bạn chính là <strong className="text-[#fafafa]">“MeOS” (Hệ Điều Hành Tôi-Là-Tất-Cả)</strong>. Bạn biết cách thu hút và chuyển đổi khách hàng... Bạn biết cách giao việc... Bạn biết số liệu tài chính... Bạn biết mọi bí mật và là người duy nhất giải quyết được mọi rắc rối. Vì điều đó, <em>doanh nghiệp của bạn hoàn toàn phụ thuộc vào BẠN</em>.
-            </p>
-            <p>
-              Nhưng hãy nhìn thẳng vào sự thật cay đắng này: <strong>MeOS được tạo ra vào thời điểm công nghệ chưa có AI</strong>. Các quy trình của bạn được đắp vá xoay quanh sức người. Và khi làn sóng AI bùng nổ, bạn làm gì?
-            </p>
-            <div className="my-6 p-5 rounded-[8px] border border-[#ff8833]/30 bg-[#0a0a0a] text-[#fafafa]">
-              <h3 className="text-[17px] font-semibold text-[#ff8833] mb-2">CƠN ÁC MỘNG "AI FIRST" MÀ CHÚNG TÔI ĐÃ MẤT 2 NĂM ĂN NẰM ĐỂ CHỨNG KIẾN:</h3>
-              <p className="text-[14px] text-[#a1a1a1] leading-relaxed">
-                Tất cả nhân viên ai cũng “AI First”, đụng việc gì cũng hỏi AI... nhưng đưa AI vào một quy trình cũ rách nát chỉ tạo ra rác ở tốc độ tên lửa. Phòng marketing có 1 tài khoản ChatGPT Plus, phòng sale 1 tài khoản, phòng CSKH 1 tài khoản... Mỗi phòng làm riêng, dữ liệu phân mảnh, kết quả không đo lường được. Nhân viên đánh mất luôn <strong>Trí Tuệ Thực Tế (Actual Intelligence)</strong> của mình, ỷ lại vào cỗ máy chỉ biết phỏng đoán thông tin từ internet.
-              </p>
-            </div>
-            <p>
-              Cuối tháng, sếp vẫn trả nguyên quỹ lương, gánh thêm hóa đơn phần mềm AI, mà hiệu suất chẳng tăng thêm một xu lợi nhuận P&L nào!
-            </p>
-            <p className="text-[#fafafa] font-semibold text-[18px]">
-              Và khi AI làm sai, khách hàng khiếu nại... AI CÓ ĐỨNG RA CHỊU TRÁCH NHIỆM KHÔNG?
-            </p>
-            <p>
-              Tuyệt đối không! Nhân viên đổ lỗi cho ChatGPT, còn đơn vị bán công cụ thì phủi tay. Đó là lý do bạn cần một Hệ điều hành có <strong>CHỈ SỐ TRÁCH NHIỆM (RESPONSIBILITY AI)</strong> và một người <strong>CAIO (Chief AI Officer)</strong> đứng ra cam kết con số thực tế.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. The 7 Core Principles of RAI² First OS */}
-      <section id="seven-principles" className="mx-auto max-w-[1152px] px-4 py-20 border-t border-[#262626]">
-        <div className="text-center max-w-[760px] mx-auto mb-16">
-          <span className="text-[12px] font-bold tracking-widest uppercase text-[#ff8833]">NỀN TẢNG BẤT BIẾN</span>
-          <h2 className="text-[32px] md:text-[40px] font-medium tracking-tight text-[#fafafa] mt-2 mb-4">
-            7 Nguyên Tắc Cốt Tử Của Hệ Điều Hành RAI²
-          </h2>
-          <p className="text-[16px] text-[#a1a1a1]">
-            Hợp nhất Người và Máy, bắt buộc có người chịu trách nhiệm chính để biến AI thành cỗ máy tạo ra dòng tiền và lợi nhuận thực tế.
+          {/* Subhead Dan Kennedy style */}
+          <p className="text-base sm:text-lg md:text-xl text-[#999999] max-w-[800px] mx-auto leading-relaxed mb-10 tracking-[-0.01em]">
+            Đa số các chủ doanh nghiệp đang rơi vào cái bẫy <strong className="text-white font-medium">"chắp vá AI"</strong> trên các quy trình cũ nát. Kết quả: AI khuếch đại sai lầm với tốc độ nhanh gấp 10 lần. Đã đến lúc trang bị một Hệ điều hành tự hành thực thụ cho đội ngũ 5–20 nhân sự.
           </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            {
-              id: "01",
-              title: "RESPONSIBILITY AI",
-              sub: "Trách Nhiệm AI",
-              desc: "Bắt buộc có một người chịu trách nhiệm chính (CAIO) cho câu hỏi: 'Làm sao AI giúp công ty kiếm được tiền và tiết kiệm cho công ty'. Không có trách nhiệm, AI chỉ là món đồ chơi đốt tiền."
-            },
-            {
-              id: "02",
-              title: "RETROFIT AI",
-              sub: "Gỡ Bỏ Chắp Vá AI",
-              desc: "Dứt khoát không đưa AI vào các quy trình cũ đã hư hỏng. Tháo dỡ các mảnh ghép chắp vá ChatGPT rời rạc để tránh khuếch đại sai lầm vận hành."
-            },
-            {
-              id: "03",
-              title: "RE-ENGINEERED AI",
-              sub: "Tái Thiết Kế Quy Trình",
-              desc: "Tái thiết kế lại quy trình xoay quanh năng lực AI: Việc gì AI làm tốt nhất (tổng hợp, cào dữ liệu, draft), việc gì Con Người làm tốt nhất (linh cảm, quan hệ, chốt deal)."
-            },
-            {
-              id: "04",
-              title: "RELIABLE AI",
-              sub: "Quy Trình Tin Cậy",
-              desc: "Xây dựng các chốt chặn phê duyệt (Approval Cards). Nhân viên và sếp hoàn toàn tin tưởng phối hợp cùng AI mà không sợ bot tự ý làm bậy."
-            },
-            {
-              id: "05",
-              title: "RESULTS-DRIVEN AI",
-              sub: "Định Hướng Kết Quả",
-              desc: "Mọi tác vụ của AI đều phải đo lường được bằng chỉ số cụ thể, thời gian tiết kiệm và năng suất đầu ra chứ không nói lý thuyết suông."
-            },
-            {
-              id: "06",
-              title: "REVENUE AI",
-              sub: "Tập Trung Dòng Tiền",
-              desc: "AI phải tác động trực tiếp vào P&L, tăng trưởng doanh thu hoặc cắt giảm chi phí vận hành có thể nhìn thấy trên tài khoản ngân hàng."
-            },
-            {
-              id: "07",
-              title: "RESILIENT AI",
-              sub: "Thích Ứng Bền Bỉ",
-              desc: "Hệ thống độc lập với nhà cung cấp mô hình (BYOK). Dù OpenAI, Claude hay Google thay đổi, doanh nghiệp của bạn vẫn bất biến và tự chủ 100%."
-            }
-          ].map((item) => (
-            <div key={item.id} className="rounded-[10px] border border-[#262626] bg-[#171717] p-6 hover:border-[#464646] transition-colors relative flex flex-col justify-between">
-              <div>
-                <span className="font-mono text-[12px] font-bold text-[#ff8833]">{item.id}</span>
-                <h3 className="text-[18px] font-semibold text-[#fafafa] mt-1">{item.title}</h3>
-                <span className="text-[13px] text-[#737373] block mb-3">{item.sub}</span>
-                <p className="text-[14px] leading-relaxed text-[#a1a1a1]">{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. Enterprise OS Architecture: Algorithms + Common Language + Desired Outputs */}
-      <section id="architecture" className="mx-auto max-w-[1152px] px-4 py-20 border-t border-[#262626]">
-        <div className="text-center max-w-[760px] mx-auto mb-16">
-          <span className="text-[12px] font-bold tracking-widest uppercase text-[#ff8833]">ĐỊNH NGHĨA KHOA HỌC</span>
-          <h2 className="text-[32px] md:text-[40px] font-medium tracking-tight text-[#fafafa] mt-2 mb-4">
-            Hệ Điều Hành Doanh Nghiệp (Enterprise OS) Là Gì?
-          </h2>
-          <p className="text-[16px] text-[#a1a1a1]">
-            Theo định nghĩa hệ điều hành chuẩn, một OS doanh nghiệp gồm 3 thành tố hợp nhất:
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6">
-            <div className="size-10 rounded-[8px] bg-[#262626] flex items-center justify-center text-[#ff8833] mb-4">
-              <Terminal className="size-5" />
-            </div>
-            <h3 className="text-[18px] font-semibold text-[#fafafa] mb-1">Set of Algorithms</h3>
-            <span className="text-[13px] text-[#ff8833] block mb-3">Tập Hợp Thuật Toán</span>
-            <p className="text-[14px] text-[#a1a1a1] leading-relaxed">
-              Chính là <strong>Quy trình vận hành & SOP chuẩn hóa</strong> của từng nghiệp vụ. Khi các bước được số hóa rõ ràng, bot sẽ thực thi chính xác 100% không lệch lạc.
-            </p>
-          </div>
-
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6">
-            <div className="size-10 rounded-[8px] bg-[#262626] flex items-center justify-center text-[#ff8833] mb-4">
-              <FileText className="size-5" />
-            </div>
-            <h3 className="text-[18px] font-semibold text-[#fafafa] mb-1">Common Language</h3>
-            <span className="text-[13px] text-[#ff8833] block mb-3">Nguồn Sự Thật Duy Nhất</span>
-            <p className="text-[14px] text-[#a1a1a1] leading-relaxed">
-              Bộ não và <strong>Thư viện Ngữ cảnh Doanh nghiệp</strong>. Người và Máy cùng giao tiếp chung một ngôn ngữ, hiểu đúng mục tiêu mà không nói hai lời.
-            </p>
-          </div>
-
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6">
-            <div className="size-10 rounded-[8px] bg-[#262626] flex items-center justify-center text-[#ff8833] mb-4">
-              <Cpu className="size-5" />
-            </div>
-            <h3 className="text-[18px] font-semibold text-[#fafafa] mb-1">Desired Outputs</h3>
-            <span className="text-[13px] text-[#ff8833] block mb-3">Đầu Ra Mong Muốn</span>
-            <p className="text-[14px] text-[#a1a1a1] leading-relaxed">
-              Chỉ số KPI, doanh thu, thời gian hoàn vốn và dòng tiền thực tế. Toàn bộ cỗ máy vận hành để đạt được mục tiêu kinh doanh cuối cùng của bạn.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. The 4 Core Digital Workers (Bộ Tứ Nhân Sự Số) */}
-      <section id="workforce" className="mx-auto max-w-[1152px] px-4 py-20 border-t border-[#262626]">
-        <div className="text-center max-w-[760px] mx-auto mb-16">
-          <span className="text-[12px] font-bold tracking-widest uppercase text-[#ff8833]">THỰC THI THỰC TẾ TRÊN RAI2.SI</span>
-          <h2 className="text-[32px] md:text-[40px] font-medium tracking-tight text-[#fafafa] mt-2 mb-4">
-            Đội Ngũ 4 Nhân Sự Số Cốt Lõi Trên RAI²
-          </h2>
-          <p className="text-[16px] text-[#a1a1a1]">
-            Không phải là một khung chat rỗng. Khi đăng nhập vào `rai2.si`, bạn sở hữu ngay 4 nhân sự số chuyên môn hóa cao:
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6 flex gap-4">
-            <div className="size-12 rounded-[10px] bg-[#262626] shrink-0 flex items-center justify-center text-[#ff8833]">
-              <Eye className="size-6" />
-            </div>
-            <div>
-              <h3 className="text-[18px] font-semibold text-[#fafafa]">@KhaoSat_NghienCuu</h3>
-              <span className="text-[12px] text-[#ff8833] font-medium">Chuyên viên Nghiên cứu & Tình báo Thị trường</span>
-              <p className="text-[14px] text-[#a1a1a1] mt-2 leading-relaxed">
-                Tự động mở trình duyệt Chromium thực thụ, quét website đối thủ, theo dõi giá bán, biến động ngành mỗi ngày và tổng hợp báo cáo lúc 7:00 sáng.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6 flex gap-4">
-            <div className="size-12 rounded-[10px] bg-[#262626] shrink-0 flex items-center justify-center text-[#ff8833]">
-              <FileText className="size-6" />
-            </div>
-            <div>
-              <h3 className="text-[18px] font-semibold text-[#fafafa]">@TruyenThong_NoiDung</h3>
-              <span className="text-[12px] text-[#ff8833] font-medium">Cỗ Máy Sáng Tạo Nội Dung & Chuẩn Hóa Thông Điệp</span>
-              <p className="text-[14px] text-[#a1a1a1] mt-2 leading-relaxed">
-                Viết bài chuẩn SEO/AEO/GEO theo giọng văn độc quyền, tự động sinh ảnh thumbnail và lên lịch xuất bản qua Postiz đa nền tảng.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6 flex gap-4">
-            <div className="size-12 rounded-[10px] bg-[#262626] shrink-0 flex items-center justify-center text-[#ff8833]">
-              <Terminal className="size-6" />
-            </div>
-            <div>
-              <h3 className="text-[18px] font-semibold text-[#fafafa]">@VanHanh_DuLieu</h3>
-              <span className="text-[12px] text-[#ff8833] font-medium">Kỹ sư Dữ liệu & Tự Động Hóa Vận Hành</span>
-              <p className="text-[14px] text-[#a1a1a1] mt-2 leading-relaxed">
-                Chạy trong môi trường Linux Sandbox riêng biệt: tự viết code Python bóc tách file Excel khách hàng, đối soát công nợ và vẽ biểu đồ dòng tiền.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[10px] border border-[#262626] bg-[#171717] p-6 flex gap-4">
-            <div className="size-12 rounded-[10px] bg-[#262626] shrink-0 flex items-center justify-center text-[#ff8833]">
-              <Users className="size-6" />
-            </div>
-            <div>
-              <h3 className="text-[18px] font-semibold text-[#fafafa]">@TroLy_DieuHanh</h3>
-              <span className="text-[12px] text-[#ff8833] font-medium">Thư Ký Điều Phối & Bàn Giao Tác Vụ</span>
-              <p className="text-[14px] text-[#a1a1a1] mt-2 leading-relaxed">
-                Nhận lệnh bằng tiếng Việt từ sếp, triệu tập phòng họp AI (Room Coordinator), phân chia việc cho 3 bot trên và gửi thẻ phê duyệt (Approval Card) về máy sếp.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Pricing Section (4 Tiers with SePay Integration) */}
-      <section id="pricing" className="mx-auto max-w-[1152px] px-4 py-20 border-t border-[#262626]">
-        <div className="text-center max-w-[760px] mx-auto mb-16">
-          <span className="text-[12px] font-bold tracking-widest uppercase text-[#ff8833]">ĐẦU TƯ CHO HIỆU SUẤT</span>
-          <h2 className="text-[32px] md:text-[44px] font-medium tracking-tight text-[#fafafa] mt-2 mb-4">
-            Bảng Giá Đầu Tư Hệ Điều Hành RAI²
-          </h2>
-          <p className="text-[16px] text-[#a1a1a1]">
-            100% Mô hình BYOK (Khách hàng tự điền API Key cá nhân) — Chi phí duy trì minh bạch, dữ liệu độc lập, hoàn vốn sau 90 ngày.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.tier}
-              className={`rounded-[10px] border p-6 flex flex-col justify-between transition-all ${
-                plan.popular
-                  ? "border-[#ff8833] bg-[#171717] shadow-[0_0_24px_rgba(255,136,51,0.15)]"
-                  : "border-[#262626] bg-[#0a0a0a] hover:border-[#464646]"
-              }`}
+          {/* CTA Buttons: Filled White Pill + Ghost Outline Pill */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={() => handleCheckout(PLANS[0])}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5"
             >
-              <div>
-                {plan.badge && (
-                  <span className={`inline-block text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-[4px] mb-3 ${
-                    plan.popular ? "bg-[#ff8833] text-[#171717]" : "bg-[#262626] text-[#a1a1a1]"
-                  }`}>
-                    {plan.badge}
-                  </span>
-                )}
-                <h3 className="text-[20px] font-bold text-[#fafafa]">{plan.name}</h3>
-                <div className="my-3">
-                  <span className="text-[28px] font-bold text-[#fafafa]">{plan.priceDisplay}</span>
-                  <span className="text-[12px] text-[#737373] block">{plan.periodDisplay}</span>
-                </div>
-                <p className="text-[13px] text-[#a1a1a1] mb-6 leading-relaxed">{plan.description}</p>
-                <div className="border-t border-[#262626] pt-4 mb-6">
-                  <span className="text-[12px] font-semibold text-[#737373] uppercase tracking-wider block mb-3">Quyền lợi bao gồm:</span>
-                  <ul className="space-y-2.5 text-[13px] text-[#a1a1a1]">
-                    {plan.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check className="size-4 shrink-0 text-[#ff8833] mt-0.5" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              Trải nghiệm 14 ngày miễn phí
+            </button>
+            <button
+              onClick={() => scrollTo("triet-ly")}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 text-[#ffffff] text-[15px] font-medium hover:border-[#0099ff] hover:text-[#0099ff] transition-all"
+            >
+              Khám phá triết lý RAI²
+            </button>
+          </div>
 
-              <button
-                type="button"
-                onClick={() => handleOpenPlan(plan)}
-                className={`w-full rounded-[8px] py-3 text-[14px] font-semibold transition-all ${
+          {/* Metrics micro-bar */}
+          <div className="mt-16 pt-10 border-t border-[#242424]/60 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-[900px] mx-auto text-left">
+            <div className="p-3 border-l border-[#242424]">
+              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Bảo chứng ROI</div>
+              <div className="text-2xl font-medium text-white mt-1">90 Ngày</div>
+              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Cam kết hoàn vốn rõ ràng</div>
+            </div>
+            <div className="p-3 border-l border-[#242424]">
+              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Dữ liệu cốt lõi</div>
+              <div className="text-2xl font-medium text-white mt-1">100% BYOK</div>
+              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Quyền sở hữu key & API tuyệt đối</div>
+            </div>
+            <div className="p-3 border-l border-[#242424]">
+              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Bộ máy tự hành</div>
+              <div className="text-2xl font-medium text-white mt-1">4 Chuyên Trách</div>
+              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Sales, Ops, Marketing & CAIO</div>
+            </div>
+            <div className="p-3 border-l border-[#242424]">
+              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Quy mô tối ưu</div>
+              <div className="text-2xl font-medium text-white mt-1">5–20 Người</div>
+              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Thiết kế đo ni đóng giày cho SME</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. SECTION: BÓC TRẦN SỰ THẬT - Dan Kennedy Hard-hitting Copy */}
+      <section id="triet-ly" className="py-20 border-t border-[#242424]/60 bg-[#080808]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="max-w-[800px] mb-14">
+            <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
+              Mổ xẻ tử huyệt vận hành
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-6">
+              Cơn ác mộng "AI-First" và ảo tưởng nguy hiểm về MeOS
+            </h2>
+            <p className="text-base sm:text-lg text-[#999999] leading-relaxed">
+              Các chuyên gia tự phong đang rao giảng việc biến một cá nhân thành "bản sao AI" (MeOS). Nhưng đây là sự thật cay đắng mà không ai dám nói với bạn:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Card 1: Ảo tưởng MeOS */}
+            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-[#000000] border border-[#242424] flex items-center justify-center text-[#ff4444] mb-6">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-medium text-white mb-3 tracking-[-0.02em]">
+                Ảo tưởng MeOS: Đóng gói sự hỗn loạn
+              </h3>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+                Nếu một người làm việc theo cảm hứng, thiếu tính kỷ luật và quy trình chuẩn, thì việc tạo ra một "bản sao AI" chỉ nhân bản sự lộn xộn đó lên gấp hàng trăm lần.
+              </p>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed">
+                Khi công ty mở rộng từ 5 lên 10 hay 20 người, MeOS trở thành cái bẫy giam cầm chính người sáng lập, biến sếp thành điểm nghẽn nghẹt thở nhất của doanh nghiệp.
+              </p>
+            </div>
+
+            {/* Card 2: Cơn ác mộng chắp vá AI */}
+            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-[#000000] border border-[#242424] flex items-center justify-center text-[#ff8833] mb-6">
+                <Zap className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-medium text-white mb-3 tracking-[-0.02em]">
+                Cái bẫy công cụ: Ném AI vào quy trình rác
+              </h3>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+                Mua tài khoản ChatGPT, cài thêm bot trả lời tin nhắn, trang bị tool tự động tạo bài viết... nhưng doanh thu không tăng, chi phí phình to và không một ai chịu trách nhiệm về kết quả cuối cùng.
+              </p>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed">
+                Đưa AI vào một quy trình hỏng chỉ giúp bạn tạo ra rác nhanh hơn, đốt tiền nhanh hơn và làm khách hàng thất vọng nhanh hơn.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. SECTION: 7 NGUYÊN TẮC CỐT TỬ RAI² FIRST OS */}
+      <section className="py-24 border-t border-[#242424]/60 bg-[#000000]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="text-center max-w-[800px] mx-auto mb-16">
+            <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
+              Triết lý nền tảng
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-5">
+              7 Nguyên Tắc Cốt Tử Của RAI² First OS
+            </h2>
+            <p className="text-base text-[#999999] leading-relaxed">
+              Khung năng lực biến tổ chức của bạn thành một thực thể số tự hành, có trách nhiệm giải trình và cam kết tỷ suất hoàn vốn.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                num: "01",
+                title: "Hệ Thống Trước — AI Theo Sau",
+                desc: "Không có phép màu nào cứu được một quy trình rách nát. Trước khi kết nối bất kỳ bot hay agent nào, hệ thống phải được chuẩn hóa và cắt bỏ các bước thừa."
+              },
+              {
+                num: "02",
+                title: "AI²: Artificial + Actual Intelligence",
+                desc: "Trí tuệ nhân tạo (Artificial Intelligence) chỉ phát huy sức mạnh khi được dẫn dắt bởi Trí tuệ thực chiến (Actual Intelligence) từ người có kinh nghiệm thực tế."
+              },
+              {
+                num: "03",
+                title: "Chuẩn Hóa Trước Khi Tự Động Hóa",
+                desc: "Chỉ tự động hóa những gì đã được kiểm chứng bằng tay và lặp lại tối thiểu 10 lần thành công. Không bao giờ tự động hóa một giả định chưa được chứng minh."
+              },
+              {
+                num: "04",
+                title: "Đo Bằng P&L Và Dòng Tiền Thực Tế",
+                desc: "Dẹp bỏ số lượng token, lượt prompt hay số bài viết vô thưởng vô phạt. Thước đo duy nhất của AI tại RAI² là: Nó mang lại bao nhiêu tiền mặt hoặc tiết kiệm bao nhiêu giờ lương?"
+              },
+              {
+                num: "05",
+                title: "Cam Kết Hoàn Vốn Trong 90 Ngày",
+                desc: "Một khoản đầu tư vào kiến trúc AI phải chứng minh được giá trị hoàn vốn (Payback Period) trong vòng 90 ngày, nếu không đó là một sự lãng phí."
+              },
+              {
+                num: "06",
+                title: "Tấn Công Vào Điểm Nghẽn (TOC)",
+                desc: "Dựa trên Lý thuyết điểm nghẽn (Theory of Constraints): Chỉ tập trung đội ngũ bot vào mắt xích đang kìm hãm dòng tiền của toàn bộ công ty."
+              }
+            ].map((p, idx) => (
+              <div
+                key={idx}
+                className="p-7 rounded-[15px] bg-[#080808] border border-[#242424] hover:border-[#0099ff]/60 transition-all group"
+              >
+                <div className="text-[12px] font-mono text-[#0099ff] mb-4">
+                  PRINCIPLE // {p.num}
+                </div>
+                <h3 className="text-lg font-medium text-white mb-2.5 tracking-[-0.01em] group-hover:text-white transition-colors">
+                  {p.title}
+                </h3>
+                <p className="text-[13px] text-[#8c8c8c] leading-relaxed">
+                  {p.desc}
+                </p>
+              </div>
+            ))}
+
+            {/* Nguyên tắc 7: Full width highlight */}
+            <div className="md:col-span-2 lg:col-span-3 p-8 rounded-[15px] bg-[#080808] border border-[#0099ff]/30 hover:border-[#0099ff] transition-all relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#0099ff]/5 blur-3xl pointer-events-none" />
+              <div className="text-[12px] font-mono text-[#0099ff] mb-3">
+                PRINCIPLE // 07 — CỐT LÕI
+              </div>
+              <h3 className="text-xl sm:text-2xl font-medium text-white mb-3 tracking-[-0.02em]">
+                Trách Nhiệm Giải Trình & Vai Trò Của CAIO
+              </h3>
+              <p className="text-[14px] text-[#999999] leading-relaxed max-w-[950px]">
+                AI không thể bị thả nổi. Tại RAI², mọi tác vụ số đều có một Giám đốc AI (CAIO) đứng sau giám sát: chịu trách nhiệm về số liệu P&L, kiểm soát rủi ro bảo mật và cam kết kết quả đầu ra cho toàn bộ các phòng ban của doanh nghiệp bạn.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SECTION: TÍNH NĂNG - BỘ TỨ NHÂN SỰ SỐ TỰ HÀNH */}
+      <section id="tinh-nang" className="py-24 border-t border-[#242424]/60 bg-[#080808]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="max-w-[800px] mb-16">
+            <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
+              Năng lực thực thi
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-5">
+              Bộ Tứ Nhân Sự Số Vận Hành 24/7
+            </h2>
+            <p className="text-base text-[#999999] leading-relaxed">
+              Không chỉ là chatbot trả lời suông. Đây là những trợ lý tự hành sở hữu Sandbox Linux cô lập, có khả năng duyệt web thực tế, đọc tài liệu nội bộ và phối hợp đa nhiệm.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
+              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 01</div>
+              <h3 className="text-xl font-medium text-white mb-2">Trợ Lý Vận Hành & Tự Động Hóa (Ops Bot)</h3>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+                Chạy định kỳ các routine hàng ngày: thu thập báo cáo bán hàng, đồng bộ đơn hàng về Sheet, kiểm tra lỗi hệ thống và gửi thông báo trực tiếp qua Telegram/Zalo.
+              </p>
+              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+                <Check className="w-4 h-4" /> Tự động hóa không cần giám sát 24/7
+              </div>
+            </div>
+
+            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
+              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 02</div>
+              <h3 className="text-xl font-medium text-white mb-2">Trợ Lý Nghiên Cứu & Trình Duyệt Web (Browser Bot)</h3>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+                Tự động đăng nhập vào cổng thông tin, tải hóa đơn, cào dữ liệu đối thủ cạnh tranh trên Shopee/Tiki và tóm tắt thành các quyết định thực thi.
+              </p>
+              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+                <Check className="w-4 h-4" /> Điều khiển trình duyệt Chromium độc lập
+              </div>
+            </div>
+
+            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
+              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 03</div>
+              <h3 className="text-xl font-medium text-white mb-2">Trợ Lý Truyền Thông & Tiếp Thị (Content Bot)</h3>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+                Soạn thảo nội dung theo chuẩn giọng văn thương hiệu của bạn, chuyển đổi bài viết chuyên sâu thành bài đăng đa kênh, chuẩn SEO và không tạo ra nội dung rác.
+              </p>
+              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+                <Check className="w-4 h-4" /> Đảm bảo tiêu chuẩn SEO/AEO/GEO
+              </div>
+            </div>
+
+            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
+              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 04</div>
+              <h3 className="text-xl font-medium text-white mb-2">Phòng Họp Multi-Agent & Giám Sát CAIO</h3>
+              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+                Không gian làm việc chung (AI Rooms) nơi các bot cùng trao đổi, phản biện và hợp tác giải quyết một bài toán hóc búa của ban giám đốc.
+              </p>
+              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+                <Check className="w-4 h-4" /> Đưa ra nguồn sự thật duy nhất (Single Source of Truth)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SECTION: BẢNG GIÁ & ĐĂNG KÝ (PRICING) */}
+      <section id="bang-gia" className="py-24 border-t border-[#242424]/60 bg-[#000000]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="text-center max-w-[750px] mx-auto mb-16">
+            <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
+              Minh bạch • Không rủi ro
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-5">
+              Bắt Đầu Với Chi Phí Chưa Bằng Một Bữa Trưa
+            </h2>
+            <p className="text-base text-[#999999] leading-relaxed">
+              Mô hình BYOK (Bring Your Own Key) giúp bạn nắm 100% quyền kiểm soát chi phí API trực tiếp với nhà cung cấp. Không phụ phí ẩn.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {PLANS.map((plan) => (
+              <div
+                key={plan.tier}
+                className={`relative flex flex-col justify-between p-7 rounded-[15px] transition-all ${
                   plan.popular
-                    ? "bg-[#ff8833] text-[#171717] hover:bg-[#ff9944]"
-                    : "bg-[#e5e5e5] text-[#171717] hover:bg-white"
+                    ? "bg-[#080808] border-2 border-[#0099ff] shadow-xl shadow-[#0099ff]/5"
+                    : "bg-[#080808] border border-[#242424] hover:border-[#333333]"
                 }`}
               >
-                {plan.tier === "trial" ? "Bắt Đầu Dùng Thử 14 Ngày" : `Đăng Ký Gói ${plan.name}`}
-              </button>
+                {plan.badge && (
+                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    plan.popular ? "bg-[#0099ff] text-white" : "bg-white text-black"
+                  }`}>
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div>
+                  <div className="text-base font-medium text-white mb-2">{plan.name}</div>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-2xl sm:text-3xl font-medium tracking-tight text-white">
+                      {plan.priceDisplay}
+                    </span>
+                  </div>
+                  <div className="text-[12px] text-[#666666] mb-5">{plan.periodDisplay}</div>
+
+                  <p className="text-[13px] text-[#8c8c8c] leading-relaxed mb-6 min-h-[55px]">
+                    {plan.description}
+                  </p>
+
+                  <div className="space-y-3 mb-8 pt-6 border-t border-[#242424]">
+                    {plan.features.map((f, i) => (
+                      <div key={i} className="flex items-start gap-2.5 text-[12px] text-[#cccccc]">
+                        <Check className="w-3.5 h-3.5 text-[#0099ff] mt-0.5 shrink-0" />
+                        <span className="leading-snug">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleCheckout(plan)}
+                  className={`w-full py-3 rounded-full text-[13px] font-medium transition-all ${
+                    plan.popular
+                      ? "bg-[#0099ff] text-white hover:bg-[#0088ee]"
+                      : plan.tier === "trial"
+                      ? "bg-white text-black hover:bg-[#e6e6e6]"
+                      : "border border-white/20 text-white hover:border-[#0099ff] hover:text-[#0099ff]"
+                  }`}
+                >
+                  {plan.tier === "trial" ? "Bắt đầu dùng thử ngay" : "Chọn gói này"}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Cam kết hoàn vốn 90 ngày của Dan Kennedy */}
+          <div className="mt-16 p-8 rounded-[15px] bg-[#080808] border border-[#242424] max-w-[900px] mx-auto text-center">
+            <div className="inline-flex items-center gap-2 text-[#0099ff] text-[13px] font-medium uppercase tracking-wider mb-3">
+              <Shield className="w-4 h-4" /> Cam kết không rủi ro
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 9. Dan Kennedy Guarantee & P.S. (Cam Kết Không Rủi Ro) */}
-      <section className="mx-auto max-w-[880px] px-4 py-16 border-t border-[#262626]">
-        <div className="rounded-[10px] border border-[#ff8833]/40 bg-[#171717] p-8 md:p-10 text-center">
-          <div className="size-12 rounded-full bg-[#ff8833]/20 text-[#ff8833] flex items-center justify-center mx-auto mb-4">
-            <Shield className="size-6" />
-          </div>
-          <h3 className="text-[24px] font-bold text-[#fafafa] mb-3">
-            CAM KẾT HOÀN VỐN TRONG 90 NGÀY (100% NO-RISK GUARANTEE)
-          </h3>
-          <p className="text-[15px] text-[#a1a1a1] leading-relaxed max-w-[700px] mx-auto mb-6">
-            Nếu sau 90 ngày đưa Hệ điều hành RAI² First OS vào vận hành, hệ thống không giúp bạn <strong className="text-[#fafafa]">tiết kiệm tối thiểu 15.000.000 VNĐ chi phí</strong> hoặc <strong className="text-[#fafafa]">giải phóng ít nhất 10 giờ làm việc tay chân mỗi tuần</strong> cho bạn: Chúng tôi sẽ hoàn lại 100% tiền thuê bao không một câu hỏi vặn vẹo. Rủi ro thuộc về chúng tôi, hiệu suất thuộc về bạn.
-          </p>
-
-          <div className="text-left border-t border-[#262626] pt-6 mt-6 text-[14px] text-[#a1a1a1] space-y-3 font-mono">
-            <p>
-              <strong className="text-[#ff8833]">P.S. (Tái bút):</strong> Trong kinh doanh, cái đắt đỏ nhất không phải là tiền mua phần mềm, mà là <em>chi phí cơ hội của việc người chủ phải làm những việc lặt vặt của nhân viên 5 triệu/tháng</em>. Hãy ngừng làm khổ chủ cho chính công ty của mình.
-            </p>
-            <p>
-              <strong className="text-[#ff8833]">P.P.S.:</strong> Gói dùng thử 14 ngày hoàn toàn miễn phí, không yêu cầu thẻ tín dụng, kích hoạt trong 30 giây. Bạn không mất gì cả ngoài chiếc bẫy MeOS đang giam cầm bạn.
+            <h3 className="text-xl sm:text-2xl font-medium text-white mb-3">
+              Bảo Chứng Hoàn Vốn 90 Ngày (Dan Kennedy Style)
+            </h3>
+            <p className="text-[14px] text-[#8c8c8c] leading-relaxed max-w-[750px] mx-auto">
+              Nếu trong vòng 90 ngày kể từ khi triển khai RAI² First OS theo đúng quy trình chuẩn hóa, doanh nghiệp của bạn không tiết kiệm được tối thiểu 30 giờ làm việc vô nghĩa hoặc không nhìn thấy sự gia tăng rõ rệt về hiệu suất P&L, chúng tôi sẽ hoàn trả 100% chi phí đăng ký nền tảng. Không đôi co. Không thủ tục phiền hà.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 10. Footer */}
-      <footer className="border-t border-[#262626] bg-[#0a0a0a] py-12 px-4">
-        <div className="mx-auto max-w-[1152px] flex flex-col md:flex-row items-center justify-between gap-6 text-[13px] text-[#737373]">
-          <div className="flex items-center gap-3">
-            <img src="/assets/rai-logo.png" alt="RAI²" className="h-6 w-auto object-contain" />
-            <span>© 2026 RAI² First LLC. All rights reserved.</span>
+      {/* 7. FOOTER - Minimalist Framer Aesthetic */}
+      <footer className="py-16 border-t border-[#242424]/60 bg-[#000000]">
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+          {/* Logo trắng trên nền đen, không chèn text */}
+          <div className="flex items-center">
+            <img
+              src="/logo-white.png"
+              alt="Logo"
+              className="h-7 w-auto object-contain opacity-90"
+            />
           </div>
-          <div className="flex items-center gap-6">
-            <a href="https://raifirst.si/news/he-dieu-hanh-doanh-nghiep-rai2-first-os-la-gi" target="_blank" rel="noopener noreferrer" className="hover:text-[#a1a1a1] transition-colors">
-              Bài Phân Tích Gốc
-            </a>
-            <button type="button" onClick={onAdminSignIn} className="hover:text-[#fafafa] transition-colors">
-              Đăng nhập Quản Trị Viên (Pairing Code)
-            </button>
+
+          {/* Links */}
+          <div className="flex items-center gap-8 text-[13px] text-[#8c8c8c]">
+            <button onClick={() => scrollTo("triet-ly")} className="hover:text-white transition-colors">Triết lý</button>
+            <button onClick={() => scrollTo("tinh-nang")} className="hover:text-white transition-colors">Tính năng</button>
+            <button onClick={() => scrollTo("bang-gia")} className="hover:text-white transition-colors">Bảng giá</button>
+            <button onClick={onAdminSignIn} className="hover:text-white transition-colors">Đăng nhập</button>
+          </div>
+
+          {/* Copyright */}
+          <div className="text-[12px] text-[#666666]">
+            © {new Date().getFullYear()} RAI² • All rights reserved.
           </div>
         </div>
       </footer>
 
-      {/* 11. Modal Thanh Toán SePay VietQR hoặc Đăng Ký 14 Ngày */}
+      {/* 8. MODAL THANH TOÁN SEPAY & DÙNG THỬ */}
       {selectedPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-[480px] rounded-[10px] border border-[#262626] bg-[#171717] p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="relative w-full max-w-[480px] bg-[#111111] border border-[#242424] rounded-[20px] p-6 sm:p-8 shadow-2xl">
+            {/* Nút đóng modal */}
             <button
-              type="button"
               onClick={() => setSelectedPlan(null)}
-              className="absolute right-4 top-4 text-[#737373] hover:text-[#fafafa] transition-colors"
+              className="absolute top-5 right-5 text-[#8c8c8c] hover:text-white transition-colors p-1"
             >
-              <X className="size-5" />
+              <X className="w-5 h-5" />
             </button>
 
-            {isPaid ? (
-              <div className="text-center py-6">
-                <CheckCircle2 className="size-16 text-emerald-400 mx-auto mb-4" />
-                <h3 className="text-[22px] font-bold text-[#fafafa] mb-2">
-                  {selectedPlan.tier === "trial" ? "Kích Hoạt 14 Ngày Thành Công!" : "Thanh Toán Thành Công!"}
-                </h3>
-                <p className="text-[14px] text-[#a1a1a1] mb-6">
-                  {selectedPlan.tier === "trial"
-                    ? "Tài khoản của bạn đã được mở khóa 14 ngày trải nghiệm đầy đủ quyền năng của RAI² First OS."
-                    : "Hệ thống đã nhận được chuyển khoản từ SePay và kích hoạt 31 ngày dịch vụ."}
+            {selectedPlan.tier === "trial" ? (
+              /* Modal Dùng thử 14 ngày */
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0099ff]/10 text-[#0099ff] text-[11px] font-medium uppercase tracking-wide mb-4">
+                  <Sparkles className="w-3.5 h-3.5" /> Dùng thử 14 ngày hoàn toàn miễn phí
+                </div>
+                <h3 className="text-2xl font-medium text-white mb-2">Bắt Đầu Trải Nghiệm RAI²</h3>
+                <p className="text-[13px] text-[#8c8c8c] mb-6">
+                  Điền email nhận tài khoản truy cập ngay trong 30 giây. Không cần thẻ tín dụng.
                 </p>
-                <button
-                  type="button"
-                  onClick={onAdminSignIn}
-                  className="w-full rounded-[8px] bg-[#e5e5e5] py-3 text-[14px] font-semibold text-[#171717] hover:bg-white transition-all"
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    alert(`Đăng ký thành công tài khoản trải nghiệm 14 ngày cho: ${email || "bạn"}. Vui lòng đăng nhập hệ thống!`);
+                    setSelectedPlan(null);
+                    onAdminSignIn();
+                  }}
+                  className="space-y-4"
                 >
-                  Vào Không Gian Làm Việc Ngay →
-                </button>
-              </div>
-            ) : paymentData ? (
-              <div>
-                <div className="text-center mb-4">
-                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#ff8833]">QUÉT MÃ THANH TOÁN TỰ ĐỘNG</span>
-                  <h3 className="text-[20px] font-bold text-[#fafafa] mt-1">Gói {selectedPlan.name}</h3>
-                  <p className="text-[13px] text-[#a1a1a1]">Mở ứng dụng ngân hàng bất kỳ để quét mã VietQR</p>
-                </div>
-
-                <div className="bg-white p-4 rounded-[10px] mx-auto w-fit shadow-md my-4">
-                  <img src={paymentData.qrUrl} alt="SePay VietQR" className="size-56 object-contain" />
-                </div>
-
-                <div className="space-y-2 rounded-[8px] border border-[#262626] bg-[#0a0a0a] p-3 text-[13px] font-mono mb-4">
-                  <div className="flex justify-between items-center text-[#a1a1a1]">
-                    <span>Số tiền:</span>
-                    <strong className="text-[#fafafa] text-[15px]">{paymentData.amount.toLocaleString("vi-VN")} đ</strong>
-                  </div>
-                  <div className="flex justify-between items-center text-[#a1a1a1]">
-                    <span>Ngân hàng:</span>
-                    <span className="text-[#fafafa]">{paymentData.bankName}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[#a1a1a1]">
-                    <span>Số tài khoản:</span>
-                    <span className="text-[#fafafa]">{paymentData.bankAccount}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[#ff8833] pt-1 border-t border-[#262626]">
-                    <span>Nội dung chuyển khoản:</span>
-                    <button
-                      type="button"
-                      onClick={() => copyContent(paymentData.transferContent)}
-                      className="flex items-center gap-1 font-bold hover:underline"
-                    >
-                      {paymentData.transferContent} <Copy className="size-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {copied && <p className="text-center text-[12px] text-emerald-400 mb-2">Đã sao chép nội dung chuyển khoản!</p>}
-
-                <div className="flex items-center justify-center gap-2 text-[12px] text-[#737373]">
-                  <div className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Hệ thống tự động kích hoạt ngay khi nhận tiền (3 giây)...</span>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="mb-6">
-                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#ff8833]">
-                    {selectedPlan.tier === "trial" ? "TRẢI NGHIỆM MIỄN PHÍ" : "ĐĂNG KÝ GÓI THUÊ BAO"}
-                  </span>
-                  <h3 className="text-[22px] font-bold text-[#fafafa] mt-1">{selectedPlan.name}</h3>
-                  <p className="text-[14px] text-[#a1a1a1] mt-1">
-                    Giá đầu tư: <strong className="text-[#fafafa]">{selectedPlan.priceDisplay}</strong> {selectedPlan.periodDisplay}
-                  </p>
-                </div>
-
-                <form onSubmit={handleCheckout} className="space-y-4">
                   <div>
-                    <label className="block text-[13px] font-medium text-[#a1a1a1] mb-1.5">
-                      Email doanh nghiệp của bạn:
+                    <label className="block text-[12px] font-medium text-[#cccccc] mb-1.5">
+                      Email doanh nghiệp của bạn
                     </label>
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="ceo@congty.vn"
-                      className="w-full rounded-[8px] border border-[#262626] bg-[#0a0a0a] px-3.5 py-2.5 text-[14px] text-[#fafafa] outline-none focus:border-[#ff8833]"
+                      placeholder="ceo@company.com"
+                      className="w-full px-4 py-3 rounded-[10px] bg-[#000000] border border-[#242424] text-white text-[14px] focus:outline-none focus:border-[#0099ff] transition-colors"
                     />
-                  </div>
-
-                  <div className="p-3 rounded-[8px] bg-[#0a0a0a] border border-[#262626] text-[12px] text-[#737373] space-y-1">
-                    <p className="text-[#a1a1a1] font-semibold">Quy tắc bảo mật RAI²:</p>
-                    <p>• Dữ liệu của bạn được cô lập trong Sandbox máy ảo riêng.</p>
-                    <p>• Mô hình 100% BYOK – bạn tự cắm API Key cá nhân.</p>
                   </div>
 
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="w-full rounded-[8px] bg-[#ff8833] py-3 text-[14px] font-semibold text-[#171717] hover:bg-[#ff9944] transition-all disabled:opacity-50"
+                    className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all"
                   >
-                    {isSubmitting
-                      ? "Đang khởi tạo..."
-                      : selectedPlan.tier === "trial"
-                      ? "Bắt Đầu Trải Nghiệm 14 Ngày Ngay"
-                      : "Tạo Mã QR Chuyển Khoản Ngân Hàng"}
+                    Kích hoạt tài khoản ngay
                   </button>
                 </form>
+              </div>
+            ) : (
+              /* Modal Thanh toán VietQR SePay */
+              <div>
+                <div className="text-[12px] font-medium text-[#0099ff] uppercase tracking-wider mb-2">
+                  Thanh toán an toàn qua VietQR
+                </div>
+                <h3 className="text-xl sm:text-2xl font-medium text-white mb-1">
+                  Đăng ký {selectedPlan.name}
+                </h3>
+                <div className="text-lg font-medium text-white mb-5">
+                  {selectedPlan.priceDisplay} <span className="text-[12px] text-[#8c8c8c]">{selectedPlan.periodDisplay}</span>
+                </div>
+
+                {isPaid ? (
+                  <div className="py-8 text-center">
+                    <CheckCircle2 className="w-16 h-16 text-[#0099ff] mx-auto mb-4" />
+                    <h4 className="text-xl font-medium text-white mb-2">Thanh Toán Thành Công!</h4>
+                    <p className="text-[13px] text-[#8c8c8c] mb-6">
+                      Hệ thống đã nhận được chuyển khoản tự động. Tài khoản của bạn đã được kích hoạt.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSelectedPlan(null);
+                        onAdminSignIn();
+                      }}
+                      className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all"
+                    >
+                      Truy cập hệ thống ngay
+                    </button>
+                  </div>
+                ) : isSubmitting ? (
+                  <div className="py-12 text-center text-[#8c8c8c]">
+                    <div className="w-8 h-8 border-2 border-[#0099ff] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-[13px]">Đang khởi tạo mã QR thanh toán...</p>
+                  </div>
+                ) : paymentData ? (
+                  <div>
+                    <div className="bg-[#000000] p-4 rounded-[12px] border border-[#242424] flex flex-col items-center mb-5">
+                      <img
+                        src={paymentData.qrUrl}
+                        alt="VietQR SePay"
+                        className="w-48 h-48 object-contain rounded-[8px] bg-white p-2"
+                      />
+                      <div className="mt-3 text-[11px] text-[#8c8c8c] flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#0099ff] animate-ping" />
+                        Hệ thống tự động kích hoạt ngay khi chuyển khoản
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-[12px] bg-[#080808] p-3.5 rounded-[10px] border border-[#242424] mb-5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#8c8c8c]">Ngân hàng:</span>
+                        <span className="font-medium text-white">{paymentData.bankName}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#8c8c8c]">Số tài khoản:</span>
+                        <span className="font-mono text-white">{paymentData.bankAccount}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#8c8c8c]">Số tiền:</span>
+                        <span className="font-medium text-[#0099ff]">
+                          {paymentData.amount.toLocaleString("vi-VN")} VNĐ
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-[#242424]">
+                        <span className="text-[#8c8c8c]">Nội dung CK:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-white bg-[#171717] px-2 py-0.5 rounded">
+                            {paymentData.transferContent}
+                          </span>
+                          <button
+                            onClick={() => copyToClipboard(paymentData.transferContent)}
+                            className="text-[#8c8c8c] hover:text-white"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {copied && (
+                      <div className="text-center text-[12px] text-[#0099ff] mb-2">
+                        Đã sao chép nội dung chuyển khoản!
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-[13px] text-[#8c8c8c] mb-4">
+                      Vui lòng thử lại nếu mã thanh toán chưa hiển thị.
+                    </p>
+                    <button
+                      onClick={() => handleCheckout(selectedPlan)}
+                      className="px-6 py-2.5 rounded-full bg-white text-black text-[13px] font-medium"
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
