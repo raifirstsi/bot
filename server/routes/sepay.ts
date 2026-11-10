@@ -4,6 +4,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { json, readBody } from "../harness/http.ts";
+import { cookieMaxAgeSeconds, type SessionRegistry } from "../sessions.ts";
+import { serializeSessionCookie, requestOrigin } from "../request-auth.ts";
 
 export interface SubscriptionPlan {
   tier: "starter" | "pro" | "team";
@@ -151,7 +153,9 @@ export function handleSepayRoutes(
   res: ServerResponse,
   path: string,
   method: string,
-  store: SubscriptionStore
+  store: SubscriptionStore,
+  sessions?: SessionRegistry,
+  sessionCookieName?: string
 ): boolean {
   // 1. GET /api/subscription/plans
   if (path === "/api/subscription/plans" && method === "GET") {
@@ -178,7 +182,10 @@ export function handleSepayRoutes(
           transferContent: order.code,
         }
       });
-    }).catch(() => json(res, 400, { error: "Invalid request payload" }));
+    }).catch((err) => {
+      console.error("instant-access error:", err);
+      json(res, 400, { error: err instanceof Error ? err.message : "Invalid request payload" });
+    });
     return true;
   }
 
@@ -239,6 +246,54 @@ export function handleSepayRoutes(
         json(res, 200, { success: true, message: `Code ${code} not found in pending orders` });
       }
     }).catch(() => json(res, 400, { error: "Malformed webhook payload" }));
+    return true;
+  }
+
+  // 5. POST /api/auth/instant-access
+  if (path === "/api/auth/instant-access" && method === "POST") {
+    void readBody(req).then((data) => {
+      const body = data as { email?: string; tier?: string; code?: string; type?: string };
+      const rawEmail = typeof body?.email === "string" ? body.email.trim() : "";
+      if (!rawEmail || !rawEmail.includes("@")) {
+        json(res, 400, { error: "Vui lòng nhập địa chỉ email hợp lệ" });
+        return;
+      }
+      const email = rawEmail.toLowerCase();
+      if (!sessions || !sessionCookieName) {
+        json(res, 500, { error: "Auth registry is not initialized" });
+        return;
+      }
+
+      // Record in store if trial or new order
+      if (body.tier === "trial" || !body.tier) {
+        store.createOrder("starter", email);
+      }
+
+      // Issue an authenticated session with full admin + client scopes for the user
+      const issued = sessions.issue({
+        label: `RAI² (${email})`,
+        scopes: ["admin", "client"],
+        userId: `rai2:${email}`,
+      });
+
+      const secure = requestOrigin(req)?.startsWith("https://") === true || req.headers["x-forwarded-proto"] === "https";
+      const cookieStr = serializeSessionCookie(sessionCookieName, issued.token, {
+        secure,
+        maxAgeSeconds: cookieMaxAgeSeconds(issued.session),
+      });
+
+      res.setHeader("set-cookie", cookieStr);
+      json(res, 200, {
+        ok: true,
+        redirectUrl: "/app",
+        session: issued.session,
+        token: issued.token,
+        email,
+      });
+    }).catch((err) => {
+      console.error("instant-access error:", err);
+      json(res, 400, { error: err instanceof Error ? err.message : "Invalid request payload" });
+    });
     return true;
   }
 

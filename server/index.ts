@@ -12715,7 +12715,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       return json(res, 200, loadBrand());
     }
     // Public: SePay VietQR payment endpoints & webhook
-    if (handleSepayRoutes(req, res, path, method, subscriptionStore)) {
+    if (handleSepayRoutes(req, res, path, method, subscriptionStore, sessions, SESSION_COOKIE)) {
       return;
     }
     if (!gate.auth) return json(res, gate.status, { error: gate.error });

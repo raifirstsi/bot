@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { readSessionState } from "../../lib/session";
 import {
   Shield, Check, ArrowRight, X, QrCode, Sparkles, Terminal, Copy,
   CheckCircle2, Users, Cpu, FileText, ChevronRight, Lock, Eye, AlertTriangle, Zap
@@ -95,6 +96,44 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
   } | null>(null);
   const [isPaid, setIsPaid] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Trạng thái xác thực & đăng nhập tức thì
+  const [activating, setActivating] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
+
+  useEffect(() => {
+    void readSessionState().then((s) => {
+      if (s.kind === "session" || (s.kind === "loopback" && s.trust !== "service")) {
+        setCurrentUser({ email: s.kind === "session" ? s.email : undefined });
+      }
+    });
+  }, []);
+
+  const handleInstantAccess = async (targetEmail: string, tier = "trial", code?: string) => {
+    setActivating(true);
+    setAuthError(null);
+    try {
+      const res = await fetch("/api/auth/instant-access", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: targetEmail, tier, code }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        window.location.href = data.redirectUrl || "/app";
+      } else {
+        setAuthError(data.error || "Không thể kích hoạt tài khoản. Vui lòng thử lại.");
+        setActivating(false);
+      }
+    } catch {
+      setAuthError("Không thể kết nối máy chủ. Vui lòng thử lại.");
+      setActivating(false);
+    }
+  };
 
   // Mở khóa thanh cuộn hoàn toàn cho toàn trang khi Landing Page hiển thị
   useEffect(() => {
@@ -195,11 +234,11 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#242424]/60">
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo trắng trên nền đen, hài hòa cân đối, tuyệt đối không chèn chữ */}
-          <a href="/" className="flex items-center group py-2">
+          <a href="/" className="flex items-center group py-1">
             <img
-              src="/logo-white.png"
+              src="/logo-white.png?v=3"
               alt="RAI²"
-              className="h-8 md:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
+              className="h-9 md:h-10 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
           </a>
 
@@ -223,22 +262,40 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             >
               Bảng giá
             </button>
-            <button
-              onClick={onAdminSignIn}
-              className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
-            >
-              Đăng nhập
-            </button>
+            {currentUser ? (
+              <a
+                href="/app"
+                className="text-[14px] font-medium text-[#0099ff] hover:text-[#ffffff] transition-colors cursor-pointer"
+              >
+                Vào Workspace
+              </a>
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              >
+                Đăng nhập
+              </button>
+            )}
           </nav>
 
-          {/* Action Button: Bấm trực tiếp mở Popup Đăng ký 14 ngày */}
+          {/* Action Button: Vào Workspace hoặc Dùng thử 14 ngày */}
           <div className="hidden sm:block">
-            <button
-              onClick={() => handleCheckout(PLANS[0])}
-              className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              Dùng thử 14 ngày
-            </button>
+            {currentUser ? (
+              <a
+                href="/app"
+                className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center gap-1.5"
+              >
+                Vào Hệ Thống RAI² <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            ) : (
+              <button
+                onClick={() => handleCheckout(PLANS[0])}
+                className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                Dùng thử 14 ngày
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -269,12 +326,21 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
           {/* CTA Buttons: Bấm mở Popup trực tiếp */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-30">
-            <button
-              onClick={() => handleCheckout(PLANS[0])}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5 cursor-pointer"
-            >
-              Trải nghiệm 14 ngày miễn phí
-            </button>
+            {currentUser ? (
+              <a
+                href="/app"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5 cursor-pointer inline-flex items-center justify-center gap-2"
+              >
+                Vào Không Gian Làm Việc RAI² <ArrowRight className="w-4 h-4" />
+              </a>
+            ) : (
+              <button
+                onClick={() => handleCheckout(PLANS[0])}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5 cursor-pointer"
+              >
+                Trải nghiệm 14 ngày miễn phí
+              </button>
+            )}
             <button
               onClick={() => scrollTo("triet-ly")}
               className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 text-[#ffffff] text-[15px] font-medium hover:border-[#0099ff] hover:text-[#0099ff] transition-all cursor-pointer"
@@ -597,9 +663,9 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           {/* Logo trắng trên nền đen, hài hòa cân đối, không chèn chữ */}
           <div className="flex items-center">
             <img
-              src="/logo-white.png"
+              src="/logo-white.png?v=3"
               alt="RAI²"
-              className="h-7 w-auto object-contain opacity-90"
+              className="h-8 md:h-9 w-auto object-contain opacity-90"
             />
           </div>
 
@@ -608,7 +674,11 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             <button onClick={() => scrollTo("triet-ly")} className="hover:text-white transition-colors cursor-pointer">Triết lý</button>
             <button onClick={() => scrollTo("tinh-nang")} className="hover:text-white transition-colors cursor-pointer">Tính năng</button>
             <button onClick={() => scrollTo("bang-gia")} className="hover:text-white transition-colors cursor-pointer">Bảng giá</button>
-            <button onClick={onAdminSignIn} className="hover:text-white transition-colors cursor-pointer">Đăng nhập</button>
+            {currentUser ? (
+              <a href="/app" className="text-[#0099ff] hover:text-white transition-colors cursor-pointer">Vào Workspace</a>
+            ) : (
+              <button onClick={() => setShowLoginModal(true)} className="hover:text-white transition-colors cursor-pointer">Đăng nhập</button>
+            )}
           </div>
 
           {/* Copyright */}
@@ -642,14 +712,17 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                 </p>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    alert(`Đăng ký thành công tài khoản trải nghiệm 14 ngày cho: ${email || "bạn"}. Vui lòng đăng nhập hệ thống!`);
-                    setSelectedPlan(null);
-                    onAdminSignIn();
+                    await handleInstantAccess(email, "trial");
                   }}
                   className="space-y-4"
                 >
+                  {authError && (
+                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
+                      {authError}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-[12px] font-medium text-[#cccccc] mb-1.5">
                       Email doanh nghiệp của bạn
@@ -666,9 +739,17 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer"
+                    disabled={activating}
+                    className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Kích hoạt tài khoản ngay
+                    {activating ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        Đang kích hoạt tài khoản & Đăng nhập...
+                      </>
+                    ) : (
+                      "Kích hoạt tài khoản & Vào làm việc ngay ->"
+                    )}
                   </button>
                 </form>
               </div>
@@ -692,14 +773,26 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                     <p className="text-[13px] text-[#8c8c8c] mb-6">
                       Hệ thống đã nhận được chuyển khoản tự động. Tài khoản của bạn đã được kích hoạt.
                     </p>
+                    {authError && (
+                      <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
+                        {authError}
+                      </div>
+                    )}
                     <button
-                      onClick={() => {
-                        setSelectedPlan(null);
-                        onAdminSignIn();
+                      disabled={activating}
+                      onClick={async () => {
+                        await handleInstantAccess(email || "customer@rai2.si", selectedPlan.tier, paymentData?.transferContent);
                       }}
-                      className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer"
+                      className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      Truy cập hệ thống ngay
+                      {activating ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                          Đang mở Không gian làm việc...
+                        </>
+                      ) : (
+                        "Truy cập hệ thống ngay ->"
+                      )}
                     </button>
                   </div>
                 ) : isSubmitting ? (
@@ -773,6 +866,70 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 9. MODAL ĐĂNG NHẬP KHÔNG GIAN LÀM VIỆC */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="relative w-full max-w-[440px] bg-[#111111] border border-[#242424] rounded-[20px] p-6 sm:p-8 shadow-2xl">
+            <button
+              onClick={() => { setShowLoginModal(false); setAuthError(null); }}
+              className="absolute top-5 right-5 text-[#8c8c8c] hover:text-white transition-colors p-1 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0099ff]/10 text-[#0099ff] text-[11px] font-medium uppercase tracking-wide mb-4">
+              <Sparkles className="w-3.5 h-3.5" /> Đăng nhập hệ thống
+            </div>
+            <h3 className="text-2xl font-medium text-white mb-2">Không Gian Làm Việc RAI²</h3>
+            <p className="text-[13px] text-[#8c8c8c] mb-6">
+              Nhập email doanh nghiệp của bạn để truy cập ngay vào không gian làm việc thực tế.
+            </p>
+            {authError && (
+              <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
+                {authError}
+              </div>
+            )}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setLoggingIn(true);
+                setAuthError(null);
+                await handleInstantAccess(loginEmail, "starter");
+                setLoggingIn(false);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[12px] font-medium text-[#cccccc] mb-1.5">
+                  Email của bạn
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="ceo@company.com"
+                  className="w-full px-4 py-3 rounded-[10px] bg-[#000000] border border-[#242424] text-white text-[14px] focus:outline-none focus:border-[#0099ff] transition-colors"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loggingIn || activating}
+                className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loggingIn || activating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    Đang xác thực & mở ứng dụng...
+                  </>
+                ) : (
+                  "Đăng nhập & Vào làm việc ngay ->"
+                )}
+              </button>
+            </form>
           </div>
         </div>
       )}
