@@ -15,14 +15,14 @@ export interface BrandStatus {
 }
 
 export const DEFAULT_BRAND: Brand = {
-  name: "RAI² SI",
-  logo: "/logo-white.png",
+  name: "RAI²",
+  logo: "/assets/rai-logo.png",
   favicon: "/favicon.png",
-  tagline: "Retrofit AI Architecture",
-  supportUrl: "https://raifirst.si"
+  tagline: "ARTIFICIAL INTELLIGENCE + ACTUAL INTELLIGENCE",
+  supportUrl: "https://rai2.si"
 };
 /** The product's name wherever a person reads it. */
-export const PRODUCT_NAME = "RAI² SI";
+export const PRODUCT_NAME = "RAI²";
 
 let current: BrandStatus = { brand: DEFAULT_BRAND, source: "default", file: "" };
 

@@ -83,8 +83,7 @@ export function MeetScreen({ hosted, onNext }: { hosted: boolean; onNext: () => 
       </h1>
       <span className="absolute left-1/2 top-[calc(50%-75px)] flex -translate-x-1/2 -translate-y-1/2" style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }}>
         <picture className="size-full flex items-center justify-center">
-          <source srcSet="/logo-black.png" media="(prefers-color-scheme: light)" />
-          <img src="/logo-white.png" alt="RAI² SI" width={MASCOT_SIZE} height={MASCOT_SIZE} className="size-full object-contain" />
+          <img src={brand().logo || "/assets/rai-logo.png"} alt={productName()} width={MASCOT_SIZE} height={MASCOT_SIZE} className="size-full object-contain" />
         </picture>
       </span>
       <DemoComposer reduced={reduced} onTyping={setTyping} />
