@@ -13,6 +13,7 @@ import { applySoftwareRendering } from "./lib/software-rendering";
 import { settleInterfaceMode } from "./lib/new-look";
 import { BrowserSignInPage } from "./pair/BrowserSignInPage";
 import { PairPage } from "./pair/PairPage";
+import { RaiLandingPage } from "./components/landing/RaiLandingPage";
 import { HomeScreen, SignedOutAtHome } from "./components/HomeScreen";
 import { PageBoundary } from "./components/PageBoundary";
 import { endedBeforeReload, forgetEndedSession } from "./lib/session-ended";
@@ -47,8 +48,11 @@ async function chooseRoot(): Promise<React.ReactNode> {
   const session = await readSessionState();
   if (session.kind === "unauthenticated") {
     await pageLanguage;
-    const pair = <PairPage initialCode={null} reason={endedBeforeReload() ? t("pair.sessionEnded") : session.error} />;
-    return home ? <SignedOutAtHome bridge={home} fallback={pair} /> : pair;
+    if (location.pathname === "/pair" || location.search.includes("code=") || location.hash.includes("code=")) {
+      const pair = <PairPage initialCode={takePairingCodeFromLocation()} reason={endedBeforeReload() ? t("pair.sessionEnded") : session.error} />;
+      return home ? <SignedOutAtHome bridge={home} fallback={pair} /> : pair;
+    }
+    return <RaiLandingPage onAdminSignIn={() => { location.href = "/pair"; }} />;
   }
   forgetEndedSession();
   if (session.kind === "loopback" && session.trust === "service") {

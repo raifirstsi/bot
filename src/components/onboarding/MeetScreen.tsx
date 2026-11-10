@@ -67,7 +67,7 @@ export function MeetScreen({ hosted, onNext }: { hosted: boolean; onNext: () => 
   const { recommended } = aiChoices(state.instances.filter((instance) => instance.install && !engineReady(instance)));
   const pill = useSignInPill(recommended);
   const [dialog, setDialog] = useState(false);
-  const [typing, setTyping] = useState(false);
+  const [, setTyping] = useState(false);
 
   const failure = pill.error ?? (tested?.state === "failed" ? tested.error ?? t("onboarding.engines.noAnswer", { name: tested.instance.displayName }) : null);
   const signingIn = asking && !ready;
