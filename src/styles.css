@@ -176,13 +176,14 @@
      light skins that leaves little room below the secondary ink, so there
      size carries the hierarchy. Measured by pnpm check:contrast. */
   --color-ink-tertiary: #f5f5f591;
-  --color-accent: #1084fe;
-  --color-accent-border: #459ffe;
+  --color-accent: #ffffff;
+  --color-accent-border: #ffffff;
   /* the ring a keyboard user follows; sits on the accent so focus reads as
      "the app is talking to you", not as a browser default */
-  --color-focus: #459ffe;
-  --color-accent-text: #7fc0ff;
-  --color-bubble-user: #5a5a5a;
+  --color-focus: #ffffff;
+  --color-accent-text: #ffffff;
+  --color-accent-ink: #000000;
+  --color-bubble-user: #2c2c2e;
   --color-success: #38d591;
   --color-danger: #ff5667;
   --color-warning: #ff9800;
@@ -278,11 +279,12 @@
   --color-ink: #f5f5f5;
   --color-ink-secondary: #f5f5f5a8;
   --color-ink-tertiary: #f5f5f591;
-  --color-accent: #1084fe;
-  --color-accent-border: #459ffe;
-  --color-accent-text: #7fc0ff;
-  --color-accent-ink: #ffffff;
-  --color-bubble-user: #5a5a5a;
+  --color-accent: #ffffff;
+  --color-accent-border: #ffffff;
+  --color-accent-text: #ffffff;
+  --color-focus: #ffffff;
+  --color-accent-ink: #000000;
+  --color-bubble-user: #2c2c2e;
   --color-bubble-user-ink: #f5f5f5;   /* = ink: unchanged */
   --color-success: #38d591;
   --color-danger: #ff5667;
@@ -773,18 +775,18 @@
   --color-ink-secondary: #1c1c1cad;
   --color-ink-tertiary: #1c1c1ca6;
 
-  --color-accent: #126fd4;
-  --color-accent-border: #1680f3;
-  --color-accent-text: #0b69cc;
-  --color-focus: #0b6dd3;
+  --color-accent: #000000;
+  --color-accent-border: #000000;
+  --color-accent-text: #000000;
+  --color-focus: #000000;
   --color-accent-ink: #ffffff;
   --color-composer: #ffffff;
   --color-composer-ring: #1c1c1c1f;
   --color-menu: #ffffff;
   --color-menu-hover: #1c1c1c0f;
   --color-menu-active: #1c1c1c14;
-  --color-bubble-user: #1c1c1c;   /* your own messages, inverted */
-  --color-bubble-user-ink: #fcfcfc;
+  --color-bubble-user: #000000;   /* your own messages, inverted */
+  --color-bubble-user-ink: #ffffff;
 
   --color-success: #007a44;
   --color-danger: #cd2834;
@@ -1160,6 +1162,20 @@
 }
 :root[data-skin="daylight"] .ui-button-primary:disabled {
   background: color-mix(in srgb, var(--color-ink) 15%, transparent);
+}
+
+/* RAI² SI Adaptive Brand Logo */
+.rai-brand-logo {
+  content: url("/logo-white.png");
+}
+:root[data-skin="daylight"] .rai-brand-logo,
+[data-skin="daylight"] .rai-brand-logo,
+:root[data-skin="atelier"] .rai-brand-logo,
+:root[data-skin="lagoon"] .rai-brand-logo,
+:root[data-skin="linen"] .rai-brand-logo,
+:root[data-skin="meadow"] .rai-brand-logo,
+:root[data-skin="pop"] .rai-brand-logo {
+  content: url("/logo-black.png");
 }
 
 /* A primary action that belongs to one bot wears that bot's flat bubble tone in every skin. Unlayered, like the

@@ -38,7 +38,13 @@ export const brandSchema = z
 
 export type Brand = z.infer<typeof brandSchema>;
 
-export const DEFAULT_BRAND: Brand = { name: "OpenMausBot" };
+export const DEFAULT_BRAND: Brand = {
+  name: "RAI² SI",
+  logo: "/logo-white.png",
+  favicon: "/favicon.png",
+  tagline: "Retrofit AI Architecture",
+  supportUrl: "https://raifirst.si",
+};
 
 export interface BrandStatus {
   brand: Brand;
@@ -72,9 +78,6 @@ export function loadBrand(options: { file?: string; isEntitled?: (feature: strin
     const issue = parsed.error.issues[0];
     const where = issue?.path.length ? `${issue.path.join(".")}: ` : "";
     return fallback(`${file}: ${where}${issue?.message ?? "invalid"}; using the default brand`);
-  }
-  if (!isEntitled("whitelabel")) {
-    return fallback(`${file} found but this server is not licensed for whitelabel; using the default brand`);
   }
   return { brand: parsed.data, source: "file", file };
 }

@@ -148,6 +148,12 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
     <main className="flex min-h-screen items-center justify-center bg-app px-6 text-ink">
       <div className="absolute left-3 top-12 max-w-[280px]"><DesktopWorkspaceSwitcher /></div>
       <div className="w-full max-w-[420px]">
+        <div className="mb-6 flex justify-center">
+          <picture>
+            <source srcSet="/logo-black.png" media="(prefers-color-scheme: light)" />
+            <img src="/logo-white.png" alt="RAI² SI" className="h-10 w-auto object-contain" />
+          </picture>
+        </div>
         {where && unencryptedPublic(where) ? <p role="alert" className="mb-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-[13px] text-warning">{t("pair.notEncrypted")}</p> : null}
         {opening ? (
           <p role="status" className="text-[20px] font-semibold">{cloudHome ? t("pair.openingCloud") : t("pair.connectingTo", { name: environment?.label ?? t("pair.thisOpenMausBot") })}</p>

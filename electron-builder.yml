@@ -1,6 +1,6 @@
-appId: com.openmausbot.app
-productName: OpenMausBot
-artifactName: OpenMausBot-${version}-${arch}.${ext}
+appId: com.raifirst.bot
+productName: RAI² SI
+artifactName: RAI2-SI-${version}-${arch}.${ext}
 
 protocols:
   - name: OpenMausBot package install

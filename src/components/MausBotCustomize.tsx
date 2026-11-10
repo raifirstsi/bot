@@ -35,7 +35,7 @@ export function MausBotCustomize({ preview, name, nameRef, image, onName, onPatc
           ref={nameRef}
           value={name}
           maxLength={BOT_PROFILE_LIMITS.name}
-          placeholder="MausBot"
+          placeholder="RAI² SI"
           data-mausbot-welcome-name=""
           onChange={(event) => onName(event.target.value)}
           className="mt-1 w-full rounded-lg border border-hairline/40 bg-inset px-3 py-2 text-[14px] text-ink focus:outline-none"

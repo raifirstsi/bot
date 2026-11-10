@@ -650,7 +650,7 @@ import { onThreadSeen, personAsks as personAskAt, sawThread } from "./thread-pre
 const PORT = Number(process.env.OMB_PORT || process.env.OGB_PORT || 8799);
 const WEBHOOK_PORT = Number(process.env.OMB_WEBHOOK_PORT || PORT + 1);
 const WEBHOOK_PUBLIC_URL = process.env.OMB_WEBHOOK_PUBLIC_URL || undefined;
-const STATIC_DIR = process.env.OMB_STATIC_DIR || null;
+const STATIC_DIR = process.env.OMB_STATIC_DIR || (existsSync(join(import.meta.dirname, "..", "dist", "index.html")) ? join(import.meta.dirname, "..", "dist") : null);
 
 ensureDirs();
 // Acquire before any durable identity, sessions, config or Store state is loaded.

@@ -14,9 +14,15 @@ export interface BrandStatus {
   notice?: string;
 }
 
-export const DEFAULT_BRAND: Brand = { name: "OpenMausBot" };
-/** The product's name wherever a person reads it. OpenMausBot names only the open-source project and its repository. */
-export const PRODUCT_NAME = "MausBot";
+export const DEFAULT_BRAND: Brand = {
+  name: "RAI² SI",
+  logo: "/logo-white.png",
+  favicon: "/favicon.png",
+  tagline: "Retrofit AI Architecture",
+  supportUrl: "https://raifirst.si"
+};
+/** The product's name wherever a person reads it. */
+export const PRODUCT_NAME = "RAI² SI";
 
 let current: BrandStatus = { brand: DEFAULT_BRAND, source: "default", file: "" };
 

@@ -1,4 +1,5 @@
 import { OrganizationIdentity } from "./OrganizationIdentity";
+import { RaiLogo } from "./RaiLogo";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch } from "react";
 import { createPortal } from "react-dom";
 import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
@@ -1283,8 +1284,15 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           </button>
           <div className="relative flex">{plusControl}</div>
         </div>}
-        {density !== "icons" && (simpleDesk ? <div data-sidebar-top-slot className="min-w-0 flex-1" /> : (
+        {density !== "icons" && (simpleDesk ? (
+          <div data-sidebar-top-slot className="flex min-w-0 flex-1 items-center gap-2">
+            <RaiLogo className="h-6 w-auto object-contain" />
+          </div>
+        ) : (
           <div data-sidebar-top-slot className={cn("@container/sidebar-top flex min-w-0 flex-1 items-center", simple && "justify-end")}>
+            <div className="mr-2 flex items-center">
+              <RaiLogo className="h-6 w-auto object-contain" />
+            </div>
             {!simple && <div data-sidebar-top-spacer className="min-w-0 flex-1 @min-[96px]/sidebar-top:min-w-6" />}
             <div data-sidebar-top-switcher className={simple ? "flex min-w-0 items-center" : "flex min-w-0 max-w-[140px] items-center"}>
               <DesktopWorkspaceSwitcher inline pill={simple} cloudHome={state.config?.cloudHome === true} place={state.config?.team?.name} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />
