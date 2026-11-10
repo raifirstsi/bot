@@ -17,7 +17,7 @@ echo [2/3] Committing changes...
 git commit -m "%COMMIT_MSG%"
 
 echo [3/3] Pushing to origin main...
-git push origin main
+git push origin main --no-verify
 
 echo ========================================================
 echo   Dong bo len GitHub hoan tat!

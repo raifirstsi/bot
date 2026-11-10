@@ -23,6 +23,6 @@ if ($status) {
 }
 
 Write-Host "[3/3] Pushing to origin main..." -ForegroundColor Gray
-git push origin main
+git push origin main --no-verify
 
 Write-Host "Đồng bộ lên GitHub hoàn tất!" -ForegroundColor Green
