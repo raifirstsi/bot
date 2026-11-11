@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Check, Edit3, ShieldCheck, Clock } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Edit3, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { validateOutgoingDraft } from "@/lib/silent-error-interceptor";
 
 export interface HitlApprovalPayload {
   taskId: string;
@@ -32,6 +33,20 @@ export function HitlApprovalCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(payload.draftContent);
   const [approved, setApproved] = useState(false);
+
+  const validation = useMemo(() => {
+    return validateOutgoingDraft({
+      id: payload.taskId,
+      recipient: payload.clientName,
+      channel: "proposal",
+      content: editedText,
+      quotedPrice: payload.netMarginRate !== undefined ? 100 : undefined,
+      costEstimate:
+        payload.netMarginRate !== undefined
+          ? 100 * (1 - payload.netMarginRate)
+          : undefined,
+    });
+  }, [payload.taskId, payload.clientName, payload.netMarginRate, editedText]);
 
   const isMarginSafe = (payload.netMarginRate ?? 0.35) >= 0.35;
 
@@ -124,6 +139,32 @@ export function HitlApprovalCard({
           )}
         </div>
 
+        {/* Silent Error Interceptor Alert */}
+        {validation.violations.length > 0 && (
+          <div
+            className={cn(
+              "p-2.5 rounded-xl border text-[11px] leading-relaxed",
+              validation.status === "BLOCKED"
+                ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300"
+                : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300"
+            )}
+          >
+            <div className="font-bold flex items-center gap-1.5 mb-0.5">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <span>
+                {validation.status === "BLOCKED"
+                  ? "Silent Error Interceptor (Khóa khẩn cấp):"
+                  : "Cảnh báo chất lượng phát hành:"}
+              </span>
+            </div>
+            <ul className="list-disc list-inside space-y-0.5">
+              {validation.violations.map((v, i) => (
+                <li key={i}>{v.message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex items-center gap-2 pt-1">
           {isEditing ? (
@@ -152,14 +193,20 @@ export function HitlApprovalCard({
           ) : (
             <>
               <button
+                disabled={validation.status === "BLOCKED"}
                 onClick={() => {
                   setApproved(true);
                   onApprove?.(payload.taskId);
                 }}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-500 dark:hover:bg-sky-400 text-white font-semibold text-xs shadow-sm hover:shadow flex items-center justify-center gap-1.5 transition-all"
+                className={cn(
+                  "flex-1 py-2.5 px-4 rounded-xl font-semibold text-xs shadow-sm hover:shadow flex items-center justify-center gap-1.5 transition-all",
+                  validation.status === "BLOCKED"
+                    ? "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"
+                    : "bg-slate-900 hover:bg-slate-800 dark:bg-sky-500 dark:hover:bg-sky-400 text-white"
+                )}
               >
                 <Check className="w-4 h-4" />
-                Duyệt Gửi (1-Click)
+                {validation.status === "BLOCKED" ? "Đang Bị Chặn Lỗi Ngầm" : "Duyệt Gửi (1-Click)"}
               </button>
               <button
                 onClick={() => setIsEditing(true)}
