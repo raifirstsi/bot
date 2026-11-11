@@ -1170,7 +1170,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     {plusMotion.shown && (
       <>
         <div role="menu" aria-label={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")} onKeyDown={navigateThreadMenu} className={cn(
-          "absolute z-40 w-max min-w-[200px] overflow-hidden", MENU_SHEET,
+          "absolute z-40 w-[220px] overflow-hidden shadow-lg", MENU_SHEET,
           rail ? "left-full top-0 ml-4" : cn("top-full", advanced ? "mt-1" : "mt-1.5", density === "icons" ? "left-0" : "right-0"),
           plusMotion.className,
         )} {...plusMotion.exitProps}>
@@ -1228,24 +1228,24 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                 role="menuitem"
                 className={plusItem}
               >
-                <Gauge size={16} className="text-amber-500" />
-                <span className="flex-1 font-medium text-ink">Bắt Điểm Nghẽn TOC (RAI² First OS)</span>
+                <Gauge size={16} className="text-amber-500 shrink-0" />
+                <span className="flex-1 font-medium text-ink truncate">Bắt Điểm Nghẽn TOC</span>
               </button>
               <button
                 onClick={() => { setPlusOpen(false); setHireDialogOpen(true); }}
                 role="menuitem"
                 className={plusItem}
               >
-                <Sparkles size={16} className="text-accent" />
-                <span className="flex-1 font-medium text-ink">Tuyển Nhân Sự Số (RAI² First OS)</span>
+                <Sparkles size={16} className="text-accent shrink-0" />
+                <span className="flex-1 font-medium text-ink truncate">Tuyển Nhân Sự Số</span>
               </button>
               <button
                 onClick={() => { setPlusOpen(false); setVaultModalOpen(true); }}
                 role="menuitem"
                 className={plusItem}
               >
-                <BookOpen size={16} className="text-emerald-500" />
-                <span className="flex-1 font-medium text-ink">Két Sắt Ngữ Cảnh 8 Trụ Cột (RAI² First OS)</span>
+                <BookOpen size={16} className="text-emerald-500 shrink-0" />
+                <span className="flex-1 font-medium text-ink truncate">Két Sắt Ngữ Cảnh</span>
               </button>
             </>
           )}
