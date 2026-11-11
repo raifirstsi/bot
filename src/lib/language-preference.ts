@@ -21,7 +21,13 @@ const desktop = () => globalThis.window?.ogb?.desktopLanguage;
 
 function storedChoice(): string | null {
   try {
-    return storage()?.getItem(LANGUAGE_KEY) ?? null;
+    const store = storage();
+    if (store && !store.getItem("rai-default-lang-v2")) {
+      store.setItem("rai-default-lang-v2", "1");
+      store.setItem(LANGUAGE_KEY, "vi");
+      return "vi";
+    }
+    return store?.getItem(LANGUAGE_KEY) ?? null;
   } catch {
     return null;
   }
@@ -44,7 +50,7 @@ export function languageChoice(): string | null {
 }
 
 export function effectiveLanguage(choice: string | null, serverDefault: string | undefined): string {
-  return choice ?? serverDefault ?? "";
+  return choice ?? serverDefault ?? "vi";
 }
 
 export function localeTag(language: string, system: string | undefined = globalThis.navigator?.language): string | undefined {

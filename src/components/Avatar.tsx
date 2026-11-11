@@ -15,7 +15,6 @@ import { CursorAvatar, type CursorAvatarHandle } from "./CursorAvatar";
 import { avatarCropRadius, botAvatarProfile, clampAvatarFocus, clampAvatarZoom, mascotFaceInk, type BotAvatarCrop, type MascotFaceColor } from "../../shared/bot-avatar";
 import { MASCOT_BODIES, botMascotBody } from "../../shared/mascot-bodies";
 import { isCarvedBody, type BotBodyId } from "../../shared/bot-body";
-import { useFestivalDress, wornBody } from "@/lib/festival-dress";
 import { t } from "@/lib/i18n";
 import { CarvedAvatar } from "./CarvedAvatar";
 import { steelBodyImage } from "@/lib/steel-body";
@@ -246,9 +245,8 @@ export function resolveBotAvatarOutcome(params: {
   return "flatImage";
 }
 
-export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotProps }: BotAvatarProps) {
+export function BotAvatar({ bot, size = 44, label }: BotAvatarProps) {
   const profile = botAvatarProfile(bot);
-  const festival = useFestivalDress();
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => setImageFailed(false), [profile.avatarUrl]);

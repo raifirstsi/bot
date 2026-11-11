@@ -24,8 +24,8 @@ Hệ thống thiết kế của **RAI²** được xây dựng trên triết lý
 | :--- | :--- | :--- |
 | `--color-app` | `#f8fafd` | Nền chính không gian làm việc (Thread / Main Canvas) |
 | `--color-hero-glow` | `rgba(0, 153, 255, 0.09)` | Vùng ánh sáng xanh thanh khiết tỏa từ trên đỉnh Section Hero |
-| `--color-panel` | `#f1f5fa` | Nền thanh bên Sidebar danh sách Bot / Kênh chat |
-| `--color-card` | `#ffffff` | Thẻ tin nhắn phản hồi của Bot, thẻ tính năng, bảng giá |
+| `--color-panel` | `#f1f5fa` | Nền thanh bên Sidebar danh sách RAI / Kênh chat |
+| `--color-card` | `#ffffff` | Thẻ tin nhắn phản hồi của RAI, thẻ tính năng, bảng giá |
 | `--color-raised` | `#e3edf7` | Trạng thái được chọn (Active row / Selected item) |
 | `--color-raised-hover`| `#ebf3fa` | Trạng thái di chuột (Hover row / Hover item) |
 | `--color-inset` | `#edf2f7` | Khung nhập liệu tìm kiếm (Search bar), ô input form |
@@ -98,7 +98,7 @@ background-attachment: fixed;
 * **Đường biên**: Viền đáy 1px siêu mỏng `border-b border-[#e5e5e5]/80`.
 * **Logo**: Logo bản đen `rai-core-black.png` tự động kích hoạt trên nền sáng.
 
-### 5.2. Thẻ Trò Chuyện Của Bot (Bot Cards)
+### 5.2. Thẻ Trò Chuyện Của RAI (RAI Cards)
 * **Nền**: Trắng tinh khôi (`#ffffff`).
 * **Bo góc**: `rounded-2xl` (16px).
 * **Viền**: 1px `border border-[#e2e8f0]/85`.
@@ -133,7 +133,7 @@ background-attachment: fixed;
 | **Card / Khung Chứa** | Nền trắng `#ffffff`, viền `#e2e8f0` | Nền trắng `#ffffff`, viền `#e2e8f0` |
 | **Màu Điểm Nhấn (Accent)**| `#0099ff` (Electric Blue) | `#0099ff` (Electric Blue) |
 | **Chữ Tiêu Đề** | `#111111` / `#0f172a` (Tracking -0.04em) | `#0f172a` (Slate Black tương phản cao) |
-| **Mascot Avatar** | Headline Mascot Badge & Avatar 8 Bot | Avatar tròn đồng bộ của 8 Bot |
+| **Mascot Avatar** | Headline Mascot Badge & Avatar 8 RAI | Avatar tròn đồng bộ của 8 RAI |
 | **Bong Bóng User** | Jet Black `#0f172a` hoặc `#000000` | Jet Black `#0f172a` với chữ trắng `#ffffff` |
 | **Toggle Theme** | Nút Mặt trời / Mặt trăng trên Header | Nút chuyển Theme tức thời + Cài đặt giao diện |
 

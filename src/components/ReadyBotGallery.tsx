@@ -2,7 +2,6 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus } from "lucide-react";
 import { stoppedAtBotLimit } from "@/lib/bot-limit";
-import { MausAvatar } from "./Avatar";
 import { getBotMascotUrl } from "@/lib/mascot-mapping";
 import { NewBotDialog } from "./lazy-screens";
 import { READY_BOT_CATEGORIES, READY_BOTS, matchesReadyBot, readyBotCopy, type ReadyBotCategory } from "@/lib/ready-bots";

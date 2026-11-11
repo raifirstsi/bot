@@ -100,13 +100,13 @@ export const AI_TEAM_MASCOTS: AiTeamMascot[] = [
     name: "Biscuit",
     role: "Trợ Lý Khởi Tạo & Điều Phối",
     badge: "Sẵn sàng 24/7",
-    desc: "Tiếp nhận yêu cầu ban đầu, phân bổ đầu việc và kết nối tất cả các bot trong phòng họp số.",
+    desc: "Tiếp nhận yêu cầu ban đầu, phân bổ đầu việc và kết nối tất cả các RAI trong phòng họp số.",
     avatar: "/assets/mascots/mascot-1.png?v=7",
     color: "#0099ff",
   },
   {
     id: "mascot-2",
-    name: "Browser Bot",
+    name: "Browser RAI",
     role: "Kỹ Sư Trình Duyệt Web",
     badge: "Chromium Sandbox",
     desc: "Đăng nhập cổng thông tin, cào dữ liệu đối thủ, tải hóa đơn và cập nhật giá tự động.",
@@ -115,7 +115,7 @@ export const AI_TEAM_MASCOTS: AiTeamMascot[] = [
   },
   {
     id: "mascot-3",
-    name: "Content Bot",
+    name: "Content RAI",
     role: "Chiến Lược Gia Nội Dung",
     badge: "Chuẩn SEO / AEO",
     desc: "Soạn thảo bài viết chuyên sâu theo giọng văn thương hiệu, chuyển đổi đa kênh không tạo rác.",
@@ -124,7 +124,7 @@ export const AI_TEAM_MASCOTS: AiTeamMascot[] = [
   },
   {
     id: "mascot-4",
-    name: "Support Bot",
+    name: "Support RAI",
     role: "Chuyên Viên Dịch Vụ & CSKH",
     badge: "Phản hồi tức thì",
     desc: "Lắng nghe tâm tư khách hàng, phân loại khiếu nại và phản hồi kịp thời qua Zalo/Telegram.",
@@ -142,7 +142,7 @@ export const AI_TEAM_MASCOTS: AiTeamMascot[] = [
   },
   {
     id: "mascot-6",
-    name: "Data Bot",
+    name: "Data RAI",
     role: "Kỹ Sư Dữ Liệu & Báo Cáo",
     badge: "Google Sheets & SQL",
     desc: "Tự động hóa sổ sách kế toán, trích xuất báo cáo doanh thu và đồng bộ dữ liệu thời gian thực.",
@@ -339,7 +339,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               Triết lý
             </button>
             <button
-              onClick={() => scrollTo("doi-ngu-bot")}
+              onClick={() => scrollTo("doi-ngu-rai")}
               className={cn(
                 "text-[14px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5",
                 isDark ? "text-[#8c8c8c] hover:text-[#ffffff]" : "text-[#666666] hover:text-[#000000]"
@@ -482,7 +482,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               </button>
               <button
                 onClick={() => {
-                  scrollTo("doi-ngu-bot");
+                  scrollTo("doi-ngu-rai");
                   setMobileMenuOpen(false);
                 }}
                 className={cn(
@@ -491,7 +491,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                 )}
               >
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                Nhân sự số (8 Bots)
+                Nhân sự số (8 RAI)
               </button>
               <button
                 onClick={() => {
@@ -704,7 +704,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
 
       {/* 2.5 SECTION: ĐỘI NGŨ NHÂN SỰ SỐ RAI² - Mascot Team Showcase (Mausbot.com Style) */}
       <section
-        id="doi-ngu-bot"
+        id="doi-ngu-rai"
         className={cn(
           "py-16 sm:py-20 md:py-24 border-t transition-colors relative overflow-hidden",
           isDark ? "bg-[#0b0b0b] border-[#242424]/60" : "bg-[#f8fafc] border-[#e2e8f0]"
@@ -913,7 +913,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                 Cái bẫy công cụ: Ném AI vào quy trình rác
               </h3>
               <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
-                Mua tài khoản ChatGPT, cài thêm bot trả lời tin nhắn, trang bị tool tự động tạo bài viết... nhưng doanh thu không tăng, chi phí phình to và không một ai chịu trách nhiệm về kết quả cuối cùng.
+                Mua tài khoản ChatGPT, cài thêm RAI trả lời tin nhắn, trang bị tool tự động tạo bài viết... nhưng doanh thu không tăng, chi phí phình to và không một ai chịu trách nhiệm về kết quả cuối cùng.
               </p>
               <p className={cn("text-[14px] leading-relaxed", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Đưa AI vào một quy trình hỏng chỉ giúp bạn tạo ra rác nhanh hơn, đốt tiền nhanh hơn và làm khách hàng thất vọng nhanh hơn.
@@ -948,7 +948,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               {
                 num: "01",
                 title: "Hệ Thống Trước — AI Theo Sau",
-                desc: "Không có phép màu nào cứu được một quy trình rách nát. Trước khi kết nối bất kỳ bot hay agent nào, hệ thống phải được chuẩn hóa và cắt bỏ các bước thừa."
+                desc: "Không có phép màu nào cứu được một quy trình rách nát. Trước khi kết nối bất kỳ RAI hay agent nào, hệ thống phải được chuẩn hóa và cắt bỏ các bước thừa."
               },
               {
                 num: "02",
@@ -973,7 +973,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               {
                 num: "06",
                 title: "Tấn Công Vào Điểm Nghẽn (TOC)",
-                desc: "Dựa trên Lý thuyết điểm nghẽn (Theory of Constraints): Chỉ tập trung đội ngũ bot vào mắt xích đang kìm hãm dòng tiền của toàn bộ công ty."
+                desc: "Dựa trên Lý thuyết điểm nghẽn (Theory of Constraints): Chỉ tập trung đội ngũ RAI vào mắt xích đang kìm hãm dòng tiền của toàn bộ công ty."
               }
             ].map((p, idx) => (
               <div
@@ -1060,7 +1060,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* AGENT 01: Ops Bot */}
+            {/* AGENT 01: Ops RAI */}
             <div
               className={cn(
                 "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
@@ -1077,7 +1077,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                   >
                     <img
                       src="/assets/mascots/mascot-1.png?v=7"
-                      alt="Ops Bot"
+                      alt="Ops RAI"
                       className="size-full rounded-full object-cover"
                     />
                   </div>
@@ -1088,7 +1088,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                     AGENT 01 • VẬN HÀNH
                   </div>
                   <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#0099ff] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
-                    Trợ Lý Vận Hành & Tự Động Hóa (Ops Bot)
+                    Trợ Lý Vận Hành & Tự Động Hóa (Ops RAI)
                   </h3>
                   <div className="text-[11px] sm:text-[12px] text-emerald-500 font-medium flex items-center gap-1.5 mt-0.5">
                     <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -1104,7 +1104,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               </div>
             </div>
 
-            {/* AGENT 02: Browser Bot */}
+            {/* AGENT 02: Browser RAI */}
             <div
               className={cn(
                 "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
@@ -1121,7 +1121,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                   >
                     <img
                       src="/assets/mascots/mascot-2.png?v=7"
-                      alt="Browser Bot"
+                      alt="Browser RAI"
                       className="size-full rounded-full object-cover"
                     />
                   </div>
@@ -1132,7 +1132,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                     AGENT 02 • TRÌNH DUYỆT
                   </div>
                   <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#10b981] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
-                    Trợ Lý Nghiên Cứu & Web (Browser Bot)
+                    Trợ Lý Nghiên Cứu & Web (Browser RAI)
                   </h3>
                   <div className="text-[11px] sm:text-[12px] text-emerald-500 font-medium flex items-center gap-1.5 mt-0.5">
                     <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -1148,7 +1148,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               </div>
             </div>
 
-            {/* AGENT 03: Content Bot */}
+            {/* AGENT 03: Content RAI */}
             <div
               className={cn(
                 "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
@@ -1165,7 +1165,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                   >
                     <img
                       src="/assets/mascots/mascot-3.png?v=7"
-                      alt="Content Bot"
+                      alt="Content RAI"
                       className="size-full rounded-full object-cover"
                     />
                   </div>
@@ -1176,7 +1176,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                     AGENT 03 • NỘI DUNG
                   </div>
                   <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#f59e0b] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
-                    Trợ Lý Truyền Thông & Tiếp Thị (Content Bot)
+                    Trợ Lý Truyền Thông & Tiếp Thị (Content RAI)
                   </h3>
                   <div className="text-[11px] sm:text-[12px] text-amber-500 font-medium flex items-center gap-1.5 mt-0.5">
                     <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
@@ -1229,7 +1229,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                 </div>
               </div>
               <p className={cn("text-[13px] sm:text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
-                Không gian làm việc chung (AI Rooms) nơi các bot cùng trao đổi, phản biện và hợp tác giải quyết một bài toán hóc búa của ban giám đốc.
+                Không gian làm việc chung (AI Rooms) nơi các RAI cùng trao đổi, phản biện và hợp tác giải quyết một bài toán hóc búa của ban giám đốc.
               </p>
               <div className="text-[12px] text-[#8b5cf6] flex items-center gap-1.5 font-medium pt-3 border-t border-hairline/20">
                 <Check className="w-4 h-4" /> Đưa ra nguồn sự thật duy nhất (Single Source of Truth)
@@ -1394,7 +1394,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               Triết lý
             </button>
             <button
-              onClick={() => scrollTo("doi-ngu-bot")}
+              onClick={() => scrollTo("doi-ngu-rai")}
               className={cn(
                 "py-1 px-1.5 transition-colors cursor-pointer flex items-center gap-1.5",
                 isDark ? "text-[#8c8c8c] hover:text-white" : "text-[#64748b] hover:text-black"
