@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Edit3, ShieldCheck, Clock, AlertTriangle, ArrowRight } from "lucide-react";
+import { Check, Edit3, ShieldCheck, Clock } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export interface HitlApprovalPayload {

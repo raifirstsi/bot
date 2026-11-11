@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check, Sparkles, X, ChevronRight, ShieldCheck, Zap } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { RAI2_DEPARTMENTS, type RaiAgentDefinition, type RaiDepartment } from "@/lib/rai2-departments";
+import { RAI2_DEPARTMENTS, type RaiAgentDefinition } from "@/lib/rai2-departments";
 import { RaiLogo } from "./RaiLogo";
 
 interface HireAgentDialogProps {
