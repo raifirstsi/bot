@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="vi" data-skin="daylight" class="dark">
+<html lang="vi" data-skin="daylight">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#070707" />
+    <meta name="theme-color" content="#f8fafd" id="meta-theme-color" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="RAI²" />
@@ -12,24 +12,138 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>RAI² | ARTIFICIAL INTELLIGENCE + ACTUAL INTELLIGENCE</title>
-    <link rel="preload" href="/assets/rai-core-white.png?v=7" as="image" />
-  </head>
-  <body style="margin:0;background:#070707;color:#f3f4f6;">
-    <div id="root">
-      <div style="position:fixed;inset:0;background:#070707;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        <div style="position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
-          <img src="/assets/rai-core-white.png?v=7" alt="RAI²" style="height:44px;width:auto;object-fit:contain;" />
-        </div>
-        <div style="width:130px;height:3px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;position:relative;">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:40%;background:#ff8833;border-radius:999px;animation:rai-bar 1.1s infinite ease-in-out;"></div>
-        </div>
-        <style>
-          @keyframes rai-bar {
-            0% { left: -40%; width: 40%; }
-            50% { left: 35%; width: 50%; }
-            100% { left: 100%; width: 40%; }
+    <link rel="preload" href="/assets/rai-core-black.png?v=8" as="image" />
+    <link rel="preload" href="/assets/rai-core-white.png?v=8" as="image" />
+    <script>
+      (function() {
+        try {
+          var skin = localStorage.getItem("omb-skin");
+          var darkSkins = ["midnight", "foundry", "graphite", "dusk", "halloween", "diwali", "aurora"];
+          var isDark = false;
+          if (skin === "system") {
+            isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          } else if (skin) {
+            isDark = darkSkins.indexOf(skin) !== -1;
           }
-        </style>
+          var resolvedSkin = isDark ? (skin === "system" ? "midnight" : skin) : (skin || "daylight");
+          document.documentElement.dataset.skin = resolvedSkin;
+          var themeColor = document.getElementById("meta-theme-color");
+          if (isDark) {
+            document.documentElement.classList.add("dark");
+            if (themeColor) themeColor.setAttribute("content", "#070707");
+          } else {
+            document.documentElement.classList.remove("dark");
+            if (themeColor) themeColor.setAttribute("content", "#f8fafd");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      :root {
+        --rai-splash-bg: #f8fafd;
+        --rai-splash-gradient: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 153, 255, 0.12) 0%, #f8fafd 70%);
+        --rai-splash-track: rgba(0, 153, 255, 0.15);
+        --rai-splash-bar: #0099ff;
+        --rai-splash-glow: 0 0 12px rgba(0, 153, 255, 0.5);
+      }
+      html.dark,
+      html[data-skin="midnight"],
+      html[data-skin="foundry"],
+      html[data-skin="graphite"],
+      html[data-skin="dusk"],
+      html[data-skin="halloween"],
+      html[data-skin="diwali"],
+      html[data-skin="aurora"] {
+        --rai-splash-bg: #070707;
+        --rai-splash-gradient: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 153, 255, 0.14) 0%, #070707 70%);
+        --rai-splash-track: rgba(255, 255, 255, 0.08);
+        --rai-splash-bar: #0099ff;
+        --rai-splash-glow: 0 0 12px rgba(0, 153, 255, 0.6);
+      }
+      body {
+        margin: 0;
+        background: var(--rai-splash-bg);
+      }
+      #rai-splash {
+        position: fixed;
+        inset: 0;
+        background-color: var(--rai-splash-bg);
+        background-image: var(--rai-splash-gradient);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      .rai-splash-logo-light {
+        display: block;
+        height: 44px;
+        width: auto;
+        object-fit: contain;
+      }
+      .rai-splash-logo-dark {
+        display: none;
+        height: 44px;
+        width: auto;
+        object-fit: contain;
+      }
+      html.dark .rai-splash-logo-light,
+      html[data-skin="midnight"] .rai-splash-logo-light,
+      html[data-skin="foundry"] .rai-splash-logo-light,
+      html[data-skin="graphite"] .rai-splash-logo-light,
+      html[data-skin="dusk"] .rai-splash-logo-light,
+      html[data-skin="halloween"] .rai-splash-logo-light,
+      html[data-skin="diwali"] .rai-splash-logo-light,
+      html[data-skin="aurora"] .rai-splash-logo-light {
+        display: none !important;
+      }
+      html.dark .rai-splash-logo-dark,
+      html[data-skin="midnight"] .rai-splash-logo-dark,
+      html[data-skin="foundry"] .rai-splash-logo-dark,
+      html[data-skin="graphite"] .rai-splash-logo-dark,
+      html[data-skin="dusk"] .rai-splash-logo-dark,
+      html[data-skin="halloween"] .rai-splash-logo-dark,
+      html[data-skin="diwali"] .rai-splash-logo-dark,
+      html[data-skin="aurora"] .rai-splash-logo-dark {
+        display: block !important;
+      }
+      .rai-splash-track {
+        width: 140px;
+        height: 3px;
+        background: var(--rai-splash-track);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+      }
+      .rai-splash-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 40%;
+        background: var(--rai-splash-bar);
+        border-radius: 999px;
+        box-shadow: var(--rai-splash-glow);
+        animation: rai-bar 1.1s infinite ease-in-out;
+      }
+      @keyframes rai-bar {
+        0% { left: -40%; width: 40%; }
+        50% { left: 35%; width: 50%; }
+        100% { left: 100%; width: 40%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="rai-splash">
+        <div style="position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+          <img class="rai-splash-logo-light" src="/assets/rai-core-black.png?v=8" alt="RAI²" />
+          <img class="rai-splash-logo-dark" src="/assets/rai-core-white.png?v=8" alt="RAI²" />
+        </div>
+        <div class="rai-splash-track">
+          <div class="rai-splash-bar"></div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

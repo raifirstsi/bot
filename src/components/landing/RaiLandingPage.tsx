@@ -414,15 +414,23 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                 Vào Hệ Thống RAI² <ArrowRight className="w-3.5 h-3.5" />
               </a>
             ) : (
-              <button
-                onClick={() => handleCheckout(PLANS[0])}
-                className={cn(
-                  "px-5 py-2 rounded-full text-[13px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
-                  isDark ? "bg-[#ffffff] text-[#000000] hover:bg-[#e6e6e6]" : "bg-[#000000] text-[#ffffff] hover:bg-[#222222]"
-                )}
-              >
-                Dùng thử 14 ngày
-              </button>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/pair"
+                  className={cn(
+                    "px-3 py-1.5 text-[13px] font-medium transition-colors cursor-pointer",
+                    isDark ? "text-[#a3a3a3] hover:text-[#ffffff]" : "text-[#475569] hover:text-[#0f172a]"
+                  )}
+                >
+                  Đăng Nhập
+                </a>
+                <a
+                  href="/pair"
+                  className="px-4 py-2 rounded-full text-[13px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center gap-1.5 bg-[#0099ff] hover:bg-[#0088ee] text-white shadow-sm"
+                >
+                  Đăng Ký <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
             )}
           </div>
 
@@ -526,18 +534,16 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                   Vào Không Gian Làm Việc
                 </a>
               ) : (
-                <button
-                  onClick={() => {
-                    setShowLoginModal(true);
-                    setMobileMenuOpen(false);
-                  }}
+                <a
+                  href="/pair"
+                  onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "text-left py-2 text-[15px] font-medium transition-colors",
                     isDark ? "text-[#cccccc] hover:text-white" : "text-[#444444] hover:text-black"
                   )}
                 >
                   Đăng nhập
-                </button>
+                </a>
               )}
             </div>
 
@@ -554,18 +560,13 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                   Vào Hệ Thống RAI² <ArrowRight className="w-4 h-4" />
                 </a>
               ) : (
-                <button
-                  onClick={() => {
-                    handleCheckout(PLANS[0]);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={cn(
-                    "w-full py-3 rounded-full text-center text-[14px] font-medium",
-                    isDark ? "bg-white text-black" : "bg-black text-white"
-                  )}
+                <a
+                  href="/pair"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-3 rounded-full text-center text-[14px] font-semibold inline-flex items-center justify-center gap-2 bg-[#0099ff] hover:bg-[#0088ee] text-white shadow-sm"
                 >
-                  Dùng thử 14 ngày miễn phí
-                </button>
+                  Đăng Ký & Dùng Thử Ngay <ArrowRight className="w-4 h-4" />
+                </a>
               )}
             </div>
           </div>

@@ -12,6 +12,17 @@ const DARK_SKINS = new Set([
   "aurora",
 ]);
 
+const LIGHT_SKINS = new Set([
+  "daylight",
+  "linen",
+  "meadow",
+  "chalk",
+  "porcelain",
+  "sage",
+  "sand",
+  "paper",
+]);
+
 export function RaiLogo({
   className = "h-6 sm:h-7 w-auto object-contain",
   alt = "RAI²",
@@ -20,11 +31,13 @@ export function RaiLogo({
   alt?: string;
 }) {
   const skin = useSyncExternalStore(subscribeSkin, readSkin, readSkin);
-  const isDark =
-    DARK_SKINS.has(skin) ||
-    (typeof document !== "undefined" &&
-      (document.documentElement.classList.contains("dark") ||
-        document.documentElement.getAttribute("data-theme") === "dark"));
+  const isDark = LIGHT_SKINS.has(skin)
+    ? false
+    : DARK_SKINS.has(skin) ||
+      (typeof document !== "undefined" &&
+        !LIGHT_SKINS.has(document.documentElement.getAttribute("data-skin") || "") &&
+        (document.documentElement.classList.contains("dark") ||
+          document.documentElement.getAttribute("data-theme") === "dark"));
 
   return (
     <span className={cn("inline-flex items-center select-none shrink-0", className)}>

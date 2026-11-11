@@ -21,8 +21,8 @@ import { t } from "../lib/i18n";
 import { formatPairingCode, PAIRING_INPUT_PROBLEM_KEY, readPairingInput } from "../../shared/pairing-code";
 import { isPrivateHost } from "../../shared/private-host";
 
-const input = "mt-1.5 w-full rounded-xl border border-hairline/60 bg-inset/70 px-3.5 py-2.5 text-[14px] text-ink outline-none transition-all focus:border-[#ff8833] focus:ring-2 focus:ring-[#ff8833]/15";
-const buttonPrimary = "w-full rounded-xl bg-[#ff8833] hover:bg-[#ff7711] px-4 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-all disabled:opacity-50 cursor-pointer";
+const input = "mt-1.5 w-full rounded-xl border border-hairline/60 bg-inset/70 px-3.5 py-2.5 text-[14px] text-ink outline-none transition-all focus:border-[#0099ff] focus:ring-2 focus:ring-[#0099ff]/15";
+const buttonPrimary = "w-full rounded-xl bg-[#0099ff] hover:bg-[#0088ee] px-4 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-all disabled:opacity-50 cursor-pointer";
 const fieldLabel = "mt-3.5 block text-[12px] font-medium text-ink-secondary";
 
 /** Only the desktop app pairs from a link at once; a browser asks, so a sent link cannot sign it in unseen. */
@@ -235,13 +235,13 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
         <div className="mb-4 flex items-center justify-between">
           <a
             href="/"
-            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-secondary hover:text-[#ff8833] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-secondary hover:text-[#0099ff] transition-colors"
           >
             ← Trang chủ RAI²
           </a>
           <a
             href="/#bang-gia"
-            className="text-[12px] font-medium text-[#ff8833] hover:underline"
+            className="text-[12px] font-medium text-[#0099ff] hover:underline"
           >
             Bảng giá & Gói dịch vụ
           </a>
@@ -291,7 +291,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
 
         {opening ? (
           <div className="py-8 text-center">
-            <div className="inline-block size-6 animate-spin rounded-full border-2 border-[#ff8833] border-t-transparent mb-3" />
+            <div className="inline-block size-6 animate-spin rounded-full border-2 border-[#0099ff] border-t-transparent mb-3" />
             <p role="status" className="text-[16px] font-medium text-ink">
               {cloudHome ? t("pair.openingCloud") : t("pair.connectingTo", { name: environment?.label ?? t("pair.thisOpenMausBot") })}
             </p>
@@ -304,7 +304,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
             <p className="text-[15px] font-medium text-ink">Bạn đã kết nối thành công!</p>
             <a
               href="/app"
-              className="mt-4 inline-block rounded-xl bg-[#ff8833] px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm hover:bg-[#ff7711] transition-all"
+              className="mt-4 inline-block rounded-xl bg-[#0099ff] px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm hover:bg-[#0088ee] transition-all"
             >
               Vào ứng dụng ngay →
             </a>
@@ -364,7 +364,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               <form onSubmit={handleRegister} className="space-y-4">
                 <div>
                   <label className="block text-[12px] font-medium text-ink-secondary" htmlFor="reg-email">
-                    Email của Bạn hoặc Doanh nghiệp <span className="text-[#ff8833]">*</span>
+                    Email của Bạn hoặc Doanh nghiệp <span className="text-[#0099ff]">*</span>
                   </label>
                   <input
                     id="reg-email"
@@ -408,7 +408,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                         onClick={() => setRegTier(plan.id as any)}
                         className={`rounded-xl border p-2 text-left transition-all cursor-pointer ${
                           regTier === plan.id
-                            ? "border-[#ff8833] bg-[#ff8833]/10 ring-1 ring-[#ff8833]"
+                            ? "border-[#0099ff] bg-[#0099ff]/10 ring-1 ring-[#0099ff]"
                             : "border-hairline/60 bg-inset/40 hover:border-hairline"
                         }`}
                       >
@@ -429,7 +429,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                   <button
                     type="button"
                     onClick={() => { setActiveTab("login"); setError(null); }}
-                    className="text-[12px] text-ink-secondary hover:text-[#ff8833] transition-colors"
+                    className="text-[12px] text-ink-secondary hover:text-[#0099ff] transition-colors"
                   >
                     Đã có tài khoản? <span className="font-semibold text-ink underline">Đăng nhập</span>
                   </button>
@@ -442,7 +442,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               <form onSubmit={handleInstantLogin} className="space-y-4">
                 <div>
                   <label className="block text-[12px] font-medium text-ink-secondary" htmlFor="login-email">
-                    Email đã đăng ký <span className="text-[#ff8833]">*</span>
+                    Email đã đăng ký <span className="text-[#0099ff]">*</span>
                   </label>
                   <input
                     id="login-email"
@@ -493,7 +493,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                   <button
                     type="button"
                     onClick={() => { setActiveTab("register"); setError(null); }}
-                    className="hover:text-[#ff8833] transition-colors"
+                    className="hover:text-[#0099ff] transition-colors"
                   >
                     Chưa có tài khoản? <span className="font-semibold text-ink underline">Đăng ký mới</span>
                   </button>
@@ -511,7 +511,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
             {/* TAB 3: DÙNG THỬ NHANH 1-CLICK */}
             {activeTab === "guest" && (
               <div className="space-y-4 py-2 text-center">
-                <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[#ff8833]/10 text-2xl">
+                <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[#0099ff]/10 text-2xl">
                   ⚡
                 </div>
                 <div>
@@ -591,7 +591,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                 {where?.origin ? (
                   <p className="text-center text-[12px] text-ink-secondary pt-1">
                     {t("pair.onPhone")}{" "}
-                    <a href={openInAppLink(where.origin, code)} className="text-[#ff8833] underline">
+                    <a href={openInAppLink(where.origin, code)} className="text-[#0099ff] underline">
                       {t("pair.openInApp", { app: productName() })}
                     </a>
                   </p>

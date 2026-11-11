@@ -1225,10 +1225,17 @@
 }
 
 /* RAI² Adaptive Brand Logo */
-:is(html.dark, [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-dark {
+:is([data-skin="daylight"], [data-skin="linen"], [data-skin="meadow"], [data-skin="chalk"], [data-skin="porcelain"], [data-skin="sage"], [data-skin="sand"], [data-skin="paper"]) .rai-logo-light {
   display: block !important;
 }
-:is(html.dark, [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-light {
+:is([data-skin="daylight"], [data-skin="linen"], [data-skin="meadow"], [data-skin="chalk"], [data-skin="porcelain"], [data-skin="sage"], [data-skin="sand"], [data-skin="paper"]) .rai-logo-dark {
+  display: none !important;
+}
+
+:is(html.dark:not([data-skin="daylight"]):not([data-skin="linen"]):not([data-skin="meadow"]):not([data-skin="chalk"]):not([data-skin="porcelain"]):not([data-skin="sage"]):not([data-skin="sand"]):not([data-skin="paper"]), [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-dark {
+  display: block !important;
+}
+:is(html.dark:not([data-skin="daylight"]):not([data-skin="linen"]):not([data-skin="meadow"]):not([data-skin="chalk"]):not([data-skin="porcelain"]):not([data-skin="sage"]):not([data-skin="sand"]):not([data-skin="paper"]), [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-light {
   display: none !important;
 }
 :is(html:not(.dark):not([data-theme="dark"]):not([data-skin="midnight"]):not([data-skin="foundry"]):not([data-skin="graphite"]):not([data-skin="dusk"]):not([data-skin="halloween"]):not([data-skin="diwali"]):not([data-skin="aurora"])) .rai-logo-dark {

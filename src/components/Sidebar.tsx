@@ -2,7 +2,7 @@ import { OrganizationIdentity } from "./OrganizationIdentity";
 import { RaiLogo } from "./RaiLogo";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch } from "react";
 import { createPortal } from "react-dom";
-import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
+import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
 import { liveActivityLabel, sidebarMessage } from "@/lib/live-activity";
@@ -30,6 +30,7 @@ import { nextRename } from "@/lib/rename";
 import { useDesktopCapabilities, windowFramed } from "./DesktopCapabilities";
 import { MIN_QUERY, SearchResults } from "./SearchResults";
 import { ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
+import { HireAgentDialog } from "./HireAgentDialog";
 import { SidebarNewChatPanel } from "./SidebarNewChatPanel";
 import { openCommandPalette } from "./CommandPalette";
 import { TeamSettingsDialog } from "./TeamSettingsDialog";
@@ -978,6 +979,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const newTaskFolderBot = state.bots.find((bot) => bot.id === newTaskFolderBotId);
   const [teamLibraryOpen, setTeamLibraryOpen] = useState(false);
   const [teamInstallUrl, setTeamInstallUrl] = useState<string | null>(null);
+  const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [archivedBotsOpen, setArchivedBotsOpen] = useState(false);
   const [teamFeedback, setTeamFeedback] = useState<{
     error: boolean;
@@ -1213,6 +1215,14 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           >
             <LayoutTemplate size={16} className="text-ink-secondary" />
             {t("sidebar.teamLibrary")}
+          </button>}
+          {teamSettingsAllowed !== false && <button
+            onClick={() => { setPlusOpen(false); setHireDialogOpen(true); }}
+            role="menuitem"
+            className={plusItem}
+          >
+            <Sparkles size={16} className="text-accent" />
+            <span className="flex-1 font-medium text-ink">Tuyển Nhân Sự Số (RAI² First OS)</span>
           </button>}
           {advanced && archivedBots.length > 0 && (
             <button
@@ -1667,6 +1677,10 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           }}
         />
       )}
+      <HireAgentDialog
+        open={hireDialogOpen}
+        onClose={() => setHireDialogOpen(false)}
+      />
       {teamFeedback &&
         createPortal(
           <div
