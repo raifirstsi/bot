@@ -120,7 +120,7 @@ export class SubscriptionStore {
     return this.items.get(code.toUpperCase());
   }
 
-  markPaid(code: string, ref: string, gateway: string, amountReceived: number): SubscriptionRecord | null {
+  markPaid(code: string, ref: string, gateway: string, _amountReceived: number): SubscriptionRecord | null {
     const rec = this.items.get(code.toUpperCase());
     if (!rec) return null;
     rec.status = "paid";

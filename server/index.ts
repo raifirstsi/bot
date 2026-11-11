@@ -12630,7 +12630,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
     if (method === "POST" && path === "/api/auth/cloud-guest") {
       const issued = sessions.issue({
         label: `Khách Cloud (${new Date().toLocaleDateString("vi-VN")})`,
-        scopes: ["client"],
+        scopes: ["admin", "client"],
         userId: `guest:${randomUUID()}`,
       });
       const secure = requestOrigin(req)?.startsWith("https://") === true || req.headers["x-forwarded-proto"] === "https";
@@ -12660,7 +12660,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       if (cleanCode === "GUEST" || cleanCode === "CLOUD" || cleanCode === "RAI2GUEST") {
         const issued = sessions.issue({
           label: `Khách Cloud (${new Date().toLocaleDateString("vi-VN")})`,
-          scopes: ["client"],
+          scopes: ["admin", "client"],
           userId: `guest:${randomUUID()}`,
         });
         const secure = requestOrigin(req)?.startsWith("https://") === true || req.headers["x-forwarded-proto"] === "https";
