@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { RAI2_DEPARTMENTS, type RaiAgentDefinition } from "@/lib/rai2-departments";
-import { RaiLogo } from "./RaiLogo";
 
 interface HireAgentDialogProps {
   open: boolean;
@@ -60,53 +59,37 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150"
+      className="ui-scrim fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5"
       role="dialog"
       aria-modal="true"
       aria-labelledby={dialogTitleId}
       onClick={onClose}
     >
       <div
-        className="relative w-full h-[100dvh] sm:h-[88vh] sm:max-w-5xl bg-[#f8fafd] dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-[#e2e8f0] dark:border-slate-800 flex flex-col overflow-hidden"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 50% 0%, rgba(0, 153, 255, 0.08) 0%, rgba(0, 153, 255, 0.02) 40%, transparent 65%)",
-        }}
+        className="ui-modal relative flex h-[min(760px,94dvh)] w-full max-w-[1000px] flex-col overflow-hidden outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Header: 56px Minimalist White */}
-        <div className="h-14 px-4 sm:px-6 border-b border-[#e2e8f0] dark:border-slate-800 flex items-center justify-between shrink-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <RaiLogo className="h-5 w-auto shrink-0" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2
-                  id={dialogTitleId}
-                  className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-white tracking-tight truncate"
-                >
-                  Tuyển Nhân Sự Số
-                </h2>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-[#0077cc] dark:text-sky-300 border border-[#e2e8f0] dark:border-slate-700 shrink-0">
-                  RAI² OS
-                </span>
-              </div>
-              <p className="text-[11px] text-[#475569] dark:text-slate-400 truncate hidden sm:block">
-                Giải phóng điểm nghẽn ràng buộc (TOC) của doanh nghiệp.
-              </p>
-            </div>
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-hairline/40 px-5 py-4">
+          <div className="min-w-0">
+            <h2 id={dialogTitleId} className="truncate text-[17px] font-semibold text-ink">
+              Bàn Tuyển Dụng Nhân Sự Số
+            </h2>
+            <p className="mt-0.5 hidden truncate text-[13px] text-ink-secondary sm:block">
+              Chọn một RAI theo đúng vùng nghiệp vụ và điểm nghẽn doanh nghiệp.
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full text-slate-400 hover:text-[#0f172a] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 flex items-center justify-center transition-all shrink-0"
+            className="ui-icon-button shrink-0"
             aria-label="Đóng"
           >
-            <X className="w-5 h-5" />
+            <X size={18} className="pointer-events-none" />
           </button>
         </div>
 
-        {/* Mobile Horizontal Zone Pills (Minimalist White/Blue) */}
-        <div className="md:hidden border-b border-[#e2e8f0] dark:border-slate-800 bg-white/60 dark:bg-slate-950/40 px-3 py-2 overflow-x-auto flex gap-1.5 shrink-0 scrollbar-none snap-x">
+        {/* Mobile Horizontal Zone Pills */}
+        <div className="flex shrink-0 snap-x gap-1 overflow-x-auto border-b border-hairline/40 p-2 scrollbar-none md:hidden">
           {RAI2_DEPARTMENTS.map((dept) => {
             const isSelected = dept.zone === selectedZone;
             const label = SHORT_ZONE_NAMES[dept.zone] || `Z${dept.zone}`;
@@ -116,10 +99,10 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                 type="button"
                 onClick={() => handleSelectZone(dept.zone)}
                 className={cn(
-                  "px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 snap-start active:scale-95",
+                  "shrink-0 snap-start whitespace-nowrap rounded-lg px-3 py-2 text-[13px] transition-colors",
                   isSelected
-                    ? "bg-[#0f172a] dark:bg-[#0099ff] text-white shadow-2xs font-bold"
-                    : "bg-white dark:bg-slate-800 text-[#475569] dark:text-slate-300 border border-[#e2e8f0] dark:border-slate-700 hover:border-slate-300"
+                    ? "bg-control font-medium text-ink"
+                    : "text-ink-secondary hover:bg-control/50 hover:text-ink"
                 )}
               >
                 {label}
@@ -130,17 +113,17 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
 
         {/* Mobile Back Bar */}
         {mobileView === "detail" && (
-          <div className="md:hidden px-4 py-2 bg-white/80 dark:bg-slate-800/80 border-b border-[#e2e8f0] dark:border-slate-700 flex items-center justify-between shrink-0">
+          <div className="flex shrink-0 items-center justify-between border-b border-hairline/40 px-4 py-2 md:hidden">
             <button
               type="button"
               onClick={() => setMobileView("list")}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0077cc] dark:text-sky-400 active:opacity-70 py-0.5"
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent-text"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft size={14} />
               <span>Quay lại {currentDepartment.name.replace(/^Phòng\s+/i, "")}</span>
             </button>
-            <span className="text-[11px] text-slate-400 font-medium">
-              Vùng {selectedZone} ({currentDepartment.agents.length} nhân sự)
+            <span className="text-[13px] text-ink-secondary">
+              {currentDepartment.agents.length} nhân sự
             </span>
           </div>
         )}
@@ -148,74 +131,76 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
         {/* Main Content Layout */}
         <div className="flex flex-1 overflow-hidden">
           {/* Left Column: 7 Departments Navigation (Desktop only) */}
-          <div className="hidden md:block w-64 lg:w-72 border-r border-[#e2e8f0] dark:border-slate-800 overflow-y-auto p-3 space-y-1 bg-white/40 dark:bg-slate-950/20 shrink-0">
-            <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
-              <span>7 Vùng Nghiệp Vụ TOC</span>
-              <Users className="w-3.5 h-3.5 text-slate-400" />
+          <div className="hidden w-[200px] shrink-0 flex-col overflow-y-auto border-r border-hairline/40 p-3 md:flex">
+            <div className="flex items-center justify-between px-2 pb-2 pt-1 text-[12px] font-medium text-ink-tertiary">
+              <span>7 Vùng Nghiệp Vụ</span>
+              <Users size={13} className="text-ink-tertiary" />
             </div>
-            {RAI2_DEPARTMENTS.map((dept) => {
-              const isSelected = dept.zone === selectedZone;
-              return (
-                <button
-                  key={dept.code}
-                  type="button"
-                  onClick={() => handleSelectZone(dept.zone)}
-                  className={cn(
-                    "w-full text-left p-2.5 rounded-xl transition-all flex items-center gap-2.5 text-xs",
-                    isSelected
-                      ? "bg-white dark:bg-slate-800 shadow-2xs border border-[#e2e8f0] dark:border-slate-700 text-[#0f172a] dark:text-white font-bold"
-                      : "text-[#475569] dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800/40"
-                  )}
-                >
-                  <div
+            <div className="space-y-0.5">
+              {RAI2_DEPARTMENTS.map((dept) => {
+                const isSelected = dept.zone === selectedZone;
+                return (
+                  <button
+                    key={dept.code}
+                    type="button"
+                    onClick={() => handleSelectZone(dept.zone)}
                     className={cn(
-                      "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0",
+                      "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors",
                       isSelected
-                        ? "bg-[#0099ff] text-white"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                        ? "bg-control font-medium text-ink"
+                        : "text-ink-secondary hover:bg-control/60 hover:text-ink"
                     )}
                   >
-                    Z{dept.zone}
-                  </div>
-                  <div className="flex-1 min-w-0 truncate">
-                    {dept.name}
-                  </div>
-                  {isSelected && (
-                    <ChevronRight className="w-3.5 h-3.5 text-[#0099ff] shrink-0" />
-                  )}
-                </button>
-              );
-            })}
+                    <div
+                      className={cn(
+                        "flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold",
+                        isSelected
+                          ? "bg-ink/10 text-ink"
+                          : "bg-control text-ink-secondary"
+                      )}
+                    >
+                      Z{dept.zone}
+                    </div>
+                    <div className="flex-1 min-w-0 truncate">
+                      {dept.name}
+                    </div>
+                    {isSelected && (
+                      <ChevronRight size={14} className="text-ink-tertiary shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Center Column: Department Agents List */}
           <div
             className={cn(
-              "overflow-y-auto p-3 sm:p-4 space-y-2.5",
+              "space-y-2 overflow-y-auto p-3",
               mobileView === "list" ? "flex-1 w-full" : "hidden md:block",
-              "md:w-72 lg:w-80 md:border-r border-[#e2e8f0] dark:border-slate-800 md:shrink-0"
+              "border-hairline/40 md:w-72 md:shrink-0 md:border-r lg:w-80"
             )}
           >
             {/* Department Summary Header Card */}
-            <div className="p-3 rounded-2xl bg-white dark:bg-slate-800/60 border border-[#e2e8f0] dark:border-slate-800 shadow-2xs">
+            <div className="rounded-xl border border-hairline/40 bg-card p-3">
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-bold uppercase text-[#0077cc] dark:text-sky-400">
+                <span className="text-[11px] font-semibold text-accent-text uppercase tracking-wide">
                   Vùng {currentDepartment.zone}
                 </span>
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[11px] text-ink-secondary">
                   {currentDepartment.agents.length} nhân sự
                 </span>
               </div>
-              <h3 className="text-xs font-bold text-[#0f172a] dark:text-white">
+              <h3 className="text-[13px] font-semibold text-ink">
                 {currentDepartment.name}
               </h3>
-              <p className="text-[11px] text-[#475569] dark:text-slate-400 leading-snug mt-1">
+              <p className="text-[12px] text-ink-secondary leading-snug mt-0.5">
                 {currentDepartment.description}
               </p>
             </div>
 
-            {/* List of Agents (Pure White Cards with Hairline Border) */}
-            <div className="space-y-2">
+            {/* List of Agents */}
+            <div className="space-y-1.5">
               {currentDepartment.agents.map((agent) => {
                 const isActive = activeAgent?.key === agent.key;
 
@@ -224,41 +209,41 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                     key={agent.key}
                     onClick={() => handleAgentClick(agent)}
                     className={cn(
-                      "p-3.5 rounded-2xl border transition-all cursor-pointer relative active:scale-[0.99] shadow-2xs",
+                       "cursor-pointer rounded-xl border p-3 transition-colors",
                       isActive
-                        ? "border-[#0099ff] bg-white dark:bg-slate-900 ring-1 ring-[#0099ff]/40"
-                        : "border-[#e2e8f0] dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
+                         ? "border-hairline/60 bg-raised"
+                         : "border-hairline/40 bg-card hover:bg-raised/50"
                     )}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#0099ff] shrink-0" />
-                        <span className="font-bold text-[#0f172a] dark:text-white text-xs sm:text-sm truncate">
+                       <span className="size-1.5 shrink-0 rounded-full bg-ink/35" />
+                        <span className="font-semibold text-ink text-[13px] truncate">
                           {agent.name}
                         </span>
                       </div>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 shrink-0">
+                       <span className="ui-chip shrink-0 bg-control text-ink-secondary">
                         Z{agent.zone}
                       </span>
                     </div>
 
-                    <div className="text-[11px] font-medium text-[#475569] dark:text-slate-400 mb-1 truncate">
+                    <div className="text-[12px] text-ink-secondary mb-1 truncate">
                       {agent.title}
                     </div>
 
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-2">
+                    <p className="text-[12px] text-ink-secondary line-clamp-2 leading-relaxed mb-1.5">
                       {agent.tagline}
                     </p>
 
-                    <div className="mb-2">
-                      <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-50 dark:bg-slate-800 text-[#0077cc] dark:text-sky-300 border border-slate-200/60 dark:border-slate-700">
+                     <div className="mb-1.5">
+                       <span className="inline-block rounded-md bg-inset px-2 py-0.5 text-[11px] text-ink-secondary">
                         KPI: {agent.kpiCommitment}
                       </span>
                     </div>
 
-                    <div className="md:hidden pt-1.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-[#0077cc] dark:text-sky-400 font-bold">
+                    <div className="md:hidden pt-1.5 border-t border-hairline flex items-center justify-between text-[12px] text-accent-text font-medium">
                       <span>Xem chi tiết & Kích hoạt</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <ChevronRight size={13} />
                     </div>
                   </div>
                 );
@@ -266,73 +251,73 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
             </div>
           </div>
 
-          {/* Right Column: Deep Agent Profile (Clean Minimalist White) */}
+          {/* Right Column: Deep Agent Profile */}
           <div
             className={cn(
-              "overflow-y-auto bg-transparent flex-1 flex flex-col",
+              "flex flex-1 flex-col overflow-y-auto",
               mobileView === "detail" ? "w-full block" : "hidden md:flex"
             )}
           >
             {activeAgent ? (
               <div className="flex-1 flex flex-col justify-between">
-                <div className="p-4 sm:p-6 space-y-3.5 max-w-2xl">
+                <div className="p-4 sm:p-5 space-y-3 max-w-2xl">
                   {/* Agent Header Hero */}
-                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs">
+                  <div className="rounded-xl border border-hairline/40 bg-card p-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold text-[#0077cc] dark:text-sky-400 uppercase tracking-wider">
+                      <span className="text-[11px] font-semibold text-accent-text uppercase tracking-wide">
                         {activeAgent.departmentName}
                       </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="text-ink-tertiary">·</span>
+                      <span className="text-[11px] text-ink-tertiary font-mono">
                         {activeAgent.key.toUpperCase()}
                       </span>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-[#0f172a] dark:text-white tracking-tight">
+                    <h3 className="text-[17px] font-semibold text-ink tracking-tight">
                       {activeAgent.name}
                     </h3>
-                    <p className="text-xs text-[#475569] dark:text-slate-300 mt-0.5 font-medium">
+                    <p className="text-[13px] text-ink-secondary mt-0.5">
                       {activeAgent.title}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                    <p className="text-[13px] text-ink-secondary mt-1 leading-relaxed">
                       {activeAgent.tagline}
                     </p>
                   </div>
 
-                  {/* Pain Point in SME */}
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs">
-                    <div className="text-xs font-bold text-[#0f172a] dark:text-white mb-1 flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 text-[#0077cc] shrink-0" />
+                  {/* Pain Point */}
+                  <div className="rounded-xl border border-hairline/40 bg-card p-3.5">
+                    <div className="text-[13px] font-semibold text-ink mb-1 flex items-center gap-1.5">
+                      <AlertCircle size={14} className="text-accent-text shrink-0" />
                       <span>Vấn Đề Giải Quyết:</span>
                     </div>
-                    <p className="text-xs text-[#475569] dark:text-slate-300 leading-relaxed">
+                    <p className="text-[13px] text-ink-secondary leading-relaxed">
                       {activeAgent.painPoint}
                     </p>
                   </div>
 
                   {/* KPI Output Commitment */}
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs">
-                    <div className="text-xs font-bold text-[#0f172a] dark:text-white mb-1 flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5 text-[#0099ff] shrink-0" />
+                  <div className="rounded-xl border border-hairline/40 bg-card p-3.5">
+                    <div className="text-[13px] font-semibold text-ink mb-1 flex items-center gap-1.5">
+                      <Target size={14} className="text-accent shrink-0" />
                       <span>Cam Kết Đầu Ra (KPI):</span>
                     </div>
-                    <p className="text-xs text-[#0077cc] dark:text-sky-300 leading-relaxed font-semibold">
+                    <p className="text-[13px] text-accent-text leading-relaxed font-medium">
                       {activeAgent.kpiCommitment}
                     </p>
                   </div>
 
                   {/* 80% Prebaked Operating DNA */}
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs space-y-2">
-                    <div className="text-xs font-bold text-[#0f172a] dark:text-white flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#0099ff] shrink-0" />
-                      <span>80% Nghiệp Vụ Chuẩn Hóa Nạp Sẵn:</span>
+                  <div className="space-y-2 rounded-xl border border-hairline/40 bg-card p-3.5">
+                    <div className="text-[13px] font-semibold text-ink flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-accent shrink-0" />
+                      <span>80% Nghiệp Vụ Nạp Sẵn:</span>
                     </div>
                     <div className="space-y-1.5">
                       {activeAgent.prebakedDna.map((dna, idx) => (
                         <div
                           key={idx}
-                          className="flex items-start gap-2 text-xs text-[#475569] dark:text-slate-300"
+                          className="flex items-start gap-2 text-[13px] text-ink-secondary"
                         >
-                          <Check className="w-3.5 h-3.5 text-[#0099ff] shrink-0 mt-0.5" />
+                          <Check size={13} className="text-accent shrink-0 mt-0.5" />
                           <span className="leading-snug">{dna}</span>
                         </div>
                       ))}
@@ -340,14 +325,14 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                   </div>
 
                   {/* Single-Task Boundary */}
-                  <div className="p-3 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50 flex items-center gap-2 text-xs text-[#475569] dark:text-slate-400">
-                    <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 rounded-lg bg-inset p-3 text-[13px] text-ink-secondary">
+                    <Briefcase size={13} className="text-ink-tertiary shrink-0" />
                     <span>Đơn nhiệm chuyên sâu, log kiểm toán minh bạch dưới quyền CAIO.</span>
                   </div>
                 </div>
 
                 {/* Sticky Action Footer CTA */}
-                <div className="sticky bottom-0 left-0 right-0 p-3.5 sm:p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-[#e2e8f0] dark:border-slate-800 z-20 pb-[max(0.875rem,env(safe-area-inset-bottom))]">
+                <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-hairline/40 bg-panel p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:p-4">
                   <div className="max-w-2xl mx-auto">
                     <button
                       type="button"
@@ -355,19 +340,19 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                         onSelectAgent?.(activeAgent);
                         onClose();
                       }}
-                      className="w-full py-3 px-5 rounded-full bg-[#0f172a] hover:bg-slate-800 dark:bg-[#0099ff] dark:hover:bg-sky-400 active:scale-[0.98] text-white font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                      className="ui-button ui-button-primary ui-button-lg w-full"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <Sparkles size={14} />
                       <span>Kích Hoạt {activeAgent.name} Ngay</span>
                     </button>
-                    <p className="text-[10px] text-center text-slate-400 mt-1">
+                    <p className="text-[11px] text-center text-ink-tertiary mt-1.5">
                       Chuẩn RAI² OS · Tối ưu điểm nghẽn TOC · Kích hoạt 1-Click
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-slate-400 text-xs p-6">
+              <div className="h-full flex items-center justify-center text-ink-tertiary text-[13px] p-6">
                 Chọn một nhân sự số để xem chi tiết
               </div>
             )}
