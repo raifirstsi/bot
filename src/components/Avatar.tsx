@@ -254,7 +254,7 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
 
   // If this bot is RAI² (default bot, chief, or chrome) without a custom uploaded photo, use RAI² official mascot
   const isRaiBot =
-    (Boolean(bot.defaultBot) ||
+    (Boolean((bot as any).defaultBot) ||
       bot.name?.toLowerCase().includes("rai") ||
       (bot as any).chiefOfStaff ||
       bot.color === "chrome") &&

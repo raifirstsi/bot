@@ -63,7 +63,7 @@ export function brandFile(): string {
 /** Never throws. */
 export function loadBrand(options: { file?: string; isEntitled?: (feature: string) => boolean } = {}): BrandStatus {
   const file = options.file ?? brandFile();
-  const _isEntitled = options.isEntitled ?? entitled;
+  void (options.isEntitled ?? entitled);
   const fallback = (notice?: string): BrandStatus =>
     notice ? { brand: DEFAULT_BRAND, source: "default", file, notice } : { brand: DEFAULT_BRAND, source: "default", file };
   if (!existsSync(file)) return fallback();

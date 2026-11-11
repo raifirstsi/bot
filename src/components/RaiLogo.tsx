@@ -20,7 +20,11 @@ export function RaiLogo({
   alt?: string;
 }) {
   const skin = useSyncExternalStore(subscribeSkin, readSkin, readSkin);
-  const isDark = DARK_SKINS.has(skin);
+  const isDark =
+    DARK_SKINS.has(skin) ||
+    (typeof document !== "undefined" &&
+      (document.documentElement.classList.contains("dark") ||
+        document.documentElement.getAttribute("data-theme") === "dark"));
 
   return (
     <span className={cn("inline-flex items-center select-none shrink-0", className)}>

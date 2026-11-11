@@ -1,8 +1,8 @@
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { readSessionState } from "../../lib/session";
 import {
-  Shield, Check, ArrowRight, X, QrCode, Sparkles, Terminal, Copy,
-  CheckCircle2, Users, Cpu, FileText, ChevronRight, Lock, Eye, AlertTriangle, Zap,
+  Shield, Check, ArrowRight, X, Sparkles, Copy,
+  CheckCircle2, AlertTriangle, Zap,
   Sun, Moon, Menu as MenuIcon, X as CloseIcon
 } from "lucide-react";
 import { applySkinChoice, readSkin, subscribeSkin, THEME_SKINS } from "@/lib/skins";
@@ -179,7 +179,7 @@ const DARK_SKINS = new Set([
   "aurora",
 ]);
 
-export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void }) {
+export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignIn?: () => void }) {
   const currentSkin = useSyncExternalStore(subscribeSkin, readSkin, readSkin);
   const isDark = DARK_SKINS.has(currentSkin);
 

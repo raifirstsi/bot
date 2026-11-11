@@ -291,7 +291,7 @@ export function buildBotOverview(facts: OverviewFacts): BotOverview {
   };
 }
 
-const DEFAULT_BOT_NAMES = /^(new bot|bot|untitled)(\s*\d+)?$/i;
+const DEFAULT_BOT_NAMES = /^(new bot|bot|new rai|rai|untitled)(\s*\d+)?$/i;
 
 export function setupSteps(facts: OverviewFacts): SetupStep[] {
   const named = facts.bot.name.trim() !== "" && !DEFAULT_BOT_NAMES.test(facts.bot.name.trim());

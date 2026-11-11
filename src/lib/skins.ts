@@ -1,5 +1,4 @@
 import { paintAuroraField } from "./aurora-field";
-import { hasPriorRun } from "./prior-run";
 
 export const SKIN_IDS = [
   "midnight",

@@ -107,7 +107,7 @@ export function TriggersPage({ onBack, onOpenRoom }: { onBack: () => void; onOpe
                 </button>
               ))}
             </div>
-            <button type="button" onClick={() => setNewText("")} className="flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-ink hover:brightness-110"><Plus size={15} aria-hidden="true" />{t("automations.new")}</button>
+            <button type="button" onClick={() => setNewText("")} className="flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-ink shadow-xs hover:brightness-110"><Plus size={15} aria-hidden="true" />{t("automations.new")}</button>
           </div>
         </div>
       </header>
@@ -119,10 +119,10 @@ export function TriggersPage({ onBack, onOpenRoom }: { onBack: () => void; onOpe
               <LimitWarnings botFilter={showFilter ? botFilter : "all"} />
               {all.length === 0 && state.routinesLoadState !== "loading" && state.hydrated ? (
                 <section aria-label={t("automations.empty.title")} className="px-6 py-16 text-center">
-                  <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-accent/10 text-accent"><Zap size={22} /></div>
+                  <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-xs"><Zap size={22} className="text-accent" /></div>
                   <h2 className="text-[17px] font-semibold text-ink">{t("automations.empty.title")}</h2>
-                  <button type="button" onClick={() => setNewText(t("automations.empty.example"))} className="mt-3 text-[14px] text-accent-text underline-offset-2 hover:underline">{t("automations.empty.try")}</button>
-                  <div><button type="button" onClick={() => setNewText("")} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-[13px] font-medium text-accent-ink hover:brightness-110"><Plus size={15} />{t("automations.new")}</button></div>
+                  <button type="button" onClick={() => setNewText(t("automations.empty.example"))} className="mt-3 text-[14px] font-medium text-accent-text underline-offset-2 hover:underline">{t("automations.empty.try")}</button>
+                  <div><button type="button" onClick={() => setNewText("")} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-xs hover:brightness-110"><Plus size={15} />{t("automations.new")}</button></div>
                 </section>
               ) : (
                 <ul aria-label={t("automations.title")} className="divide-y divide-hairline/30 overflow-hidden rounded-2xl border border-hairline/40 bg-card">

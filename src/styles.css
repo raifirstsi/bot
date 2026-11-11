@@ -138,55 +138,35 @@
   /* Team map: a card's border acknowledging a message sent to it from the map. */
   --animate-sent-border: sent-border 1.2s ease-out forwards;
 
-  /* Defaults = Midnight. Kept here so the app is never unstyled. */
-  --color-app: #121212;
-  --color-panel: #0e0e0e;
-  --color-raised: #202020;
-  --color-raised-hover: #2c2c2c;
-  /* the composer pill. Every skin but Daylight paints it in `raised`; there
-     it is the page colour with a hairline ring, so it needs a tone (and a
-     ring, transparent everywhere else) of its own. */
-  --color-composer: #1f1f1f;
-  --color-composer-ring: #2a2a2a;
-  /* popover and right-click menus. Same story as the composer: every skin
-     but Daylight paints them in `card`, which there is the bot's bubble and
-     a shade too grey for a menu. */
-  --color-menu: #1f1f1f;
-  --color-menu-hover: #f5f5f50f;
-  --color-menu-active: #f5f5f514;
-  --color-card: #1f1f1f;
-  --color-inset: #1b1b1b;
-  /* a control ON a card. The dark skins take their `raised` value, so this
-     is a no-op for them; the light skins need a tone of their own, because
-     there `raised` is pure white and a card is too. */
-  --color-control: #282828;
-  --color-hairline: #383838;
-  /* the 0.5px line where two panes meet: the sidebar and the chat */
-  --color-edge: color-mix(in srgb, var(--color-ink) 8%, transparent);
-  /* the window's frame: its top bar and the rail of places, around the
-     app's pane (the sidebar and the chat). The app's own colour a step darker, so it
-     stays in the skin's family: --frame-shade of black. */
-  --color-frame: color-mix(in oklab, var(--color-app), black var(--frame-shade));
-  --color-ink: #f5f5f5;
-  --color-ink-secondary: #f5f5f5a8;
-  /* quiet text: timestamps, hints, placeholders, calendar hours. It used to
-     be `text-ink-secondary/70`, which fades an ink already tuned close to
-     AA and landed at 2.2–4:1. Each skin sets this to the quietest ink that
-     still clears 4.5:1 on every text surface, raised-hover included; on the
-     light skins that leaves little room below the secondary ink, so there
-     size carries the hierarchy. Measured by pnpm check:contrast. */
-  --color-ink-tertiary: #f5f5f591;
-  --color-accent: #ffffff;
-  --color-accent-border: #ffffff;
-  /* the ring a keyboard user follows; sits on the accent so focus reads as
-     "the app is talking to you", not as a browser default */
-  --color-focus: #ffffff;
-  --color-accent-text: #ffffff;
-  --color-accent-ink: #000000;
-  --color-bubble-user: #2c2c2e;
-  --color-success: #38d591;
-  --color-danger: #ff5667;
-  --color-warning: #ff9800;
+  /* Defaults = Daylight (RAI² White & Soft Blue Hero Aesthetic). Kept here so the app is always crisp and contrasted. */
+  --color-app: #f8fafd;
+  --color-panel: #f1f5fa;
+  --color-raised: #e3edf7;
+  --color-raised-hover: #ebf3fa;
+  --color-composer: #ffffff;
+  --color-composer-ring: #0099ff33;
+  --color-menu: #ffffff;
+  --color-menu-hover: #f1f5f9;
+  --color-menu-active: #e2e8f0;
+  --color-card: #ffffff;
+  --color-inset: #edf2f7;
+  --color-control: #e4ecf4;
+  --color-hairline: #e2e8f0;
+  --color-edge: #edf2f7;
+  --color-frame: #f1f5fa;
+  --color-ink: #0f172a;
+  --color-ink-secondary: #475569;
+  --color-ink-tertiary: #94a3b8;
+  --color-accent: #0099ff;
+  --color-accent-border: #0099ff;
+  --color-focus: #0099ff;
+  --color-accent-text: #0077cc;
+  --color-accent-ink: #ffffff;
+  --color-bubble-user: #0f172a;
+  --color-bubble-user-ink: #ffffff;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
 
   --font-sans: "Geist Variable", -apple-system, BlinkMacSystemFont,
     "Segoe UI", system-ui, sans-serif;
@@ -849,6 +829,58 @@
   border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
+/* Explicit High-Contrast Text & Fill Overrides for Daylight (White Hero Theme) */
+:root[data-skin="daylight"] .text-accent,
+[data-skin="daylight"] .text-accent {
+  color: #0077cc !important;
+}
+
+:root[data-skin="daylight"] .text-accent-text,
+[data-skin="daylight"] .text-accent-text {
+  color: #0077cc !important;
+}
+
+:root[data-skin="daylight"] .bg-accent,
+[data-skin="daylight"] .bg-accent {
+  background-color: #0099ff !important;
+  color: #ffffff !important;
+}
+
+:root[data-skin="daylight"] .bg-accent .text-accent-ink,
+[data-skin="daylight"] .bg-accent .text-accent-ink,
+:root[data-skin="daylight"] .text-accent-ink,
+[data-skin="daylight"] .text-accent-ink {
+  color: #ffffff !important;
+}
+
+:root[data-skin="daylight"] .bg-accent\/10,
+[data-skin="daylight"] .bg-accent\/10 {
+  background-color: rgba(0, 153, 255, 0.12) !important;
+  color: #0077cc !important;
+}
+
+:root[data-skin="daylight"] .bg-accent\/12,
+[data-skin="daylight"] .bg-accent\/12 {
+  background-color: rgba(0, 153, 255, 0.14) !important;
+  color: #0077cc !important;
+}
+
+:root[data-skin="daylight"] .bg-accent\/15,
+[data-skin="daylight"] .bg-accent\/15 {
+  background-color: rgba(0, 153, 255, 0.16) !important;
+  color: #0077cc !important;
+}
+
+:root[data-skin="daylight"] .bg-accent\/20,
+[data-skin="daylight"] .bg-accent\/20 {
+  background-color: rgba(0, 153, 255, 0.20) !important;
+}
+
+:root[data-skin="daylight"] .border-accent,
+[data-skin="daylight"] .border-accent {
+  border-color: #0099ff !important;
+}
+
 /* ── Meadow ───────────────────────────────────────────────────────────────
    The MausBot brand look: a white page, a sidebar washed in the faintest
    green, mint for the selected row and a calm green accent. The brand
@@ -1193,16 +1225,16 @@
 }
 
 /* RAI² Adaptive Brand Logo */
-:is([data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-dark {
+:is(html.dark, [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-dark {
   display: block !important;
 }
-:is([data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-light {
+:is(html.dark, [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-light {
   display: none !important;
 }
-:is([data-skin="daylight"], [data-skin="atelier"], [data-skin="lagoon"], [data-skin="linen"], [data-skin="meadow"], [data-skin="pop"]) .rai-logo-dark {
+:is(html:not(.dark):not([data-theme="dark"]):not([data-skin="midnight"]):not([data-skin="foundry"]):not([data-skin="graphite"]):not([data-skin="dusk"]):not([data-skin="halloween"]):not([data-skin="diwali"]):not([data-skin="aurora"])) .rai-logo-dark {
   display: none !important;
 }
-:is([data-skin="daylight"], [data-skin="atelier"], [data-skin="lagoon"], [data-skin="linen"], [data-skin="meadow"], [data-skin="pop"]) .rai-logo-light {
+:is(html:not(.dark):not([data-theme="dark"]):not([data-skin="midnight"]):not([data-skin="foundry"]):not([data-skin="graphite"]):not([data-skin="dusk"]):not([data-skin="halloween"]):not([data-skin="diwali"]):not([data-skin="aurora"])) .rai-logo-light {
   display: block !important;
 }
 

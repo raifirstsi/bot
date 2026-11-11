@@ -32,14 +32,14 @@ const WORK = "ledger-work";
 const INBOX = "scout-inbox";
 
 const questionCard = (answered?: string): NonNullable<Message["card"]> => ({
-  title: "Your bot has a question", subtitle: QUESTION, options: CHOICES, requestId: "req-question", requestType: "question",
+  title: "Your RAI has a question", subtitle: QUESTION, options: CHOICES, requestId: "req-question", requestType: "question",
   ...(answered ? { answered: "answer", answeredText: answered } : {}),
 });
 const approvalCard: NonNullable<Message["card"]> = {
   title: "Approval needed", subtitle: COMMAND, options: ["Allow", "Deny"], requestId: "req-approval", requestType: "permission", tool: "Bash",
 };
 const openCard: NonNullable<Message["card"]> = {
-  title: "Your bot has a question", subtitle: OPEN_QUESTION, options: [], requestId: "needs-input-as_1-1", requestType: "question",
+  title: "Your RAI has a question", subtitle: OPEN_QUESTION, options: [], requestId: "needs-input-as_1-1", requestType: "question",
 };
 const cardFor = (state: string): NonNullable<Message["card"]> | null =>
   state === "question" ? questionCard() : state === "answered" ? questionCard(CHOICES[0]) : state === "approval" ? approvalCard : state === "open" ? openCard : null;

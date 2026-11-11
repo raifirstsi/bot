@@ -36,8 +36,8 @@ const SCENARIOS: ScenarioLabels = {
 };
 
 const MOTION_SCENARIOS = {
-  arrive: "New bot created",
-  switch: "Active bot changed",
+  arrive: "New RAI created",
+  switch: "Active RAI changed",
   customize: "Appearance updated",
   alert: "Needs attention",
   thinking: "Waiting for input",

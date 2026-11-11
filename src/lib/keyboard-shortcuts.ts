@@ -26,19 +26,19 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       },
       {
         id: "new-bot",
-        description: "Create a new bot",
+        description: "Create a new RAI",
         macKeys: ["⌘", "N"],
         winKeys: ["Ctrl", "N"],
       },
       {
         id: "new-thread",
-        description: "Start a new thread with the selected bot",
+        description: "Start a new thread with the selected RAI",
         macKeys: ["⌘", "⇧", "N"],
         winKeys: ["Ctrl", "Shift", "N"],
       },
       {
         id: "jump-bot",
-        description: "Jump to bot 1–9 in the roster",
+        description: "Jump to RAI 1–9 in the roster",
         macKeys: ["⌘", "1–9"],
         winKeys: ["Ctrl", "1–9"],
       },
@@ -50,7 +50,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       },
       {
         id: "switch-bot",
-        description: "Switch to previous / next bot",
+        description: "Switch to previous / next RAI",
         macKeys: ["⌘", "⇧", "[ / ]"],
         winKeys: ["Ctrl", "Shift", "[ / ]"],
       },
@@ -79,7 +79,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       },
       {
         id: "send-follow-up",
-        description: "While a bot works: queue instead of steering, or the other way round",
+        description: "While a RAI works: queue instead of steering, or the other way round",
         macKeys: ["⌘", "Return"],
         winKeys: ["Ctrl", "Enter"],
       },
