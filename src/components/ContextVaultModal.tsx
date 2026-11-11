@@ -8,9 +8,6 @@ import {
   ShieldCheck,
   Layers,
   Route,
-  Trash2,
-  ChevronRight,
-  Target,
   RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -57,13 +54,13 @@ interface ContextVaultModalProps {
 
 const SHORT_PILLAR_LABELS: Record<ContextPillarId, string> = {
   brand_voice: "1. Brand Voice",
-  customer_avatar: "2. Customer Avatar",
-  offer_matrix: "3. Offer Matrix",
-  objection_playbook: "4. Objections",
-  golden_pitch: "5. Golden Pitch",
-  delivery_sop: "6. Delivery SOP",
-  pre_mortem: "7. Pre-Mortem",
-  anti_goals: "8. Anti-Goals",
+  customer_avatar: "2. Khách Hàng",
+  offer_matrix: "3. Sản Phẩm",
+  objection_playbook: "4. Xử Lý Từ Chối",
+  golden_pitch: "5. Bài Bán Hàng",
+  delivery_sop: "6. SOP Vận Hành",
+  pre_mortem: "7. Rủi Ro Thất Bại",
+  anti_goals: "8. Ranh Giới Cấm",
 };
 
 export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
@@ -163,33 +160,37 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby={dialogTitleId}
-      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="relative w-full h-[100dvh] sm:h-[90vh] sm:max-w-5xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden"
+        className="relative w-full h-[100dvh] sm:h-[90vh] sm:max-w-5xl bg-[#f8fafd] dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-[#e2e8f0] dark:border-slate-800 flex flex-col overflow-hidden"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 50% 0%, rgba(0, 153, 255, 0.08) 0%, rgba(0, 153, 255, 0.02) 40%, transparent 65%)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top App Header (56px Apple/Linear precision) */}
-        <div className="h-14 sm:h-16 px-4 sm:px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+        {/* Top Header (56px Minimalist White) */}
+        <div className="h-14 px-4 sm:px-6 border-b border-[#e2e8f0] dark:border-slate-800 flex items-center justify-between shrink-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-[#0077cc] dark:text-sky-300 flex items-center justify-center shrink-0 border border-[#e2e8f0] dark:border-slate-700">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2
                   id={dialogTitleId}
-                  className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight truncate"
+                  className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-white tracking-tight truncate"
                 >
                   Két Sắt Ngữ Cảnh 8 Trụ Cột
                 </h2>
-                <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800 shrink-0">
-                  Documentation Dividend +30%
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-[#0077cc] dark:text-sky-300 border border-[#e2e8f0] dark:border-slate-700 shrink-0">
+                  Context Vault
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate hidden sm:block">
-                Chương 15 & 16: RAI² FIRST OS · Record First, Write Never
+              <p className="text-[11px] text-[#475569] dark:text-slate-400 truncate hidden sm:block">
+                Thu âm hoặc nạp tri thức lõi cho hệ thống AI doanh nghiệp.
               </p>
             </div>
           </div>
@@ -197,55 +198,55 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 flex items-center justify-center transition-all shrink-0"
+            className="w-9 h-9 rounded-full text-slate-400 hover:text-[#0f172a] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 flex items-center justify-center transition-all shrink-0"
             aria-label="Đóng"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* View Mode Segmented Bar (Horizontal scroll on mobile) */}
-        <div className="px-3 sm:px-6 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/40 flex items-center gap-2 shrink-0 overflow-x-auto scrollbar-none snap-x">
+        {/* View Mode Segmented Bar */}
+        <div className="px-3 sm:px-6 py-2 border-b border-[#e2e8f0] dark:border-slate-800 bg-white/60 dark:bg-slate-950/40 flex items-center gap-1.5 shrink-0 overflow-x-auto scrollbar-none snap-x">
           <button
             type="button"
             onClick={() => setViewMode("edit")}
             className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
+              "px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
               viewMode === "edit"
-                ? "bg-slate-900 dark:bg-[#0099ff] text-white shadow-xs font-bold"
-                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700"
+                ? "bg-[#0f172a] dark:bg-[#0099ff] text-white shadow-2xs font-bold"
+                : "bg-white dark:bg-slate-800 text-[#475569] dark:text-slate-300 border border-[#e2e8f0] dark:border-slate-700 hover:border-slate-300"
             )}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>8 Trụ Cột Tri Thức</span>
+            <span>8 Trụ Cột</span>
           </button>
 
           <button
             type="button"
             onClick={() => setViewMode("record")}
             className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
+              "px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
               viewMode === "record"
-                ? "bg-rose-600 text-white shadow-xs font-bold"
-                : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/50"
+                ? "bg-[#0f172a] dark:bg-[#0099ff] text-white shadow-2xs font-bold"
+                : "bg-white dark:bg-slate-800 text-[#475569] dark:text-slate-300 border border-[#e2e8f0] dark:border-slate-700 hover:border-slate-300"
             )}
           >
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <span>Record First (Thu Âm)</span>
+            <span>Thu Âm Nhanh</span>
           </button>
 
           <button
             type="button"
             onClick={() => setViewMode("router")}
             className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
+              "px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
               viewMode === "router"
-                ? "bg-blue-600 text-white shadow-xs font-bold"
-                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700"
+                ? "bg-[#0f172a] dark:bg-[#0099ff] text-white shadow-2xs font-bold"
+                : "bg-white dark:bg-slate-800 text-[#475569] dark:text-slate-300 border border-[#e2e8f0] dark:border-slate-700 hover:border-slate-300"
             )}
           >
-            <Route className="w-3.5 h-3.5 text-blue-500" />
-            <span>Context Router (-80% Token)</span>
+            <Route className="w-3.5 h-3.5 text-[#0077cc]" />
+            <span>Bộ Định Tuyến (-80% Token)</span>
           </button>
         </div>
 
@@ -253,9 +254,9 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
         {viewMode === "edit" && (
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             {/* Horizontal Pillar Tabs (Mobile) / Sidebar Tabs (Desktop) */}
-            <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 overflow-x-auto md:overflow-y-auto p-2.5 flex md:flex-col gap-1.5 bg-slate-50/50 dark:bg-slate-950/30 shrink-0 scrollbar-none snap-x">
-              <div className="hidden md:flex px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                8 Trụ Cột Bối Cảnh
+            <div className="w-full md:w-60 border-b md:border-b-0 md:border-r border-[#e2e8f0] dark:border-slate-800 overflow-x-auto md:overflow-y-auto p-2 flex md:flex-col gap-1 bg-white/40 dark:bg-slate-950/20 shrink-0 scrollbar-none snap-x">
+              <div className="hidden md:flex px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                8 Trụ Cột Tri Thức
               </div>
               {(Object.keys(CONTEXT_PILLARS) as ContextPillarId[]).map((id) => {
                 const p = CONTEXT_PILLARS[id];
@@ -268,22 +269,13 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
                     type="button"
                     onClick={() => setActiveTab(id)}
                     className={cn(
-                      "text-left px-3.5 py-2 md:py-2.5 rounded-full md:rounded-2xl text-xs transition-all whitespace-nowrap md:whitespace-normal shrink-0 snap-start active:scale-95",
+                      "text-left px-3 py-1.5 md:py-2 rounded-full md:rounded-xl text-xs transition-all whitespace-nowrap md:whitespace-normal shrink-0 snap-start active:scale-95",
                       active
-                        ? "bg-emerald-600 text-white shadow-xs font-bold"
-                        : "bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent text-slate-700 dark:text-slate-300 border border-slate-200/70 md:border-transparent dark:border-slate-700 hover:bg-white/80 dark:hover:bg-slate-800"
+                        ? "bg-[#0f172a] dark:bg-[#0099ff] text-white shadow-2xs font-bold"
+                        : "bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent text-[#475569] dark:text-slate-300 border border-[#e2e8f0] md:border-transparent dark:border-slate-700 hover:bg-white/80"
                     )}
                   >
-                    <div className="md:hidden font-semibold">{shortLabel}</div>
-                    <div className="hidden md:block font-semibold">{p.title}</div>
-                    <div
-                      className={cn(
-                        "hidden md:block text-[10px] truncate mt-0.5",
-                        active ? "text-emerald-100" : "text-slate-400"
-                      )}
-                    >
-                      {p.targetWordCount}
-                    </div>
+                    <div className="truncate">{shortLabel}</div>
                   </button>
                 );
               })}
@@ -292,14 +284,14 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
             {/* Main Editor & Sharpness Audit */}
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
               {/* Textarea Area */}
-              <div className="flex-1 flex flex-col p-4 overflow-y-auto space-y-3">
+              <div className="flex-1 flex flex-col p-3.5 sm:p-4 overflow-y-auto space-y-2.5">
                 {distillNotice && (
-                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 text-xs text-[#0f172a] dark:text-white flex items-center justify-between shadow-2xs">
                     <span>{distillNotice}</span>
                     <button
                       type="button"
                       onClick={() => setDistillNotice(null)}
-                      className="text-emerald-600 font-bold ml-2"
+                      className="text-slate-400 hover:text-slate-700 font-bold ml-2"
                     >
                       ✕
                     </button>
@@ -308,17 +300,17 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    <h3 className="font-bold text-xs sm:text-sm text-[#0f172a] dark:text-white">
                       {CONTEXT_PILLARS[activeTab].title}
                     </h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-[11px] text-[#475569] dark:text-slate-400">
                       {CONTEXT_PILLARS[activeTab].subtitle}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleResetToTemplate}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0077cc] dark:text-sky-400 hover:underline"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Nạp mẫu chuẩn</span>
@@ -328,68 +320,59 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
                 <textarea
                   value={currentContent}
                   onChange={(e) => handleContentChange(e.target.value)}
-                  className="flex-1 w-full min-h-[220px] p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none leading-relaxed"
+                  className="flex-1 w-full min-h-[200px] p-3 rounded-2xl border border-[#e2e8f0] dark:border-slate-700 bg-white dark:bg-slate-800/80 font-mono text-xs text-[#0f172a] dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#0099ff] resize-none leading-relaxed shadow-2xs"
                   placeholder="Nhập nội dung bối cảnh..."
                 />
               </div>
 
-              {/* Sharpness Gauge Panel */}
-              <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 p-4 bg-slate-50/40 dark:bg-slate-950/20 overflow-y-auto flex flex-col gap-3">
+              {/* Sharpness Gauge Panel (Clean White / Blue Accent) */}
+              <div className="w-full lg:w-72 border-t lg:border-t-0 lg:border-l border-[#e2e8f0] dark:border-slate-800 p-3.5 sm:p-4 bg-white/60 dark:bg-slate-950/20 overflow-y-auto flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Độ Sắc Nét (Sharpness)
+                  <span className="text-xs font-bold text-[#0f172a] dark:text-slate-300">
+                    Độ Sắc Nét:
                   </span>
                   <span
                     className={cn(
-                      "px-2.5 py-0.5 rounded-full text-xs font-bold",
-                      sharpness.score >= 85
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                        : sharpness.score >= 60
-                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                        : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                      "px-2 py-0.5 rounded-full text-[11px] font-bold border",
+                      sharpness.isSharp
+                        ? "bg-white text-[#0077cc] border-[#e2e8f0]"
+                        : "bg-white text-slate-700 border-slate-200"
                     )}
                   >
-                    {sharpness.score}/100 {sharpness.isSharp ? "✓ ĐẠT" : "⚠ CẦN SỬA"}
+                    {sharpness.score}/100 {sharpness.isSharp ? "✓ Đạt" : "Cần sửa"}
                   </span>
                 </div>
 
-                <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className={cn(
-                      "h-full transition-all duration-300",
-                      sharpness.score >= 85
-                        ? "bg-emerald-500"
-                        : sharpness.score >= 60
-                        ? "bg-amber-500"
-                        : "bg-rose-500"
-                    )}
+                    className="h-full bg-[#0099ff] transition-all duration-300"
                     style={{ width: `${sharpness.score}%` }}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">
+                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700">
                     <div className="text-slate-400">Số từ:</div>
-                    <div className="font-bold text-slate-900 dark:text-white">
-                      {sharpness.wordCount} từ
+                    <div className="font-bold text-[#0f172a] dark:text-white">
+                      {sharpness.wordCount}
                     </div>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">
+                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700">
                     <div className="text-slate-400">Từ/câu TB:</div>
-                    <div className="font-bold text-slate-900 dark:text-white">
+                    <div className="font-bold text-[#0f172a] dark:text-white">
                       {sharpness.averageWordsPerSentence} (chuẩn 12-18)
                     </div>
                   </div>
                 </div>
 
                 {sharpness.flaggedJargon.length > 0 && (
-                  <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/70 dark:border-rose-900/40 text-[11px] text-rose-800 dark:text-rose-300">
-                    <div className="font-bold mb-1">Từ sáo rỗng bị phát hiện:</div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 text-[11px]">
+                    <div className="font-semibold text-slate-500 mb-1">Từ sáo rỗng:</div>
                     <div className="flex flex-wrap gap-1">
                       {sharpness.flaggedJargon.map((j) => (
                         <span
                           key={j}
-                          className="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-200 line-through"
+                          className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 line-through text-[10px]"
                         >
                           {j}
                         </span>
@@ -398,30 +381,14 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
                   </div>
                 )}
 
-                {sharpness.metricsFound.length > 0 && (
-                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/40 text-[11px] text-emerald-800 dark:text-emerald-300">
-                    <div className="font-bold mb-1">Số liệu định lượng tìm thấy:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {sharpness.metricsFound.slice(0, 6).map((m) => (
-                        <span
-                          key={m}
-                          className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 font-semibold"
-                        >
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 <div>
-                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Góp ý mài sắc từ CAIO:
+                  <div className="text-xs font-bold text-[#0f172a] dark:text-slate-300 mb-1">
+                    Góp ý tinh chỉnh:
                   </div>
-                  <ul className="text-[11px] space-y-1 text-slate-600 dark:text-slate-400">
+                  <ul className="text-[11px] space-y-1 text-[#475569] dark:text-slate-400">
                     {sharpness.feedback.map((f, i) => (
                       <li key={i} className="flex items-start gap-1">
-                        <span className="text-slate-400">•</span>
+                        <span className="text-[#0077cc]">•</span>
                         <span>{f}</span>
                       </li>
                     ))}
@@ -432,49 +399,49 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
           </div>
         )}
 
-        {/* Record First View */}
+        {/* Record First View (Clean Minimalist White) */}
         {viewMode === "record" && (
-          <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto max-w-3xl mx-auto w-full">
-            <div className="text-center mb-5">
-              <span className="inline-flex items-center rounded-full bg-rose-100 dark:bg-rose-950 px-3 py-1 text-xs font-bold text-rose-700 dark:text-rose-300 mb-2">
-                Quy Tắc: Record First, Write Never
+          <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto max-w-2xl mx-auto w-full">
+            <div className="text-center mb-4">
+              <span className="inline-flex items-center rounded-full bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 px-3 py-0.5 text-xs font-bold text-[#0077cc] dark:text-sky-300 mb-1.5 shadow-2xs">
+                Record First
               </span>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                Nói Ra Mọi Suy Nghĩ, AI Tự Đóng Gói Thành Tri Thức
+              <h3 className="text-base sm:text-lg font-bold text-[#0f172a] dark:text-white">
+                Thu Âm Hoặc Dán Bối Cảnh Thực Chiến
               </h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Người sáng lập không cần ngồi viết tài liệu. Hãy ghi âm hoặc paste những lời dặn dò, kinh nghiệm thực chiến vào đây.
+              <p className="text-xs text-[#475569] dark:text-slate-400 mt-0.5">
+                Nói ra kinh nghiệm thực tế, AI tự động chắt lọc vào Két Sắt.
               </p>
             </div>
 
-            <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-3">
               <button
                 type="button"
                 onClick={handleToggleRecord}
                 className={cn(
-                  "px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold flex items-center gap-2 transition shadow-md active:scale-95",
+                  "px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition active:scale-95 shadow-2xs",
                   isRecording
                     ? "bg-rose-600 text-white animate-pulse"
-                    : "bg-slate-900 text-white dark:bg-[#0099ff]"
+                    : "bg-[#0f172a] dark:bg-[#0099ff] text-white"
                 )}
               >
-                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4 text-rose-400" />}
-                <span>{isRecording ? "Đang lắng nghe... (Chạm để dừng)" : "Bắt đầu thu âm giọng nói"}</span>
+                {isRecording ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-sky-300" />}
+                <span>{isRecording ? "Đang nghe... (Chạm để dừng)" : "Bắt đầu thu âm"}</span>
               </button>
             </div>
 
             <textarea
               value={rawMonologue}
               onChange={(e) => setRawMonologue(e.target.value)}
-              className="w-full h-44 sm:h-52 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 resize-none font-sans leading-relaxed"
-              placeholder="Hoặc dán toàn bộ đoạn trao đổi, transcript cuộc họp, lời dặn nhân viên, quy tắc báo giá vào đây..."
+              className="w-full h-40 sm:h-48 p-3.5 rounded-2xl border border-[#e2e8f0] dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-[#0f172a] dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-[#0099ff] resize-none font-sans leading-relaxed shadow-2xs"
+              placeholder="Hoặc dán toàn bộ đoạn trao đổi, transcript cuộc họp, quy tắc bán hàng vào đây..."
             />
 
-            <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2.5">
+            <div className="mt-3 flex flex-col sm:flex-row justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setRawMonologue("")}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-full text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
+                className="w-full sm:w-auto px-4 py-2 rounded-full text-xs text-slate-500 hover:bg-slate-100 font-semibold"
               >
                 Xóa văn bản
               </button>
@@ -482,37 +449,37 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
                 type="button"
                 onClick={handleDistill}
                 disabled={!rawMonologue.trim()}
-                className="w-full sm:w-auto px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#0f172a] dark:bg-[#0099ff] disabled:opacity-40 text-white text-xs font-bold transition shadow-2xs flex items-center justify-center gap-1.5 active:scale-95"
               >
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                <span>Chắt Lọc Sang SOUL.md & MEMORY.md →</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Chắt Lọc Tri Thức →</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Dynamic Context Router View */}
+        {/* Dynamic Context Router View (Clean White) */}
         {viewMode === "router" && (
-          <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto space-y-4">
+          <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto space-y-3.5">
             <div>
-              <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-950 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 mb-1">
-                Bộ Định Tuyến Bối Cảnh (Context Router)
+              <span className="inline-flex items-center rounded-full bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 px-2.5 py-0.5 text-xs font-bold text-[#0077cc] dark:text-sky-300 mb-1 shadow-2xs">
+                Context Router
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                Chống Hiện Tượng Lost-in-the-Middle & Tiết Kiệm 80% Token
+              <h3 className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-white">
+                Tự Động Trích Xuất Bối Cảnh, Tiết Kiệm 80% Token
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Chỉ nạp đúng 2-3 trụ cột bối cảnh liên quan nhất cho từng tác vụ, không nạp toàn bộ 35.000 từ.
+              <p className="text-xs text-[#475569] dark:text-slate-400 mt-0.5">
+                Chỉ nạp đúng 2–3 trụ cột liên quan theo từng tác vụ, không nạp tràn lan.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-1.5">
               {[
-                { id: "proposal", label: "Lập Báo Giá (Proposal)" },
-                { id: "ad_copy", label: "Viết Quảng Cáo (Ad Copy)" },
-                { id: "cskh", label: "Chăm Sóc Khách Hàng (CSKH)" },
-                { id: "hiring", label: "Tuyển Dụng & Sàng Lọc" },
-                { id: "qc", label: "Kiểm Soát Chất Lượng (QC)" },
+                { id: "proposal", label: "Lập Báo Giá" },
+                { id: "ad_copy", label: "Viết Quảng Cáo" },
+                { id: "cskh", label: "Chăm Sóc KH" },
+                { id: "hiring", label: "Tuyển Dụng" },
+                { id: "qc", label: "Kiểm Soát QC" },
                 { id: "finance", label: "Đối Soát Tài Chính" },
               ].map((t) => (
                 <button
@@ -520,10 +487,10 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
                   type="button"
                   onClick={() => setActiveTask(t.id as TaskType)}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium transition active:scale-95",
+                    "px-3 py-1 rounded-full text-xs font-medium transition active:scale-95",
                     activeTask === t.id
-                      ? "bg-blue-600 text-white shadow-xs font-bold"
-                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700"
+                      ? "bg-[#0f172a] dark:bg-[#0099ff] text-white font-bold shadow-2xs"
+                      : "bg-white dark:bg-slate-800 text-[#475569] dark:text-slate-300 border border-[#e2e8f0] dark:border-slate-700"
                   )}
                 >
                   {t.label}
@@ -531,66 +498,66 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
               ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 text-xs">
-                <div className="font-bold text-blue-900 dark:text-blue-200 mb-1">
-                  Trụ cột được nạp ({routed.activePillars.length}/8):
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs text-xs">
+                <div className="font-bold text-[#0f172a] dark:text-white mb-1">
+                  Trụ cột nạp ({routed.activePillars.length}/8):
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {routed.activePillars.map((p) => (
-                    <div key={p} className="text-blue-700 dark:text-blue-300 font-medium">
+                    <div key={p} className="text-[#0077cc] dark:text-sky-300 font-medium">
                       ✓ {CONTEXT_PILLARS[p].title}
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40 text-xs">
-                <div className="font-bold text-emerald-900 dark:text-emerald-200 mb-1">
-                  Token Tiết Kiệm Ước Tính:
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs text-xs">
+                <div className="font-bold text-[#0f172a] dark:text-white mb-0.5">
+                  Token Tiết Kiệm:
                 </div>
-                <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                <div className="text-lg font-black text-[#0077cc] dark:text-sky-400">
                   ~{routed.tokensSavedEstimate.toLocaleString()} tokens
                 </div>
-                <div className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-1">
-                  Giảm 75% – 85% chi phí API so với Context Dumping.
+                <div className="text-[10px] text-slate-400 mt-0.5">
+                  Giảm 75% – 85% chi phí API.
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40 text-xs">
-                <div className="font-bold text-purple-900 dark:text-purple-200 mb-1">
-                  Độ chính xác suy luận:
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 shadow-2xs text-xs">
+                <div className="font-bold text-[#0f172a] dark:text-white mb-0.5">
+                  Độ chính xác:
                 </div>
-                <div className="text-xl font-black text-purple-600 dark:text-purple-400">
+                <div className="text-lg font-black text-[#0f172a] dark:text-white">
                   &gt; 92%
                 </div>
-                <div className="text-[11px] text-purple-700 dark:text-purple-300 mt-1">
-                  Do tài liệu được đặt ở vị trí vàng trong context window.
+                <div className="text-[10px] text-slate-400 mt-0.5">
+                  Đặt đúng vị trí tối ưu ngữ cảnh.
                 </div>
               </div>
             </div>
 
             <div className="flex-1 flex flex-col">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Xem trước bối cảnh tinh khiết được nạp vào bot:
+              <div className="text-xs font-bold text-[#0f172a] dark:text-slate-300 mb-1">
+                Xem trước bối cảnh tinh gọn:
               </div>
-              <pre className="p-3.5 rounded-2xl bg-slate-900 text-slate-100 font-mono text-[11px] overflow-auto max-h-48 leading-relaxed">
+              <pre className="p-3 rounded-2xl bg-slate-900 text-slate-100 font-mono text-[11px] overflow-auto max-h-40 leading-relaxed">
                 {routed.combinedContext}
               </pre>
             </div>
           </div>
         )}
 
-        {/* Sticky Action Footer CTA (Mobile Optimized, no word-wrapping stack!) */}
-        <div className="sticky bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 z-20 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <div className="text-[11px] text-center sm:text-left text-slate-400 font-medium">
-            Mã hóa & lưu trữ cục bộ trong Két Sắt Doanh Nghiệp (Không lọt dữ liệu ra ngoài).
+        {/* Sticky Action Footer CTA (Clean White / Jet Black Pill) */}
+        <div className="sticky bottom-0 left-0 right-0 p-3.5 sm:p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-[#e2e8f0] dark:border-slate-800 z-20 pb-[max(0.875rem,env(safe-area-inset-bottom))] flex flex-col sm:flex-row gap-2.5 sm:items-center sm:justify-between">
+          <div className="text-[11px] text-center sm:text-left text-slate-400">
+            Mã hóa và lưu trữ cục bộ trong Két Sắt Doanh Nghiệp.
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="hidden sm:inline-flex px-4 py-2.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              className="hidden sm:inline-flex px-4 py-2 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100"
             >
               Đóng
             </button>
@@ -600,7 +567,7 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
                 if (onSyncComplete) onSyncComplete();
                 onClose();
               }}
-              className="w-full sm:w-auto py-3.5 sm:py-2.5 px-6 rounded-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs sm:text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto py-3 px-6 rounded-full bg-[#0f172a] hover:bg-slate-800 dark:bg-[#0099ff] dark:hover:bg-sky-400 active:scale-[0.98] text-white text-xs sm:text-sm font-bold shadow-2xs transition-all flex items-center justify-center gap-1.5"
             >
               <Check className="w-4 h-4" />
               <span>Lưu & Đồng Bộ Toàn Bộ Bots</span>
