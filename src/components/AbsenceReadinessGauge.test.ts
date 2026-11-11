@@ -1,5 +1,8 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { computeAbsenceReadiness } from "./AbsenceReadinessGauge";
+
+import { AbsenceReadinessGauge, computeAbsenceReadiness } from "./AbsenceReadinessGauge";
 import { RAI2_DEPARTMENTS } from "@/lib/rai2-departments";
 
 describe("AbsenceReadinessGauge - Algorithm & Logic", () => {
@@ -12,16 +15,15 @@ describe("AbsenceReadinessGauge - Algorithm & Logic", () => {
     });
 
     it("increases score as key departments are staffed", () => {
-      // Staff Sales (rai-quote, rai-close) and Operations (rai-task, rai-qc)
       const result = computeAbsenceReadiness(["rai-quote", "rai-close", "rai-task", "rai-qc"]);
       expect(result.overallScore).toBeGreaterThan(30);
-      const salesZone = result.zones.find((z) => z.code === "ZONE_3_SALES");
+      const salesZone = result.zones.find((zone) => zone.code === "ZONE_3_SALES");
       expect(salesZone?.activeAgentsCount).toBe(2);
       expect(salesZone?.autonomy).toBe(1);
     });
 
     it("achieves Level 3 (Absence Ready) when all 13 digital workers are active", () => {
-      const allAgentKeys = RAI2_DEPARTMENTS.flatMap((d) => d.agents.map((a) => a.key));
+      const allAgentKeys = RAI2_DEPARTMENTS.flatMap((department) => department.agents.map((agent) => agent.key));
       expect(allAgentKeys.length).toBe(13);
       const result = computeAbsenceReadiness(allAgentKeys);
       expect(result.overallScore).toBeGreaterThanOrEqual(80);
@@ -30,11 +32,35 @@ describe("AbsenceReadinessGauge - Algorithm & Logic", () => {
     });
 
     it("correctly identifies critical gap alerts for unstaffed heavy-weight zones", () => {
-      // Only staff HR (weight 0.05)
       const result = computeAbsenceReadiness(["rai-talent", "rai-coach"]);
-      const salesGap = result.gapAlerts.find((g) => g.deptCode === "ZONE_3_SALES");
+      const salesGap = result.gapAlerts.find((gap) => gap.deptCode === "ZONE_3_SALES");
       expect(salesGap).toBeDefined();
       expect(salesGap?.reason).toContain("20%");
     });
+  });
+});
+
+describe("AbsenceReadinessGauge", () => {
+  it("keeps the dashboard summary neutral and icon-free", () => {
+    const markup = renderToStaticMarkup(createElement(AbsenceReadinessGauge, {
+      activeBotIds: [],
+      onHireDepartment: () => undefined,
+      onOpenFingerprint: () => undefined,
+      onOpenTocDiagnostic: () => undefined,
+      onOpenContextVault: () => undefined,
+    }));
+
+    expect(markup).toContain('data-absence-readiness=""');
+    expect(markup).toContain("ui-button");
+    expect(markup).not.toContain("<svg");
+    expect(markup).not.toMatch(/(?:rose|emerald|amber)-/);
+    expect(markup.match(/data-readiness-zone=/g)).toHaveLength(7);
+    expect(markup.match(/phòng ban trọng yếu chưa có nhân sự số phụ trách/g)).toHaveLength(1);
+  });
+
+  it("uses plain status labels at the readiness extremes", () => {
+    expect(computeAbsenceReadiness([]).level.status).toBe("Điểm nghẽn");
+    const allAgentKeys = RAI2_DEPARTMENTS.flatMap((department) => department.agents.map((agent) => agent.key));
+    expect(computeAbsenceReadiness(allAgentKeys).level.status).toBe("Sẵn sàng");
   });
 });

@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from "react";
-import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight, Building2, Gauge, BookOpen } from "lucide-react";
 import { RAI2_DEPARTMENTS, type RaiDepartment } from "@/lib/rai2-departments";
 import { loadSavedFingerprint, type CompanyFingerprintData } from "@/components/CompanyFingerprintModal";
 import { cn } from "@/lib/cn";
@@ -37,7 +36,7 @@ const ZONE_WEIGHTS: Record<string, number> = {
 export function computeAbsenceReadiness(activeBotIds: string[] = []): {
   overallScore: number;
   zones: ZoneReadiness[];
-  level: { title: string; subtitle: string; color: string; badge: string };
+  level: { title: string; subtitle: string; status: string };
   gapAlerts: Array<{ deptCode: string; title: string; reason: string }>;
 } {
   const activeSet = new Set(
@@ -77,27 +76,24 @@ export function computeAbsenceReadiness(activeBotIds: string[] = []): {
   );
   const overallScore = Math.min(100, Math.round(overallFraction * 100));
 
-  let level: { title: string; subtitle: string; color: string; badge: string };
+  let level: { title: string; subtitle: string; status: string };
   if (overallScore >= 80) {
     level = {
       title: "Cấp độ 3: Sẵn sàng vắng mặt 14 ngày (Absence Ready)",
       subtitle: "Hệ thống tự vận hành ổn định. Dòng tiền và vận hành được bảo vệ bởi rào chắn HITL thông minh.",
-      color: "text-emerald-600 dark:text-emerald-400",
-      badge: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800",
+      status: "Sẵn sàng",
     };
   } else if (overallScore >= 50) {
     level = {
       title: "Cấp độ 2: Bán tự hành (Semi-Autonomous)",
       subtitle: "Vắng mặt an toàn tối đa 3 - 5 ngày. Cần bổ sung nhân sự số ở các phòng ban chịu tải cao.",
-      color: "text-amber-600 dark:text-amber-400",
-      badge: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800",
+      status: "Bán tự hành",
     };
   } else {
     level = {
       title: "Cấp độ 1: Phụ thuộc Người sáng lập (Founder Bottleneck)",
       subtitle: "Doanh nghiệp đình trệ nếu người sáng lập vắng mặt quá 48h. Hãy kích hoạt nhân sự số trọng yếu.",
-      color: "text-rose-600 dark:text-rose-400",
-      badge: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800",
+      status: "Điểm nghẽn",
     };
   }
 
@@ -131,96 +127,77 @@ export function AbsenceReadinessGauge({
   }, []);
 
   return (
-    <div
+    <section
+      data-absence-readiness=""
       className={cn(
-        "rounded-2xl border border-hairline/60 bg-card p-6 shadow-xs backdrop-blur-xs",
+        "overflow-hidden rounded-xl border border-hairline/50 bg-card",
         className
       )}
     >
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-5 border-b border-hairline/50">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex size-7 items-center justify-center rounded-lg bg-accent/10 text-accent">
-              <ShieldCheck className="size-4" />
-            </span>
-            <h3 className="text-base font-semibold tracking-tight text-ink">
-              Chỉ số Sẵn sàng Vắng mặt 14 ngày (ARI)
-            </h3>
-          </div>
-          <p className="mt-1 text-xs text-ink-secondary">
+      <header className="flex items-start justify-between gap-4 border-b border-hairline/40 px-4 py-4 sm:px-5">
+        <div className="min-w-0">
+          <h3 className="text-[14px] font-semibold text-ink">
+            Chỉ số Sẵn sàng Vắng mặt 14 ngày (ARI)
+          </h3>
+          <p className="mt-1 text-[13px] leading-relaxed text-ink-secondary">
             Đo lường năng lực tự hành và rào chắn an toàn tài chính của 7 phòng ban cốt lõi (RAI² First OS).
           </p>
         </div>
+        <div className="shrink-0 text-right">
+          <div className="text-[22px] font-semibold leading-none text-ink">{overallScore}%</div>
+          <div className="mt-1 text-[12px] text-ink-secondary">{level.status}</div>
+        </div>
+      </header>
 
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2 sm:gap-2.5 w-full sm:w-auto">
+      {(onOpenTocDiagnostic || onOpenFingerprint || onOpenContextVault) && (
+        <div
+          data-readiness-actions=""
+          className="flex gap-2 overflow-x-auto border-b border-hairline/40 px-4 py-3 scrollbar-none sm:px-5"
+        >
           {onOpenTocDiagnostic && (
             <button
               type="button"
               onClick={onOpenTocDiagnostic}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+              className="ui-button shrink-0 whitespace-nowrap"
             >
-              <Gauge className="size-3.5 text-amber-500 shrink-0" />
-              <span>Bắt Điểm Nghẽn TOC (60s)</span>
+              Bắt Điểm Nghẽn TOC (60s)
             </button>
           )}
           {onOpenFingerprint && (
             <button
               type="button"
               onClick={onOpenFingerprint}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-hairline bg-raised/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-raised-hover hover:border-hairline-strong transition-colors"
+              className="ui-button shrink-0 whitespace-nowrap"
             >
-              <Building2 className="size-3.5 text-accent shrink-0" />
-              <span>Sổ giá & Rào chắn ngành</span>
+              Sổ giá &amp; Rào chắn ngành
             </button>
           )}
           {onOpenContextVault && (
             <button
               type="button"
               onClick={onOpenContextVault}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+              className="ui-button shrink-0 whitespace-nowrap"
             >
-              <BookOpen className="size-3.5 text-emerald-500 shrink-0" />
-              <span>Két Sắt Ngữ Cảnh</span>
+              Két Sắt Ngữ Cảnh
             </button>
           )}
-          <div className="flex items-center gap-3 ml-auto sm:ml-0">
-            <div className="text-right">
-              <div className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
-                {overallScore}%
-              </div>
-              <div className="text-[10px] sm:text-[11px] font-medium text-ink-tertiary">
-                Điểm số ARI
-              </div>
-            </div>
-            <span
-              className={cn(
-                "rounded-full border px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold select-none",
-                level.badge
-              )}
-            >
-              {overallScore >= 80 ? "Sẵn sàng" : overallScore >= 50 ? "Bán tự hành" : "Điểm nghẽn"}
-            </span>
-          </div>
         </div>
-      </div>
+      )}
 
-      {/* Active Fingerprint Summary Banner */}
       {fingerprint && (
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-accent/5 border border-accent/20 px-3.5 py-2 text-xs text-ink">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-block size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-accent">{fingerprint.companyName}</span>
-            <span className="text-ink-tertiary">·</span>
-            <span className="text-ink-secondary">Biên LN mục tiêu: ≥{fingerprint.targetNetMargin}%</span>
-            <span className="text-ink-tertiary">·</span>
-            <span className="text-ink-secondary">Chiết khấu tối đa: ≤{fingerprint.maxDiscountAllowed}%</span>
+        <div className="flex items-start justify-between gap-3 border-b border-hairline/40 px-4 py-3 text-[12px] sm:items-center sm:px-5">
+          <div className="min-w-0 text-ink-secondary">
+            <span className="font-medium text-ink">{fingerprint.companyName}</span>
+            <span className="mx-1.5 text-ink-tertiary">·</span>
+            <span>Biên LN mục tiêu ≥{fingerprint.targetNetMargin}%</span>
+            <span className="mx-1.5 text-ink-tertiary">·</span>
+            <span>Chiết khấu tối đa ≤{fingerprint.maxDiscountAllowed}%</span>
           </div>
           {onOpenFingerprint && (
             <button
               type="button"
               onClick={onOpenFingerprint}
-              className="text-[11px] font-semibold text-accent hover:underline shrink-0 ml-2"
+              className="shrink-0 font-medium text-ink hover:underline"
             >
               Cập nhật
             </button>
@@ -228,65 +205,36 @@ export function AbsenceReadinessGauge({
         </div>
       )}
 
-      {/* Level Summary Banner */}
-      <div className="mt-4 rounded-xl bg-raised/50 p-4 border border-hairline/30">
-        <h4 className={cn("text-xs font-bold uppercase tracking-wider", level.color)}>
-          {level.title}
-        </h4>
-        <p className="mt-1 text-xs text-ink-secondary leading-relaxed">
+      <div className="px-4 py-4 sm:px-5">
+        <h4 className="text-[13px] font-medium text-ink">{level.title}</h4>
+        <p className="mt-1 text-[13px] leading-relaxed text-ink-secondary">
           {level.subtitle}
         </p>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="mt-4">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-raised">
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-control">
           <div
-            className={cn(
-              "h-full transition-all duration-500 rounded-full",
-              overallScore >= 80
-                ? "bg-emerald-500"
-                : overallScore >= 50
-                ? "bg-amber-500"
-                : "bg-rose-500"
-            )}
-            style={{ width: `${Math.max(4, overallScore)}%` }}
+            className="h-full rounded-full bg-ink/45 transition-[width] duration-500"
+            style={{ width: `${overallScore}%` }}
           />
         </div>
       </div>
 
-      {/* 7-Zone Department Grid */}
-      <div className="mt-6">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-ink-secondary mb-3">
+      <div className="border-t border-hairline/40 px-4 pb-2 pt-4 sm:px-5">
+        <h4 className="text-[12px] font-medium text-ink-secondary">
           Độ bao phủ 7 Phòng Ban (7-Zone Coverage)
         </h4>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-2 divide-y divide-hairline/40">
           {zones.map((zone) => {
             const isCovered = zone.activeAgentsCount > 0;
             return (
               <div
                 key={zone.code}
-                className={cn(
-                  "flex items-center justify-between rounded-xl border p-3 transition-colors",
-                  isCovered
-                    ? "border-hairline/60 bg-raised/30"
-                    : "border-rose-200/50 bg-rose-50/20 dark:border-rose-900/40 dark:bg-rose-950/10"
-                )}
+                data-readiness-zone={zone.code}
+                className="flex min-h-12 items-center justify-between gap-3 py-2.5"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    {isCovered ? (
-                      <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle className="size-3.5 text-rose-500 shrink-0" />
-                    )}
-                    <span className="truncate text-xs font-medium text-ink">
-                      {zone.name}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-2 text-[11px] text-ink-secondary">
+                  <div className="truncate text-[13px] font-medium text-ink">{zone.name}</div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-ink-secondary">
                     <span>Trọng số: {(zone.weight * 100).toFixed(0)}%</span>
-                    <span>·</span>
                     <span>
                       {zone.activeAgentsCount > 0
                         ? `${zone.activeAgentsCount} nhân sự số`
@@ -299,44 +247,21 @@ export function AbsenceReadinessGauge({
                   <button
                     type="button"
                     onClick={() => onHireDepartment(zone.code)}
-                    className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-lg bg-raised px-2.5 py-1 text-[11px] font-semibold text-accent hover:bg-raised-hover hover:text-accent-hover transition-colors"
+                    className="ui-button ui-button-sm shrink-0"
                   >
-                    <span>Tuyển</span>
-                    <ArrowUpRight className="size-3" />
+                    Tuyển
                   </button>
                 )}
               </div>
             );
           })}
         </div>
+        {gapAlerts.length > 0 && (
+          <p className="border-t border-hairline/40 py-3 text-[12px] leading-relaxed text-ink-secondary">
+            {gapAlerts.length} phòng ban trọng yếu chưa có nhân sự số phụ trách.
+          </p>
+        )}
       </div>
-
-      {/* Critical Gap Alerts */}
-      {gapAlerts.length > 0 && (
-        <div className="mt-5 space-y-2">
-          {gapAlerts.map((gap) => (
-            <div
-              key={gap.deptCode}
-              className="flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50/50 p-3 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-300"
-            >
-              <AlertTriangle className="size-4 text-rose-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <span className="font-semibold">{gap.title}: </span>
-                <span>{gap.reason}</span>
-              </div>
-              {onHireDepartment && (
-                <button
-                  type="button"
-                  onClick={() => onHireDepartment(gap.deptCode)}
-                  className="shrink-0 font-semibold underline underline-offset-2 hover:opacity-80"
-                >
-                  Bổ sung ngay
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    </section>
   );
 }
