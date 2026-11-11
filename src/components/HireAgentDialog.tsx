@@ -21,18 +21,28 @@ interface HireAgentDialogProps {
   onSelectAgent?: (agent: RaiAgentDefinition) => void;
 }
 
+const SHORT_ZONE_NAMES: Record<number, string> = {
+  1: "Z1 · Điều Hành",
+  2: "Z2 · Marketing & Lead",
+  3: "Z3 · Bán Hàng & Chốt",
+  4: "Z4 · Vận Hành & Giao",
+  5: "Z5 · Chăm Sóc KH",
+  6: "Z6 · Tài Chính & Dòng Tiền",
+  7: "Z7 · Nhân Sự & Văn Hóa",
+};
+
 const COLOR_CLASSES: Record<string, string> = {
-  blue: "bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-300 border-sky-200 dark:border-sky-800",
-  purple: "bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-  green: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
-  teal: "bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300 border-teal-200 dark:border-teal-800",
-  orange: "bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border-amber-200 dark:border-amber-800",
-  cyan: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/60 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
-  pink: "bg-pink-100 text-pink-800 dark:bg-pink-900/60 dark:text-pink-300 border-pink-200 dark:border-pink-800",
-  coral: "bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300 border-rose-200 dark:border-rose-800",
-  yellow: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/60 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800",
-  silver: "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700",
-  chrome: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+  blue: "bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200/80 dark:border-sky-800",
+  purple: "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200/80 dark:border-purple-800",
+  green: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800",
+  teal: "bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border-teal-200/80 dark:border-teal-800",
+  orange: "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200/80 dark:border-amber-800",
+  cyan: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border-cyan-200/80 dark:border-cyan-800",
+  pink: "bg-pink-50 text-pink-700 dark:bg-pink-950/60 dark:text-pink-300 border-pink-200/80 dark:border-pink-800",
+  coral: "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200/80 dark:border-rose-800",
+  yellow: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950/60 dark:text-yellow-300 border-yellow-200/80 dark:border-yellow-800",
+  silver: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+  chrome: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800",
 };
 
 export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialogProps) {
@@ -65,30 +75,30 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby={dialogTitleId}
       onClick={onClose}
     >
-      {/* Modal Dialog: Full viewport height and 0 border-radius on mobile, rounded card on desktop */}
+      {/* Modal Dialog: Full viewport height and 0 border-radius on mobile, rounded container on desktop */}
       <div
-        className="relative w-full h-[100dvh] sm:h-[88vh] sm:max-w-5xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden"
+        className="relative w-full h-[100dvh] sm:h-[88vh] sm:max-w-5xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top App Header */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+        {/* Top App Header: 56px Apple/Linear precision bar */}
+        <div className="h-14 sm:h-16 px-4 sm:px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-20">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <RaiLogo className="h-5 sm:h-6 w-auto shrink-0" />
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2">
                 <h2
                   id={dialogTitleId}
                   className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight truncate"
                 >
                   Tuyển Nhân Sự Số
                 </h2>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 shrink-0">
+                <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950 text-[#0099ff] dark:text-sky-300 border border-sky-200/60 dark:border-sky-800 shrink-0">
                   RAI² FIRST OS
                 </span>
               </div>
@@ -100,7 +110,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors shrink-0"
+            className="w-10 h-10 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 flex items-center justify-center transition-all shrink-0"
             aria-label="Đóng"
           >
             <X className="w-5 h-5" />
@@ -108,32 +118,23 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
         </div>
 
         {/* Mobile Horizontal Department Zone Selector (Mobile only, hidden on md+) */}
-        <div className="md:hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 overflow-x-auto flex gap-1.5 shrink-0 scrollbar-none snap-x">
+        <div className="md:hidden border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/50 px-3 py-2.5 overflow-x-auto flex gap-2 shrink-0 scrollbar-none snap-x">
           {RAI2_DEPARTMENTS.map((dept) => {
             const isSelected = dept.zone === selectedZone;
+            const label = SHORT_ZONE_NAMES[dept.zone] || `Z${dept.zone} · ${dept.name.replace(/^Phòng\s+/i, "")}`;
             return (
               <button
                 key={dept.code}
                 type="button"
                 onClick={() => handleSelectZone(dept.zone)}
                 className={cn(
-                  "px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
+                  "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 snap-start active:scale-95",
                   isSelected
-                    ? "bg-sky-600 text-white shadow-xs font-bold"
-                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700"
+                    ? "bg-slate-900 dark:bg-[#0099ff] text-white shadow-xs font-bold"
+                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700"
                 )}
               >
-                <span
-                  className={cn(
-                    "w-4 h-4 rounded text-[9px] font-bold inline-flex items-center justify-center",
-                    isSelected
-                      ? "bg-white/20 text-white"
-                      : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                  )}
-                >
-                  Z{dept.zone}
-                </span>
-                <span>{dept.name.replace(/^Phòng\s+/i, "")}</span>
+                <span>{label}</span>
               </button>
             );
           })}
@@ -141,11 +142,11 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
 
         {/* Mobile Back Bar (Only visible when mobileView === "detail" on mobile) */}
         {mobileView === "detail" && (
-          <div className="md:hidden px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
+          <div className="md:hidden px-4 py-2.5 bg-slate-100/80 dark:bg-slate-800/80 border-b border-slate-200/70 dark:border-slate-700 flex items-center justify-between shrink-0">
             <button
               type="button"
               onClick={() => setMobileView("list")}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 dark:text-sky-400 active:opacity-70 py-1"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0099ff] dark:text-sky-400 active:opacity-70 py-0.5"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Quay lại {currentDepartment.name.replace(/^Phòng\s+/i, "")}</span>
@@ -182,7 +183,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                     className={cn(
                       "w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 mt-0.5",
                       isSelected
-                        ? "bg-sky-500 text-white shadow-xs"
+                        ? "bg-[#0099ff] text-white shadow-xs"
                         : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                     )}
                   >
@@ -197,7 +198,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                     </div>
                   </div>
                   {isSelected && (
-                    <ChevronRight className="w-4 h-4 text-sky-500 shrink-0 self-center" />
+                    <ChevronRight className="w-4 h-4 text-[#0099ff] shrink-0 self-center" />
                   )}
                 </button>
               );
@@ -208,15 +209,15 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
           {/* Mobile: visible when mobileView === "list". Desktop: always visible */}
           <div
             className={cn(
-              "overflow-y-auto p-3 sm:p-4 space-y-2.5 sm:space-y-3",
+              "overflow-y-auto p-4 space-y-3",
               mobileView === "list" ? "flex-1 w-full" : "hidden md:block",
               "md:w-72 lg:w-80 md:border-r border-slate-100 dark:border-slate-800 md:shrink-0"
             )}
           >
             {/* Department Summary Header Card */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 mb-1">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 mb-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0099ff] dark:text-sky-400">
                   Vùng {currentDepartment.zone}
                 </span>
                 <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
@@ -232,7 +233,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
             </div>
 
             {/* List of Agents */}
-            <div className="space-y-2 sm:space-y-2.5">
+            <div className="space-y-2.5">
               {currentDepartment.agents.map((agent) => {
                 const isActive = activeAgent?.key === agent.key;
                 const badgeClass = COLOR_CLASSES[agent.color] ?? COLOR_CLASSES.blue;
@@ -242,13 +243,13 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                     key={agent.key}
                     onClick={() => handleAgentClick(agent)}
                     className={cn(
-                      "p-3.5 rounded-2xl border transition-all cursor-pointer relative active:scale-[0.99]",
+                      "p-4 rounded-2xl border transition-all cursor-pointer relative active:scale-[0.98] shadow-2xs",
                       isActive
-                        ? "border-sky-500 bg-sky-50/50 dark:bg-sky-950/25 shadow-xs ring-1 ring-sky-500"
-                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
+                        ? "border-[#0099ff] bg-sky-50/40 dark:bg-sky-950/20 ring-1 ring-[#0099ff]/50"
+                        : "border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
                     )}
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                         <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
@@ -260,25 +261,25 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                       </span>
                     </div>
 
-                    <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1 truncate">
+                    <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1 truncate">
                       {agent.title}
                     </div>
 
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-2">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-2.5">
                       {agent.tagline}
                     </p>
 
-                    {/* KPI & DNA Chips */}
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50 truncate max-w-full">
+                    {/* KPI Commitment Chip */}
+                    <div className="mb-2.5">
+                      <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50">
                         KPI: {agent.kpiCommitment}
                       </span>
                     </div>
 
                     {/* Mobile Tap Link Indicator */}
-                    <div className="md:hidden pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-sky-600 dark:text-sky-400 font-bold">
-                      <span>Xem hồ sơ & Kích hoạt</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                    <div className="md:hidden pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-[#0099ff] dark:text-sky-400 font-bold">
+                      <span>Xem hồ sơ chi tiết & Kích hoạt</span>
+                      <ChevronRight className="w-4 h-4" />
                     </div>
                   </div>
                 );
@@ -300,7 +301,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                   {/* Agent Header Hero */}
                   <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 shadow-2xs">
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5">
-                      <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
+                      <span className="text-[11px] font-bold text-[#0099ff] dark:text-sky-400 uppercase tracking-wider">
                         {activeAgent.departmentName}
                       </span>
                       <span className="text-slate-300">•</span>
@@ -333,7 +334,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                   {/* KPI Output Commitment */}
                   <div className="p-3.5 sm:p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/30">
                     <div className="text-xs font-bold text-sky-800 dark:text-sky-300 mb-1 flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                      <Target className="w-3.5 h-3.5 text-[#0099ff] shrink-0" />
                       <span>Cam Kết Hiệu Suất Đầu Ra (KPI):</span>
                     </div>
                     <p className="text-xs text-sky-900 dark:text-sky-200 leading-relaxed font-semibold">
@@ -373,7 +374,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                 </div>
 
                 {/* Sticky Action Footer CTA */}
-                <div className="sticky bottom-0 left-0 right-0 p-3.5 sm:p-5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-10">
+                <div className="sticky bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-20 pb-[max(1rem,env(safe-area-inset-bottom))]">
                   <div className="max-w-2xl mx-auto">
                     <button
                       type="button"
@@ -381,7 +382,7 @@ export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialo
                         onSelectAgent?.(activeAgent);
                         onClose();
                       }}
-                      className="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-sky-500 dark:hover:bg-sky-400 active:scale-[0.98] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3.5 px-6 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-[#0099ff] dark:hover:bg-sky-400 active:scale-[0.98] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
                     >
                       <Sparkles className="w-4 h-4 text-amber-400" />
                       <span>Tuyển & Kích Hoạt {activeAgent.name} Ngay</span>
