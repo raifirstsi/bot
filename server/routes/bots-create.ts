@@ -22,6 +22,17 @@ import { refusalBody, userError } from "../user-errors.ts";
 import type { ServerErrorBody } from "../../shared/server-text.ts";
 import { PASS, type RouteHandler } from "./table.ts";
 
+const DEFAULT_MASCOT_URLS = [
+  "/assets/mascots/mascot-1.png",
+  "/assets/mascots/mascot-2.png",
+  "/assets/mascots/mascot-3.png",
+  "/assets/mascots/mascot-4.png",
+  "/assets/mascots/mascot-5.png",
+  "/assets/mascots/mascot-6.png",
+  "/assets/mascots/mascot-7.png",
+  "/assets/mascots/mascot-8.png",
+];
+
 export type ModelSelectionCheck = { ok: true; selection: ModelSelection } | ({ ok: false; status: number } & ServerErrorBody);
 
 export interface BotCreateRouteDeps {
@@ -205,7 +216,7 @@ export function createBotCreateRoutes(deps: BotCreateRouteDeps): RouteHandler {
           // Store creation completed the workspace defaults (effort included): the rest of the template must not undo them.
           ...ordinary, name: bot.name, section, modelSelection: bot.modelSelection,
           mascotExpression: ordinary.mascotExpression ?? undefined,
-          avatarUrl: ordinary.avatarUrl || undefined,
+          avatarUrl: ordinary.avatarUrl || DEFAULT_MASCOT_URLS[Math.floor(Math.random() * DEFAULT_MASCOT_URLS.length)],
           computer: ordinary.computer ?? undefined, cwd: checkedCwd.cwd ?? undefined,
           peers: ordinary.peers ?? undefined, mcpServers: ordinary.mcpServers ?? undefined,
           browserProfile: ordinary.browserProfile || undefined,

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Plus } from "lucide-react";
 import { stoppedAtBotLimit } from "@/lib/bot-limit";
 import { MausAvatar } from "./Avatar";
+import { getBotMascotUrl } from "@/lib/mascot-mapping";
 import { NewBotDialog } from "./lazy-screens";
 import { READY_BOT_CATEGORIES, READY_BOTS, matchesReadyBot, readyBotCopy, type ReadyBotCategory } from "@/lib/ready-bots";
 import { cn } from "@/lib/cn";
@@ -53,7 +54,13 @@ export function ReadyBotGallery({ search, onDialog, onAdded }: {
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
       {visible.map((bot) => { const copy = readyBotCopy(bot); return <article key={bot.id} data-ready-bot={bot.id} className="flex flex-col rounded-2xl border border-hairline/40 bg-card p-4">
         <div className="flex items-center gap-3">
-          <MausAvatar color={bot.look.color} bodyId={bot.look.mascotBody} size={40} animated={false} label={bot.name} />
+          <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-xs bg-raised border border-hairline/40 select-none">
+            <img
+              src={getBotMascotUrl({ id: bot.id, name: bot.name, color: bot.look.color })}
+              alt={bot.name}
+              className="size-full object-cover transition-transform duration-200 hover:scale-105"
+            />
+          </span>
           <div className="min-w-0 flex-1">
             <h4 className="truncate text-[14px] font-medium text-ink">{bot.name}</h4>
             <p className="truncate text-[12px] text-ink-secondary">{copy.title} · {t(CATEGORY_KEYS[bot.category])}</p>

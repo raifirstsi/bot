@@ -10,6 +10,7 @@ import {
 } from "react";
 import { cn } from "@/lib/cn";
 import { CHROME_EYES, CHROME_GRADIENT, MAUS_COLORS, type MausColor, type MausMotion, type MausState } from "@/lib/mascot";
+import { getBotMascotUrl } from "@/lib/mascot-mapping";
 import { CursorAvatar, type CursorAvatarHandle } from "./CursorAvatar";
 import { avatarCropRadius, botAvatarProfile, clampAvatarFocus, clampAvatarZoom, mascotFaceInk, type BotAvatarCrop, type MascotFaceColor } from "../../shared/bot-avatar";
 import { MASCOT_BODIES, botMascotBody } from "../../shared/mascot-bodies";
@@ -281,16 +282,18 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
   });
 
   if (outcome !== "flatImage") {
+    const mascotSrc = getBotMascotUrl(bot as any);
     return (
-      <MausAvatar
-        bodyId={wornBody(bot.mascotBody, bot.color, festival)}
-        {...mascotProps}
-        color={bot.color}
-        faceColor={bot.mascotFaceColor}
-        gradient={readable ? roomAvatarGradient(bot.color) : undefined}
-        size={size}
-        label={label ?? bot.name}
-      />
+      <span
+        className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full shadow-xs bg-raised border border-hairline/40 select-none"
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={mascotSrc}
+          alt={label ?? bot.name ?? "AI Agent"}
+          className="size-full object-cover transition-transform duration-200 hover:scale-105"
+        />
+      </span>
     );
   }
 

@@ -1329,6 +1329,16 @@ export class Store {
       color: profile.color ?? rotationColor(this.bots.length), mascotFaceColor: profile.mascotFaceColor ?? undefined,
       ...(profile.mascotExpression ? { mascotExpression: profile.mascotExpression } : {}),
       ...(profile.mascotBody ? { mascotBody: profile.mascotBody } : {}),
+      avatarUrl: (profile as any).avatarUrl || [
+        "/assets/mascots/mascot-1.png",
+        "/assets/mascots/mascot-2.png",
+        "/assets/mascots/mascot-3.png",
+        "/assets/mascots/mascot-4.png",
+        "/assets/mascots/mascot-5.png",
+        "/assets/mascots/mascot-6.png",
+        "/assets/mascots/mascot-7.png",
+        "/assets/mascots/mascot-8.png",
+      ][Math.floor(Math.random() * 8)],
       // Restricted from its first frame: no one else is ever told it exists.
       ...(profile.visibility && profile.visibility !== "everyone" ? { visibility: structuredClone(profile.visibility) } : {}),
       ...(toolScope.scope ? { toolScope: toolScope.scope } : {}),

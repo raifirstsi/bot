@@ -2,6 +2,7 @@ import type { BotRoutineTemplate, NewBotDefaults } from "../../shared/new-bot-de
 import type { MascotBodyId } from "../../shared/mascot-bodies";
 import type { MausColor } from "../../shared/wire";
 import { t, tFromServer } from "@/lib/i18n";
+import { getBotMascotUrl } from "@/lib/mascot-mapping";
 
 export type ReadyBotCategory = "everyday" | "work" | "writing" | "design" | "sales" | "personal";
 
@@ -340,6 +341,7 @@ export function readyBotTemplate(defaults: NewBotDefaults, bot: ReadyBot): NewBo
     soul: bot.soul,
     color: bot.look.color,
     mascotBody: bot.look.mascotBody,
+    avatarUrl: getBotMascotUrl({ id: bot.id, name: bot.name, color: bot.look.color }),
   };
   for (const [path, text] of Object.entries(bot.notes ?? {})) {
     const own = template.memory[path]?.trimEnd();
