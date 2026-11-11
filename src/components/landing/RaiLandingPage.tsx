@@ -236,7 +236,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           {/* Logo trắng trên nền đen, hài hòa cân đối, tuyệt đối không chèn chữ */}
           <a href="/" className="flex items-center group py-1">
             <img
-              src="/logo-white.png?v=3"
+              src="/assets/rai-core-white.png?v=5"
               alt="RAI²"
               className="h-6 sm:h-7 md:h-8 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
@@ -663,7 +663,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           {/* Logo trắng trên nền đen, hài hòa cân đối, không chèn chữ */}
           <div className="flex items-center">
             <img
-              src="/logo-white.png?v=3"
+              src="/assets/rai-core-white.png?v=5"
               alt="RAI²"
               className="h-5 sm:h-6 md:h-7 w-auto object-contain opacity-85"
             />

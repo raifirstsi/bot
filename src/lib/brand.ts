@@ -16,7 +16,7 @@ export interface BrandStatus {
 
 export const DEFAULT_BRAND: Brand = {
   name: "RAI²",
-  logo: "/assets/rai-logo.png",
+  logo: "/assets/rai-core-white.png?v=5",
   favicon: "/favicon.png",
   tagline: "ARTIFICIAL INTELLIGENCE + ACTUAL INTELLIGENCE",
   supportUrl: "https://rai2.si"

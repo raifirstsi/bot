@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { RaiLogo } from "../components/RaiLogo";
 import { DesktopWorkspaceSwitcher } from "../components/DesktopWorkspaceSwitcher";
 import { productName } from "../lib/brand";
 
@@ -154,7 +155,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
           </a>
         </div>
         <div className="mb-6 flex justify-center">
-          <img src="/assets/rai-logo.png" alt="RAI²" className="h-10 w-auto object-contain" />
+          <RaiLogo className="h-10 w-auto object-contain" />
         </div>
         {where && unencryptedPublic(where) ? <p role="alert" className="mb-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-[13px] text-warning">{t("pair.notEncrypted")}</p> : null}
         {opening ? (

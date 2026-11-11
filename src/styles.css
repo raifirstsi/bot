@@ -1164,18 +1164,18 @@
   background: color-mix(in srgb, var(--color-ink) 15%, transparent);
 }
 
-/* RAI² SI Adaptive Brand Logo */
-.rai-brand-logo {
-  content: url("/logo-white.png");
+/* RAI² Adaptive Brand Logo */
+:is([data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-dark {
+  display: block !important;
 }
-:root[data-skin="daylight"] .rai-brand-logo,
-[data-skin="daylight"] .rai-brand-logo,
-:root[data-skin="atelier"] .rai-brand-logo,
-:root[data-skin="lagoon"] .rai-brand-logo,
-:root[data-skin="linen"] .rai-brand-logo,
-:root[data-skin="meadow"] .rai-brand-logo,
-:root[data-skin="pop"] .rai-brand-logo {
-  content: url("/logo-black.png");
+:is([data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-light {
+  display: none !important;
+}
+:is([data-skin="daylight"], [data-skin="atelier"], [data-skin="lagoon"], [data-skin="linen"], [data-skin="meadow"], [data-skin="pop"]) .rai-logo-dark {
+  display: none !important;
+}
+:is([data-skin="daylight"], [data-skin="atelier"], [data-skin="lagoon"], [data-skin="linen"], [data-skin="meadow"], [data-skin="pop"]) .rai-logo-light {
+  display: block !important;
 }
 
 /* A primary action that belongs to one bot wears that bot's flat bubble tone in every skin. Unlayered, like the

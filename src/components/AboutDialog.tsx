@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-
+import { RaiLogo } from "./RaiLogo";
 import {
   APP_NAME,
   APP_REPOSITORY,
@@ -59,10 +59,9 @@ export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => v
         aria-labelledby="about-dialog-title"
         className="w-full max-w-[360px] rounded-2xl border border-hairline/50 bg-panel p-6 text-center shadow-2xl"
       >
-        <picture className="mx-auto block">
-          <source srcSet="/logo-black.png" media="(prefers-color-scheme: light)" />
-          <img src="/logo-white.png" alt="RAI² SI" className="mx-auto h-12 w-auto object-contain" />
-        </picture>
+        <div className="mx-auto flex justify-center">
+          <RaiLogo className="h-12 w-auto object-contain" />
+        </div>
         <h2 id="about-dialog-title" className="mt-3 text-[17px] font-semibold text-ink">
           {productName()}
         </h2>
