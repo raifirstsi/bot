@@ -465,7 +465,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       </header>
 
       {/* 2. HERO SECTION - Editorial Framer Typographic Mass */}
-      <section className="relative pt-20 sm:pt-24 md:pt-28 pb-16 md:pb-24 overflow-hidden">
+      <section className="relative pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16 md:pb-24 overflow-hidden">
         {/* Subtle radial glow on edges */}
         <div
           className={cn(
@@ -475,10 +475,10 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
         />
 
         <div className="max-w-[1200px] mx-auto px-6 text-center relative z-20">
-          {/* Tagline Announcement: Đưa lên gần menu, hài hòa cân đối */}
+          {/* Tagline Announcement: Cân đối khoảng cách với menu bar */}
           <div
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-1 rounded-full border mb-4 sm:mb-5 transition-colors",
+              "inline-flex items-center gap-2 px-3.5 py-1 rounded-full border mb-5 sm:mb-6 transition-colors",
               isDark
                 ? "border-[#242424] bg-[#080808] hover:border-[#0099ff]/50"
                 : "border-[#e2e8f0] bg-[#ffffff] hover:border-[#0099ff]/50 shadow-xs"
@@ -495,14 +495,22 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             </span>
           </div>
 
-          {/* Headline Display: GT Walsheim Editorial Style */}
+          {/* Headline Display: GT Walsheim Editorial Style with Inline Character Badge */}
           <h1
             className={cn(
-              "text-3xl sm:text-5xl md:text-6xl lg:text-[76px] font-medium tracking-[-0.04em] leading-[1.04] sm:leading-[0.98] max-w-[1050px] mx-auto mb-5 sm:mb-6",
+              "text-3xl sm:text-5xl md:text-6xl lg:text-[76px] font-medium tracking-[-0.04em] leading-[1.12] sm:leading-[1.04] max-w-[1050px] mx-auto mb-6 sm:mb-7",
               isDark ? "text-white" : "text-[#111111]"
             )}
           >
-            Nếu hôm nay Bạn xây lại doanh nghiệp từ đầu, Bạn có tổ chức bộ máy theo cách cũ?
+            Nếu hôm nay Bạn{" "}
+            <span className="inline-flex items-center align-middle mx-1 sm:mx-2.5">
+              <img
+                src="/assets/headline-badge-circle.png?v=6"
+                alt="RAI² Avatar"
+                className="size-8 sm:size-12 md:size-14 lg:size-16 rounded-full object-cover shadow-lg border-2 border-white/20 inline-block align-middle transform -translate-y-0.5 sm:-translate-y-1 hover:scale-105 transition-transform duration-200"
+              />
+            </span>{" "}
+            xây lại doanh nghiệp từ đầu, Bạn có tổ chức bộ máy theo cách cũ?
           </h1>
 
           {/* Subhead Dan Kennedy style */}
