@@ -44,8 +44,8 @@ export const SKINS: readonly Skin[] = [
 export type SkinChoice = SkinId | "system";
 export const THEME_SKINS = { light: "daylight", dark: "midnight" } as const satisfies Record<"light" | "dark", SkinId>;
 
-export const DEFAULT_SKIN_CHOICE: SkinChoice = "midnight";
-export const PRIOR_INSTALL_SKIN: SkinId = "midnight";
+export const DEFAULT_SKIN_CHOICE: SkinChoice = "daylight";
+export const PRIOR_INSTALL_SKIN: SkinId = "daylight";
 
 const KEY = "omb-skin";
 const DARK_QUERY = "(prefers-color-scheme: dark)";
@@ -62,7 +62,7 @@ function systemPrefersDark(): boolean {
   try {
     return typeof matchMedia === "function" && matchMedia(DARK_QUERY).matches;
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -83,10 +83,10 @@ function getStore(): Storage | undefined {
 export function readSkinChoice(): SkinChoice {
   try {
     const store = getStore();
-    if (store && !store.getItem("rai-default-dark-v1")) {
-      store.setItem("rai-default-dark-v1", "1");
-      store.setItem(KEY, "midnight");
-      return "midnight";
+    if (store && !store.getItem("rai-default-white-v2")) {
+      store.setItem("rai-default-white-v2", "1");
+      store.setItem(KEY, "daylight");
+      return "daylight";
     }
     const stored = store?.getItem(KEY);
     if (isSkinChoice(stored)) return stored;

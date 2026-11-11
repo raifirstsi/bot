@@ -252,8 +252,13 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
 
   useEffect(() => setImageFailed(false), [profile.avatarUrl]);
 
-  // If this bot is RAI² (default bot or Chief of Staff) without a custom uploaded photo, use RAI² official mascot
-  const isRaiBot = (bot.defaultBot || bot.name?.includes("RAI²") || (bot as any).chiefOfStaff) && !profile.avatarUrl;
+  // If this bot is RAI² (default bot, chief, or chrome) without a custom uploaded photo, use RAI² official mascot
+  const isRaiBot =
+    (Boolean(bot.defaultBot) ||
+      bot.name?.toLowerCase().includes("rai") ||
+      (bot as any).chiefOfStaff ||
+      bot.color === "chrome") &&
+    !profile.avatarUrl;
   if (isRaiBot) {
     return (
       <span
@@ -261,7 +266,7 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
         style={{ width: size, height: size }}
       >
         <img
-          src="/assets/bot-mascot-circle.png?v=6"
+          src="/assets/bot-mascot-circle.png?v=7"
           alt={label ?? bot.name ?? "RAI²"}
           className="size-full object-cover"
         />

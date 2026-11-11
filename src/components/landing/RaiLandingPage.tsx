@@ -84,6 +84,91 @@ const PLANS: PlanOption[] = [
   }
 ];
 
+export interface AiTeamMascot {
+  id: string;
+  name: string;
+  role: string;
+  badge: string;
+  desc: string;
+  avatar: string;
+  color: string;
+}
+
+export const AI_TEAM_MASCOTS: AiTeamMascot[] = [
+  {
+    id: "mascot-1",
+    name: "Biscuit",
+    role: "Trợ Lý Khởi Tạo & Điều Phối",
+    badge: "Sẵn sàng 24/7",
+    desc: "Tiếp nhận yêu cầu ban đầu, phân bổ đầu việc và kết nối tất cả các bot trong phòng họp số.",
+    avatar: "/assets/mascots/mascot-1.png?v=7",
+    color: "#0099ff",
+  },
+  {
+    id: "mascot-2",
+    name: "Browser Bot",
+    role: "Kỹ Sư Trình Duyệt Web",
+    badge: "Chromium Sandbox",
+    desc: "Đăng nhập cổng thông tin, cào dữ liệu đối thủ, tải hóa đơn và cập nhật giá tự động.",
+    avatar: "/assets/mascots/mascot-2.png?v=7",
+    color: "#10b981",
+  },
+  {
+    id: "mascot-3",
+    name: "Content Bot",
+    role: "Chiến Lược Gia Nội Dung",
+    badge: "Chuẩn SEO / AEO",
+    desc: "Soạn thảo bài viết chuyên sâu theo giọng văn thương hiệu, chuyển đổi đa kênh không tạo rác.",
+    avatar: "/assets/mascots/mascot-3.png?v=7",
+    color: "#f59e0b",
+  },
+  {
+    id: "mascot-4",
+    name: "Support Bot",
+    role: "Chuyên Viên Dịch Vụ & CSKH",
+    badge: "Phản hồi tức thì",
+    desc: "Lắng nghe tâm tư khách hàng, phân loại khiếu nại và phản hồi kịp thời qua Zalo/Telegram.",
+    avatar: "/assets/mascots/mascot-4.png?v=7",
+    color: "#ec4899",
+  },
+  {
+    id: "mascot-5",
+    name: "CAIO Master",
+    role: "Tổng Quản Giám Sát AI",
+    badge: "Bảo chứng P&L",
+    desc: "Giám sát hiệu suất vận hành, kiểm soát rủi ro bảo mật và cam kết hoàn vốn 90 ngày.",
+    avatar: "/assets/mascots/mascot-5.png?v=7",
+    color: "#8b5cf6",
+  },
+  {
+    id: "mascot-6",
+    name: "Data Bot",
+    role: "Kỹ Sư Dữ Liệu & Báo Cáo",
+    badge: "Google Sheets & SQL",
+    desc: "Tự động hóa sổ sách kế toán, trích xuất báo cáo doanh thu và đồng bộ dữ liệu thời gian thực.",
+    avatar: "/assets/mascots/mascot-6.png?v=7",
+    color: "#06b6d4",
+  },
+  {
+    id: "mascot-7",
+    name: "Market Scout",
+    role: "Trinh Sát Thị Trường",
+    badge: "Radar Cạnh Tranh",
+    desc: "Quét xu hướng ngành, phân tích chiến dịch đối thủ và phát hiện cơ hội tăng trưởng mới.",
+    avatar: "/assets/mascots/mascot-7.png?v=7",
+    color: "#6366f1",
+  },
+  {
+    id: "mascot-8",
+    name: "Ops Executive",
+    role: "Giám Đốc Vận Hành Định Kỳ",
+    badge: "Routines Tự Hành",
+    desc: "Chạy các luồng công việc lặp lại mỗi ngày, nhắc việc và duy trì nhịp độ chuẩn xác 100%.",
+    avatar: "/assets/mascots/mascot-8.png?v=7",
+    color: "#14b8a6",
+  },
+];
+
 const DARK_SKINS = new Set([
   "midnight",
   "foundry",
@@ -242,7 +327,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             />
           </a>
 
-          {/* Desktop Nav - 4 Menu items */}
+          {/* Desktop Nav - 5 Menu items */}
           <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             <button
               onClick={() => scrollTo("triet-ly")}
@@ -252,6 +337,16 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
               )}
             >
               Triết lý
+            </button>
+            <button
+              onClick={() => scrollTo("doi-ngu-bot")}
+              className={cn(
+                "text-[14px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5",
+                isDark ? "text-[#8c8c8c] hover:text-[#ffffff]" : "text-[#666666] hover:text-[#000000]"
+              )}
+            >
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Nhân sự số
             </button>
             <button
               onClick={() => scrollTo("tinh-nang")}
@@ -384,6 +479,19 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                 )}
               >
                 Triết lý RAI²
+              </button>
+              <button
+                onClick={() => {
+                  scrollTo("doi-ngu-bot");
+                  setMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "text-left py-2 text-[15px] font-medium transition-colors flex items-center gap-2",
+                  isDark ? "text-[#cccccc] hover:text-white" : "text-[#444444] hover:text-black"
+                )}
+              >
+                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                Nhân sự số (8 Bots)
               </button>
               <button
                 onClick={() => {
@@ -594,6 +702,156 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
         </div>
       </section>
 
+      {/* 2.5 SECTION: ĐỘI NGŨ NHÂN SỰ SỐ RAI² - Mascot Team Showcase (Mausbot.com Style) */}
+      <section
+        id="doi-ngu-bot"
+        className={cn(
+          "py-16 sm:py-20 md:py-24 border-t transition-colors relative overflow-hidden",
+          isDark ? "bg-[#0b0b0b] border-[#242424]/60" : "bg-[#f8fafc] border-[#e2e8f0]"
+        )}
+      >
+        {/* Subtle decorative background glow */}
+        <div
+          className={cn(
+            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] blur-[140px] pointer-events-none rounded-full",
+            isDark ? "bg-[#0099ff]/5" : "bg-[#0099ff]/10"
+          )}
+        />
+
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+          {/* Section Header */}
+          <div className="text-center max-w-[800px] mx-auto mb-12 sm:mb-16">
+            <div
+              className={cn(
+                "inline-flex items-center gap-2 px-3.5 py-1 rounded-full border mb-4 text-[11px] sm:text-[12px] font-medium tracking-widest uppercase transition-colors",
+                isDark
+                  ? "border-[#242424] bg-[#111111] text-[#0099ff]"
+                  : "border-[#e2e8f0] bg-[#ffffff] text-[#0099ff] shadow-xs"
+              )}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0099ff] animate-pulse" />
+              Đội Ngũ Nhân Sự Số • Meet The Autonomous Team
+            </div>
+            <h2
+              className={cn(
+                "text-2xl sm:text-4xl md:text-5xl font-medium tracking-[-0.03em] leading-tight mb-4",
+                isDark ? "text-white" : "text-[#111111]"
+              )}
+            >
+              Đội Ngũ Tự Hành Sẵn Sàng 24/7 Cho Doanh Nghiệp Bạn
+            </h2>
+            <p
+              className={cn(
+                "text-sm sm:text-base md:text-lg leading-relaxed max-w-[700px] mx-auto",
+                isDark ? "text-[#999999]" : "text-[#4b5563]"
+              )}
+            >
+              Không cần tuyển dụng rườm rà hay đào tạo từ đầu. Mỗi nhân sự số sở hữu cá tính, chuyên môn sâu và tự động kết nối phối hợp nhịp nhàng trong cùng một Không gian làm việc.
+            </p>
+          </div>
+
+          {/* Responsive Mascot Grid: 2 cols on mobile, 4 cols on tablet/desktop */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+            {AI_TEAM_MASCOTS.map((bot) => (
+              <div
+                key={bot.id}
+                className={cn(
+                  "group relative p-4 sm:p-5 rounded-[18px] sm:rounded-[22px] border transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 hover:shadow-xl",
+                  isDark
+                    ? "bg-[#111111]/85 hover:bg-[#151515] border-[#222222] hover:border-[#0099ff]/50"
+                    : "bg-[#ffffff] hover:bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+                )}
+              >
+                <div>
+                  {/* Avatar & Pill Badge */}
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2.5 mb-3 sm:mb-4 text-center sm:text-left">
+                    <div className="relative">
+                      <div
+                        className={cn(
+                          "size-14 sm:size-16 md:size-18 rounded-full overflow-hidden p-0.5 border-2 transition-transform duration-300 group-hover:scale-105 shadow-md mx-auto",
+                          isDark ? "border-[#2a2a2a] bg-[#1a1a1a]" : "border-[#e2e8f0] bg-[#f8fafc]"
+                        )}
+                      >
+                        <img
+                          src={bot.avatar}
+                          alt={bot.name}
+                          className="size-full rounded-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <span className="absolute bottom-0 right-0 sm:right-0.5 size-3 sm:size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111111]" />
+                    </div>
+
+                    <span
+                      className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium border text-center whitespace-nowrap"
+                      style={{
+                        borderColor: isDark ? "#242424" : "#e2e8f0",
+                        backgroundColor: isDark ? "#171717" : "#f1f5f9",
+                        color: bot.color,
+                      }}
+                    >
+                      {bot.badge}
+                    </span>
+                  </div>
+
+                  {/* Name & Role */}
+                  <div className="text-center sm:text-left">
+                    <h3
+                      className={cn(
+                        "text-[15px] sm:text-[17px] font-medium tracking-tight mb-0.5 group-hover:text-[#0099ff] transition-colors truncate",
+                        isDark ? "text-white" : "text-[#111111]"
+                      )}
+                    >
+                      {bot.name}
+                    </h3>
+                    <div className="text-[11px] sm:text-[12px] font-medium text-[#0099ff] mb-2 truncate">
+                      {bot.role}
+                    </div>
+
+                    {/* Description */}
+                    <p
+                      className={cn(
+                        "text-[12px] sm:text-[13px] leading-relaxed line-clamp-3 sm:line-clamp-none mb-3",
+                        isDark ? "text-[#8c8c8c]" : "text-[#64748b]"
+                      )}
+                    >
+                      {bot.desc}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Status Footer */}
+                <div
+                  className="pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[11px] sm:text-[12px]"
+                  style={{ borderColor: isDark ? "#1e1e1e" : "#f1f5f9" }}
+                >
+                  <span className={cn("text-[10px] sm:text-[11px]", isDark ? "text-[#666666]" : "text-[#94a3b8]")}>
+                    Trạng thái
+                  </span>
+                  <span className="inline-flex items-center gap-1 font-medium text-emerald-500 text-[11px] sm:text-[12px]">
+                    <span className="size-1 sm:size-1.5 rounded-full bg-emerald-500 animate-ping" />
+                    Trực chiến
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick CTA strip below team cards */}
+          <div className="mt-10 sm:mt-12 text-center">
+            <button
+              onClick={() => handleCheckout(PLANS[0])}
+              className={cn(
+                "inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-[13px] sm:text-[14px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md cursor-pointer",
+                isDark ? "bg-[#ffffff] text-[#000000] hover:bg-[#e6e6e6]" : "bg-[#000000] text-[#ffffff] hover:bg-[#222222]"
+              )}
+            >
+              Kích hoạt toàn bộ đội ngũ nhân sự số ngay <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* 3. SECTION: BÓC TRẦN SỰ THẬT - Dan Kennedy Hard-hitting Copy */}
       <section
         id="triet-ly"
@@ -742,15 +1000,32 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             {/* Nguyên tắc 7: Full width highlight */}
             <div
               className={cn(
-                "md:col-span-2 lg:col-span-3 p-8 rounded-[15px] border transition-all relative overflow-hidden",
+                "md:col-span-2 lg:col-span-3 p-8 rounded-[18px] border transition-all relative overflow-hidden",
                 isDark
                   ? "bg-[#080808] border-[#0099ff]/30 hover:border-[#0099ff]"
                   : "bg-[#f0f9ff] border-[#0099ff]/30 hover:border-[#0099ff] shadow-xs"
               )}
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#0099ff]/5 blur-3xl pointer-events-none" />
-              <div className="text-[12px] font-mono text-[#0099ff] mb-3">
-                PRINCIPLE // 07 — CỐT LÕI
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+                <div className="text-[12px] font-mono text-[#0099ff] font-medium">
+                  PRINCIPLE // 07 — CỐT LÕI
+                </div>
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-medium border",
+                    isDark
+                      ? "bg-[#141414] border-[#8b5cf6]/30 text-[#a78bfa]"
+                      : "bg-[#ffffff] border-[#8b5cf6]/30 text-[#7c3aed] shadow-xs"
+                  )}
+                >
+                  <img
+                    src="/assets/mascots/mascot-5.png?v=7"
+                    alt="CAIO Master"
+                    className="size-5 rounded-full object-cover"
+                  />
+                  Giám sát trực tiếp bởi CAIO Master
+                </div>
               </div>
               <h3 className={cn("text-xl sm:text-2xl font-medium mb-3 tracking-[-0.02em]", isDark ? "text-white" : "text-[#111111]")}>
                 Trách Nhiệm Giải Trình & Vai Trò Của CAIO
@@ -785,66 +1060,178 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* AGENT 01: Ops Bot */}
             <div
               className={cn(
-                "p-8 rounded-[15px] border transition-colors",
+                "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
                 isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
               )}
             >
-              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 01</div>
-              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Trợ Lý Vận Hành & Tự Động Hóa (Ops Bot)</h3>
-              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
+              <div className="flex items-start gap-4 mb-4">
+                <div className="relative shrink-0">
+                  <div
+                    className={cn(
+                      "size-14 sm:size-16 rounded-full overflow-hidden p-0.5 border-2 transition-transform duration-300 group-hover:scale-105 shadow-md",
+                      isDark ? "border-[#0099ff]/40 bg-[#141414]" : "border-[#0099ff]/30 bg-[#f0f9ff]"
+                    )}
+                  >
+                    <img
+                      src="/assets/mascots/mascot-1.png?v=7"
+                      alt="Ops Bot"
+                      className="size-full rounded-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111111]" />
+                </div>
+                <div>
+                  <div className="text-[11px] sm:text-[12px] font-mono text-[#0099ff] font-medium uppercase tracking-wider">
+                    AGENT 01 • VẬN HÀNH
+                  </div>
+                  <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#0099ff] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
+                    Trợ Lý Vận Hành & Tự Động Hóa (Ops Bot)
+                  </h3>
+                  <div className="text-[11px] sm:text-[12px] text-emerald-500 font-medium flex items-center gap-1.5 mt-0.5">
+                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Chạy routines 24/7
+                  </div>
+                </div>
+              </div>
+              <p className={cn("text-[13px] sm:text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Chạy định kỳ các routine hàng ngày: thu thập báo cáo bán hàng, đồng bộ đơn hàng về Sheet, kiểm tra lỗi hệ thống và gửi thông báo trực tiếp qua Telegram/Zalo.
               </p>
-              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium pt-3 border-t border-hairline/20">
                 <Check className="w-4 h-4" /> Tự động hóa không cần giám sát 24/7
               </div>
             </div>
 
+            {/* AGENT 02: Browser Bot */}
             <div
               className={cn(
-                "p-8 rounded-[15px] border transition-colors",
-                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+                "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#10b981]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#10b981]/50 shadow-xs"
               )}
             >
-              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 02</div>
-              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Trợ Lý Nghiên Cứu & Trình Duyệt Web (Browser Bot)</h3>
-              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
+              <div className="flex items-start gap-4 mb-4">
+                <div className="relative shrink-0">
+                  <div
+                    className={cn(
+                      "size-14 sm:size-16 rounded-full overflow-hidden p-0.5 border-2 transition-transform duration-300 group-hover:scale-105 shadow-md",
+                      isDark ? "border-[#10b981]/40 bg-[#141414]" : "border-[#10b981]/30 bg-[#ecfdf5]"
+                    )}
+                  >
+                    <img
+                      src="/assets/mascots/mascot-2.png?v=7"
+                      alt="Browser Bot"
+                      className="size-full rounded-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111111]" />
+                </div>
+                <div>
+                  <div className="text-[11px] sm:text-[12px] font-mono text-[#10b981] font-medium uppercase tracking-wider">
+                    AGENT 02 • TRÌNH DUYỆT
+                  </div>
+                  <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#10b981] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
+                    Trợ Lý Nghiên Cứu & Web (Browser Bot)
+                  </h3>
+                  <div className="text-[11px] sm:text-[12px] text-emerald-500 font-medium flex items-center gap-1.5 mt-0.5">
+                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Chromium độc lập
+                  </div>
+                </div>
+              </div>
+              <p className={cn("text-[13px] sm:text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Tự động đăng nhập vào cổng thông tin, tải hóa đơn, cào dữ liệu đối thủ cạnh tranh trên Shopee/Tiki và tóm tắt thành các quyết định thực thi.
               </p>
-              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+              <div className="text-[12px] text-[#10b981] flex items-center gap-1.5 font-medium pt-3 border-t border-hairline/20">
                 <Check className="w-4 h-4" /> Điều khiển trình duyệt Chromium độc lập
               </div>
             </div>
 
+            {/* AGENT 03: Content Bot */}
             <div
               className={cn(
-                "p-8 rounded-[15px] border transition-colors",
-                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+                "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#f59e0b]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#f59e0b]/50 shadow-xs"
               )}
             >
-              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 03</div>
-              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Trợ Lý Truyền Thông & Tiếp Thị (Content Bot)</h3>
-              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
+              <div className="flex items-start gap-4 mb-4">
+                <div className="relative shrink-0">
+                  <div
+                    className={cn(
+                      "size-14 sm:size-16 rounded-full overflow-hidden p-0.5 border-2 transition-transform duration-300 group-hover:scale-105 shadow-md",
+                      isDark ? "border-[#f59e0b]/40 bg-[#141414]" : "border-[#f59e0b]/30 bg-[#fffbeb]"
+                    )}
+                  >
+                    <img
+                      src="/assets/mascots/mascot-3.png?v=7"
+                      alt="Content Bot"
+                      className="size-full rounded-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111111]" />
+                </div>
+                <div>
+                  <div className="text-[11px] sm:text-[12px] font-mono text-[#f59e0b] font-medium uppercase tracking-wider">
+                    AGENT 03 • NỘI DUNG
+                  </div>
+                  <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#f59e0b] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
+                    Trợ Lý Truyền Thông & Tiếp Thị (Content Bot)
+                  </h3>
+                  <div className="text-[11px] sm:text-[12px] text-amber-500 font-medium flex items-center gap-1.5 mt-0.5">
+                    <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Chuẩn SEO / AEO / GEO
+                  </div>
+                </div>
+              </div>
+              <p className={cn("text-[13px] sm:text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Soạn thảo nội dung theo chuẩn giọng văn thương hiệu của bạn, chuyển đổi bài viết chuyên sâu thành bài đăng đa kênh, chuẩn SEO và không tạo ra nội dung rác.
               </p>
-              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+              <div className="text-[12px] text-[#f59e0b] flex items-center gap-1.5 font-medium pt-3 border-t border-hairline/20">
                 <Check className="w-4 h-4" /> Đảm bảo tiêu chuẩn SEO/AEO/GEO
               </div>
             </div>
 
+            {/* AGENT 04: CAIO & Multi-Agent Room */}
             <div
               className={cn(
-                "p-8 rounded-[15px] border transition-colors",
-                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+                "p-7 sm:p-8 rounded-[20px] border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#8b5cf6]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#8b5cf6]/50 shadow-xs"
               )}
             >
-              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 04</div>
-              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Phòng Họp Multi-Agent & Giám Sát CAIO</h3>
-              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
+              <div className="flex items-start gap-4 mb-4">
+                <div className="relative shrink-0">
+                  <div
+                    className={cn(
+                      "size-14 sm:size-16 rounded-full overflow-hidden p-0.5 border-2 transition-transform duration-300 group-hover:scale-105 shadow-md",
+                      isDark ? "border-[#8b5cf6]/40 bg-[#141414]" : "border-[#8b5cf6]/30 bg-[#faf5ff]"
+                    )}
+                  >
+                    <img
+                      src="/assets/mascots/mascot-5.png?v=7"
+                      alt="CAIO Master"
+                      className="size-full rounded-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111111]" />
+                </div>
+                <div>
+                  <div className="text-[11px] sm:text-[12px] font-mono text-[#8b5cf6] font-medium uppercase tracking-wider">
+                    AGENT 04 • GIÁM SÁT
+                  </div>
+                  <h3 className={cn("text-lg sm:text-xl font-medium mt-0.5 group-hover:text-[#8b5cf6] transition-colors", isDark ? "text-white" : "text-[#111111]")}>
+                    Phòng Họp Multi-Agent & Giám Sát CAIO
+                  </h3>
+                  <div className="text-[11px] sm:text-[12px] text-purple-400 font-medium flex items-center gap-1.5 mt-0.5">
+                    <span className="size-1.5 rounded-full bg-purple-400 animate-pulse" />
+                    Không gian AI Rooms
+                  </div>
+                </div>
+              </div>
+              <p className={cn("text-[13px] sm:text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Không gian làm việc chung (AI Rooms) nơi các bot cùng trao đổi, phản biện và hợp tác giải quyết một bài toán hóc búa của ban giám đốc.
               </p>
-              <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
+              <div className="text-[12px] text-[#8b5cf6] flex items-center gap-1.5 font-medium pt-3 border-t border-hairline/20">
                 <Check className="w-4 h-4" /> Đưa ra nguồn sự thật duy nhất (Single Source of Truth)
               </div>
             </div>
@@ -941,13 +1328,30 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             ))}
           </div>
 
-          {/* Cam kết hoàn vốn 90 ngày của Dan Kennedy */}
+          {/* Cam kết hoàn vốn 90 ngày của Dan Kennedy kết hợp cùng Đội ngũ Mascot */}
           <div
             className={cn(
-              "mt-16 p-8 rounded-[15px] border max-w-[900px] mx-auto text-center transition-colors",
-              isDark ? "bg-[#080808] border-[#242424]" : "bg-[#f8fafc] border-[#e2e8f0] shadow-xs"
+              "mt-16 p-8 sm:p-12 rounded-[20px] border max-w-[900px] mx-auto text-center transition-all relative overflow-hidden",
+              isDark ? "bg-[#0b0b0b] border-[#242424]" : "bg-[#f8fafc] border-[#e2e8f0] shadow-sm"
             )}
           >
+            {/* Mascot Team Overlapping Avatar Cluster (Mausbot.com Style) */}
+            <div className="flex items-center justify-center -space-x-3 mb-5">
+              {AI_TEAM_MASCOTS.slice(0, 5).map((bot, i) => (
+                <div
+                  key={bot.id}
+                  className="relative size-12 sm:size-14 rounded-full overflow-hidden border-2 border-white dark:border-[#111111] shadow-md transition-transform hover:scale-110 duration-200"
+                  style={{ zIndex: 10 - i }}
+                >
+                  <img
+                    src={bot.avatar}
+                    alt={bot.name}
+                    className="size-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+
             <div className="inline-flex items-center gap-2 text-[#0099ff] text-[13px] font-medium uppercase tracking-wider mb-3">
               <Shield className="w-4 h-4" /> Cam kết không rủi ro
             </div>
@@ -988,6 +1392,16 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
               )}
             >
               Triết lý
+            </button>
+            <button
+              onClick={() => scrollTo("doi-ngu-bot")}
+              className={cn(
+                "py-1 px-1.5 transition-colors cursor-pointer flex items-center gap-1.5",
+                isDark ? "text-[#8c8c8c] hover:text-white" : "text-[#64748b] hover:text-black"
+              )}
+            >
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Nhân sự số
             </button>
             <button
               onClick={() => scrollTo("tinh-nang")}
