@@ -143,6 +143,25 @@ export async function pairWithCode(
   return { ok: false, error: refusalText(body, res) };
 }
 
+export async function startCloudGuestSession(
+  label = "Khách Trải Nghiệm Cloud",
+  fetchImpl: typeof fetch = fetch,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetchImpl("/api/auth/cloud-guest", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) return { ok: true };
+    const body: unknown = await res.json().catch(() => ({}));
+    return { ok: false, error: refusalText(body, res) };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
 export async function previewBrowserSignIn(credential: string, fetchImpl: typeof fetch = fetch): Promise<{ owner: string } | null> {
   try {
     const res = await fetchImpl("/api/auth/pair", {

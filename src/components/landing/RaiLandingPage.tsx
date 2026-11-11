@@ -1110,7 +1110,23 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                   </button>
                 </form>
 
-                <div className="mt-5 text-center text-[12px] text-[#666666]">
+                <div className="relative my-4 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#242424]"></div></div>
+                  <span className="relative bg-[#111111] px-3 text-[11px] uppercase tracking-wider text-[#666666]">HOẶC DÙNG NHANH</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await handleInstantAccess(`guest_${Math.floor(1000 + Math.random() * 9000)}@rai2.si`, "trial");
+                  }}
+                  disabled={activating || activationSuccess}
+                  className="w-full py-3 rounded-full border border-[#333333] bg-transparent text-white text-[13px] font-medium hover:bg-[#1a1a1a] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  🚀 Trải Nghiệm Nhanh Bản Cloud 1-Click (Không Cần Email)
+                </button>
+
+                <div className="mt-4 text-center text-[12px] text-[#666666]">
                   Cam kết bảo mật 100% • Khởi tạo tự động tức thì
                 </div>
               </div>
@@ -1306,6 +1322,33 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                 )}
               </button>
             </form>
+
+            <div className="relative my-4 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#242424]"></div></div>
+              <span className="relative bg-[#111111] px-3 text-[11px] uppercase tracking-wider text-[#666666]">HOẶC</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={async () => {
+                setLoggingIn(true);
+                await handleInstantAccess(`guest_${Math.floor(1000 + Math.random() * 9000)}@rai2.si`, "trial");
+                setLoggingIn(false);
+              }}
+              disabled={loggingIn || activating}
+              className="w-full py-3 rounded-full border border-[#333333] bg-transparent text-white text-[13px] font-medium hover:bg-[#1a1a1a] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              🚀 Trải Nghiệm Nhanh Bản Cloud 1-Click
+            </button>
+
+            <div className="mt-4 pt-3 border-t border-[#222222] text-center">
+              <a
+                href="/pair"
+                className="text-[12px] text-[#888888] hover:text-[#0099ff] transition-colors"
+              >
+                🔐 Bạn là Quản trị viên (Admin)? Đăng nhập bằng mã Master Code →
+              </a>
+            </div>
           </div>
         </div>
       )}

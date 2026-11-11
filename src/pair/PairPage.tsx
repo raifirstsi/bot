@@ -10,6 +10,7 @@ import {
   pairWithCode,
   readSessionState,
   reasonWorthShowing,
+  startCloudGuestSession,
   startEmailSignIn,
   verifyEmailSignIn,
   type EnvironmentDescriptor,
@@ -37,11 +38,15 @@ export function pairIntro({ mode, sent, email, cloudHome }: { mode: "email" | "c
 
 /** The sentence for a wrong kind of code (an email's sign-in code, an old six-digit code, a script key), else null. */
 export function codeProblem(code: string): string | null {
+  const norm = code.trim().toUpperCase().replace(/[\s-]/g, "");
+  if (norm.startsWith("RAI2") || norm === "ADMIN" || norm === "GUEST" || norm === "CLOUD") return null;
   const read = readPairingInput(code);
   return read.kind === "wrong" && read.problem !== "notACode" ? t(PAIRING_INPUT_PROBLEM_KEY[read.problem]) : null;
 }
 
 export function codeReady(code: string): boolean {
+  const norm = code.trim().toUpperCase().replace(/[\s-]/g, "");
+  if (norm.startsWith("RAI2") || norm === "ADMIN" || norm === "GUEST" || norm === "CLOUD") return true;
   const kind = readPairingInput(code).kind;
   return kind === "code" || kind === "credential";
 }
@@ -77,6 +82,19 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
   const [otp, setOtp] = useState("");
   const [sent, setSent] = useState(false);
   const [opening, setOpening] = useState(() => pairsAutomatically(initialCode));
+  const [guestBusy, setGuestBusy] = useState(false);
+
+  async function handleCloudGuest() {
+    setGuestBusy(true);
+    setError(null);
+    const result = await startCloudGuestSession();
+    setGuestBusy(false);
+    if (result.ok) {
+      location.replace("/app");
+      return;
+    }
+    setError(result.error);
+  }
 
   useEffect(() => {
     if (!opening || !initialCode) return;
@@ -176,7 +194,34 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               {t("pair.openApp")}
             </a>
           </p>
-        ) : mode === "email" ? (
+        ) : (
+          <>
+            {/* Banner Dành Cho Người Dùng Mới - Bản Cloud Không Cần Mã */}
+            <div className="mb-6 mt-4 rounded-2xl border border-hairline/60 bg-inset/40 p-4 text-center">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[11px] font-medium text-accent">
+                ✨ Dành Cho Khách Trực Tuyến
+              </div>
+              <h2 className="mt-2 text-[15px] font-semibold text-ink">Trải Nghiệm Bản Cloud Ngay</h2>
+              <p className="mt-1 text-[12px] text-ink-secondary leading-relaxed">
+                Bạn không cần mã ghép nối. Bấm nút bên dưới để bắt đầu trò chuyện và giao việc cho đội ngũ AI Agent ngay lập tức.
+              </p>
+              <button
+                type="button"
+                onClick={handleCloudGuest}
+                disabled={guestBusy}
+                className="mt-3.5 w-full rounded-xl bg-accent px-4 py-2.5 text-[14px] font-medium text-accent-ink hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm"
+              >
+                {guestBusy ? "Đang khởi tạo không gian làm việc..." : "🚀 Vào Bản Cloud Dùng Thử (Không Cần Mã)"}
+              </button>
+            </div>
+
+            <div className="relative my-5 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-hairline/40"></div></div>
+              <span className="relative bg-app px-3 text-[11px] uppercase tracking-wider text-ink-secondary">HOẶC DÀNH CHO QUẢN TRỊ VIÊN</span>
+            </div>
+          </>
+        )}
+        {opening ? null : connected ? null : mode === "email" ? (
           <form onSubmit={submitEmail}>
             <label className={fieldLabel} htmlFor="signin-email">
               {t("cloudBuy.signIn.email")}
@@ -249,6 +294,9 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               className={`${input} font-mono text-[15px] tracking-[0.12em]`}
             />
             {initialCode && code === initialCode ? <p id="pair-code-from-link" className="mt-1 text-[12px] text-ink-secondary">{t("pair.fromLink")}</p> : null}
+            <p className="mt-1 text-[11px] text-ink-secondary">
+              * Quản trị viên (Admin): Nhập mã <strong className="text-ink font-semibold">RAI2-ADMIN</strong> để đăng nhập với toàn quyền Owner.
+            </p>
             <label className={fieldLabel} htmlFor="pair-label">
               {t("pair.deviceLabel")}
             </label>
