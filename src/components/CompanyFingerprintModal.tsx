@@ -170,64 +170,67 @@ export function CompanyFingerprintModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby={dialogTitleId}
     >
-      <div className="relative w-full max-w-3xl rounded-2xl border border-hairline/70 bg-card p-6 shadow-2xl transition-all">
+      <div className="relative w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] max-w-3xl sm:rounded-2xl border-0 sm:border border-hairline/70 bg-card p-4 sm:p-6 shadow-2xl flex flex-col overflow-hidden transition-all">
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-5 top-5 rounded-lg p-1.5 text-ink-tertiary hover:bg-raised hover:text-ink transition-colors"
+          className="absolute right-4 sm:right-5 top-4 sm:top-5 rounded-lg p-2 text-ink-tertiary hover:bg-raised hover:text-ink transition-colors z-10"
           aria-label="Đóng"
         >
           <X className="size-5" />
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-3 pb-4 border-b border-hairline/60">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
+        <div className="flex items-center gap-3 pb-3 sm:pb-4 border-b border-hairline/60 shrink-0 pr-8">
+          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-accent/10 text-accent shrink-0">
             <Building2 className="size-5" />
           </div>
-          <div>
-            <h2 id={dialogTitleId} className="text-lg font-bold tracking-tight text-ink">
-              Hồ Sơ Doanh Nghiệp & Sổ Giá Mẫu (Turnkey Industry Price Book)
+          <div className="min-w-0">
+            <h2 id={dialogTitleId} className="text-base sm:text-lg font-bold tracking-tight text-ink truncate">
+              Hồ Sơ Doanh Nghiệp & Sổ Giá Mẫu
             </h2>
-            <p className="text-xs text-ink-secondary">
-              Nạp 80% DNA vận hành và rào chắn biên lợi nhuận ròng $\ge 35\%$ tức thì mà không cần chủ doanh nghiệp trả lời bảng hỏi.
+            <p className="text-[11px] sm:text-xs text-ink-secondary line-clamp-1">
+              Nạp 80% DNA vận hành và rào chắn biên lợi nhuận ròng $\ge 35\%$ tức thì.
             </p>
           </div>
         </div>
 
         {/* Tab Selection */}
-        <div className="mt-4 flex rounded-xl bg-raised/70 p-1 border border-hairline/50">
+        <div className="mt-3 sm:mt-4 flex rounded-xl bg-raised/70 p-1 border border-hairline/50 shrink-0 gap-1">
           <button
             type="button"
             onClick={() => setActiveTab("preset")}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 px-2 text-[11px] sm:text-xs font-semibold transition-all ${
               activeTab === "preset"
                 ? "bg-card text-ink shadow-xs"
                 : "text-ink-secondary hover:text-ink"
             }`}
           >
-            <Sparkles className="size-3.5 text-accent" />
-            <span>1-Click Sổ Giá Ngành Mẫu (0s Setup)</span>
+            <Sparkles className="size-3.5 text-accent shrink-0" />
+            <span className="truncate">Sổ Giá Ngành Mẫu (0s)</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("upload")}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 px-2 text-[11px] sm:text-xs font-semibold transition-all ${
               activeTab === "upload"
                 ? "bg-card text-ink shadow-xs"
                 : "text-ink-secondary hover:text-ink"
             }`}
           >
-            <Upload className="size-3.5 text-accent" />
-            <span>Kéo Thả Báo Giá / Hợp Đồng Cũ (Ambient Ingestion)</span>
+            <Upload className="size-3.5 text-accent shrink-0" />
+            <span className="truncate">Kéo Thả Báo Giá Cũ</span>
           </button>
         </div>
+
+        {/* Content Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto py-3">
 
         {/* Content Body */}
         {activeTab === "preset" ? (
@@ -393,15 +396,16 @@ export function CompanyFingerprintModal({
         )}
 
         {/* Footer Actions */}
-        <div className="mt-6 flex items-center justify-between pt-4 border-t border-hairline/60">
-          <div className="text-[11px] text-ink-tertiary">
+        </div>
+        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-hairline/60 shrink-0">
+          <div className="hidden sm:block text-[11px] text-ink-tertiary">
             RAI² First OS · Rào chắn an toàn 80/20 · Bảo vệ dòng tiền tuyệt đối
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-raised px-4 py-2 text-xs font-semibold text-ink-secondary hover:bg-raised-hover hover:text-ink transition-colors"
+              className="flex-1 sm:flex-none rounded-xl bg-raised px-4 py-2.5 text-xs font-semibold text-ink-secondary hover:bg-raised-hover hover:text-ink transition-colors"
             >
               Hủy
             </button>
@@ -409,7 +413,7 @@ export function CompanyFingerprintModal({
               type="button"
               onClick={handleSaveAndApply}
               disabled={isSuccess}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-50"
+              className="flex-2 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-accent px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-accent-hover active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {isSuccess ? (
                 <>
@@ -418,7 +422,7 @@ export function CompanyFingerprintModal({
                 </>
               ) : (
                 <>
-                  <span>Áp Dụng Cho Toàn Bộ Nhân Sự Số</span>
+                  <span>Áp Dụng Cho Nhân Sự Số</span>
                   <ArrowRight className="size-3.5" />
                 </>
               )}

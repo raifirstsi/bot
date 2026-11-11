@@ -149,33 +149,35 @@ export function AbsenceReadinessGauge({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2.5 sm:gap-3 w-full sm:w-auto">
           {onOpenFingerprint && (
             <button
               type="button"
               onClick={onOpenFingerprint}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-hairline bg-raised/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-raised-hover hover:border-hairline-strong transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-hairline bg-raised/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-raised-hover hover:border-hairline-strong transition-colors order-2 sm:order-1"
             >
               <Building2 className="size-3.5 text-accent" />
               <span>Sổ giá & Rào chắn ngành</span>
             </button>
           )}
-          <div className="text-right">
-            <div className="text-2xl font-bold tracking-tight text-ink">
-              {overallScore}%
+          <div className="flex items-center gap-3 order-1 sm:order-2 ml-auto sm:ml-0">
+            <div className="text-right">
+              <div className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
+                {overallScore}%
+              </div>
+              <div className="text-[10px] sm:text-[11px] font-medium text-ink-tertiary">
+                Điểm số ARI
+              </div>
             </div>
-            <div className="text-[11px] font-medium text-ink-tertiary">
-              Điểm số chuẩn hóa
-            </div>
+            <span
+              className={cn(
+                "rounded-full border px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold select-none",
+                level.badge
+              )}
+            >
+              {overallScore >= 80 ? "Sẵn sàng" : overallScore >= 50 ? "Bán tự hành" : "Điểm nghẽn"}
+            </span>
           </div>
-          <span
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs font-semibold select-none",
-              level.badge
-            )}
-          >
-            {overallScore >= 80 ? "Sẵn sàng" : overallScore >= 50 ? "Bán tự hành" : "Điểm nghẽn"}
-          </span>
         </div>
       </div>
 
