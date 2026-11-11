@@ -83,11 +83,16 @@ function getStore(): Storage | undefined {
 export function readSkinChoice(): SkinChoice {
   try {
     const store = getStore();
+    if (store && !store.getItem("rai-default-dark-v1")) {
+      store.setItem("rai-default-dark-v1", "1");
+      store.setItem(KEY, "midnight");
+      return "midnight";
+    }
     const stored = store?.getItem(KEY);
     if (isSkinChoice(stored)) return stored;
-    return hasPriorRun(store) ? PRIOR_INSTALL_SKIN : DEFAULT_SKIN_CHOICE;
+    return DEFAULT_SKIN_CHOICE;
   } catch {
-    return PRIOR_INSTALL_SKIN;
+    return DEFAULT_SKIN_CHOICE;
   }
 }
 

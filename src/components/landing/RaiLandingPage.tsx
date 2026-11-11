@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { readSessionState } from "../../lib/session";
 import {
   Shield, Check, ArrowRight, X, QrCode, Sparkles, Terminal, Copy,
-  CheckCircle2, Users, Cpu, FileText, ChevronRight, Lock, Eye, AlertTriangle, Zap
+  CheckCircle2, Users, Cpu, FileText, ChevronRight, Lock, Eye, AlertTriangle, Zap,
+  Sun, Moon, Menu as MenuIcon, X as CloseIcon
 } from "lucide-react";
+import { applySkinChoice, readSkin, subscribeSkin, THEME_SKINS } from "@/lib/skins";
+import { cn } from "@/lib/cn";
 
 interface PlanOption {
   tier: "trial" | "starter" | "pro" | "team";
@@ -49,40 +52,53 @@ const PLANS: PlanOption[] = [
   },
   {
     tier: "pro",
-    name: "RAI² Chuyên Nghiệp",
-    priceDisplay: "699.000 VNĐ",
+    name: "RAI² Tăng Tốc",
+    priceDisplay: "799.000 VNĐ",
     periodDisplay: "/ tháng",
-    badge: "KHUYÊN DÙNG CHO SẾP",
+    badge: "PHỔ BIẾN NHẤT",
     popular: true,
-    description: "Cỗ máy tự hành hoàn chỉnh giải phóng người sáng lập khỏi bẫy MeOS, tự động vận hành phòng ban số hóa.",
+    description: "Lựa chọn tối ưu cho doanh nghiệp 5–20 nhân sự muốn giải phóng đội ngũ khỏi các mắt xích trì trệ.",
     features: [
-      "Đầy đủ quyền năng Bộ Tứ Nhân Sự Số + Tùy Biến Agent",
-      "100% BYOK – Không giới hạn lượt gọi qua key cá nhân",
-      "Trình duyệt Chromium Tự Hành (Browser Automation)",
-      "Kết Nối 500+ Ứng Dụng (Composio, Webhooks, CRM)",
-      "Bảo Mật Quyết Định (Decision Log) & Phê Duyệt Di Động",
-      "Bộ 3 Quy Trình Tự Động Hóa 24/7 Chuẩn Hóa Sẵn"
+      "Toàn bộ quyền lợi của gói Khởi Động",
+      "Kích hoạt phòng họp Multi-Agent phối hợp",
+      "Browser Sandbox duyệt web & tương tác UI",
+      "Kho lưu trữ quy trình SOP nội bộ không giới hạn",
+      "Cam kết bảo chứng hoàn vốn 90 ngày (Dan Kennedy Style)",
+      "Hỗ trợ ưu tiên 1-1 qua nhóm riêng"
     ]
   },
   {
     tier: "team",
-    name: "RAI² Doanh Nghiệp",
-    priceDisplay: "1.890.000 VNĐ",
-    periodDisplay: "/ tháng (Đội ngũ 5–20 người)",
-    badge: "DOANH NGHIỆP 5-20 NGƯỜI",
-    description: "Tái cấu trúc toàn bộ bộ máy công ty, đồng bộ một ngôn ngữ chung và nguồn sự thật duy nhất giữa Người và Máy.",
+    name: "RAI² Chuyển Đổi Doanh Nghiệp",
+    priceDisplay: "1.990.000 VNĐ",
+    periodDisplay: "/ tháng",
+    description: "Giải pháp toàn diện biến doanh nghiệp thành thực thể số tự hành với vai trò CAIO đồng hành.",
     features: [
-      "Workspace Dùng Chung Cho Đội Ngũ 5–20 Nhân Sự",
-      "Phòng Họp Multi-Agent Phối Hợp Đa Nhiệm (AI Rooms)",
-      "Private Chat Cho Từng Nhân Viên & Shared Bot Công Ty",
-      "TẶNG 1 Buổi Audit 1-1 Chuẩn Hóa Quy Trình Cùng CAIO",
-      "Cam Kết Hoàn Vốn (Payback Guarantee) Trong 90 Ngày",
-      "Sao Lưu Dữ Liệu Tự Động Lên Cloud Storage Riêng"
+      "Toàn bộ tính năng cao cấp của gói Tăng Tốc",
+      "Triển khai không giới hạn thành viên & nhóm",
+      "Định danh CAIO chịu trách nhiệm giám sát P&L",
+      "Custom Connector tích hợp ERP / CRM nội bộ",
+      "Đào tạo chuyển giao khung tư duy RAI² First OS",
+      "Ký hợp đồng bảo mật SLA & Hỗ trợ kỹ thuật 24/7"
     ]
   }
 ];
 
+const DARK_SKINS = new Set([
+  "midnight",
+  "foundry",
+  "graphite",
+  "dusk",
+  "halloween",
+  "diwali",
+  "aurora",
+]);
+
 export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void }) {
+  const currentSkin = useSyncExternalStore(subscribeSkin, readSkin, readSkin);
+  const isDark = DARK_SKINS.has(currentSkin);
+
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<PlanOption | null>(null);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,99 +110,75 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
     transferContent: string;
     code: string;
   } | null>(null);
-  const [isPaid, setIsPaid] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  // Trạng thái xác thực & đăng nhập tức thì
   const [activating, setActivating] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [activationSuccess, setActivationSuccess] = useState(false);
+
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    void readSessionState().then((s) => {
-      if (s.kind === "session" || (s.kind === "loopback" && s.trust !== "service")) {
-        setCurrentUser({ email: s.kind === "session" ? s.email : undefined });
-      }
-    });
+    document.body.classList.add("has-landing-page");
+    return () => {
+      document.body.classList.remove("has-landing-page");
+    };
   }, []);
 
-  const handleInstantAccess = async (targetEmail: string, tier = "trial", code?: string) => {
+  useEffect(() => {
+    try {
+      const sess = readSessionState();
+      if (sess && sess.credential) {
+        setCurrentUser(sess.credential);
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  const handleInstantAccess = async (targetEmail: string, tier: string = "trial") => {
+    if (!targetEmail || !targetEmail.includes("@")) {
+      setAuthError("Vui lòng nhập địa chỉ email hợp lệ!");
+      return;
+    }
     setActivating(true);
     setAuthError(null);
     try {
-      const res = await fetch("/api/auth/instant-access", {
+      const res = await fetch("/api/subscription/instant-access", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: targetEmail, tier, code }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail, tier })
       });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        window.location.href = data.redirectUrl || "/app";
+      if (res.ok) {
+        const data = await res.json();
+        setActivationSuccess(true);
+        setTimeout(() => {
+          window.location.href = data.redirectUrl || "/app";
+        }, 800);
       } else {
-        setAuthError(data.error || "Không thể kích hoạt tài khoản. Vui lòng thử lại.");
-        setActivating(false);
+        const err = await res.json().catch(() => ({}));
+        setAuthError(err.error || "Không thể cấp quyền truy cập. Vui lòng thử lại!");
       }
-    } catch {
-      setAuthError("Không thể kết nối máy chủ. Vui lòng thử lại.");
+    } catch (e: any) {
+      setAuthError("Lỗi kết nối máy chủ: " + e.message);
+    } finally {
       setActivating(false);
     }
   };
 
-  // Mở khóa thanh cuộn hoàn toàn cho toàn trang khi Landing Page hiển thị
-  useEffect(() => {
-    document.body.classList.add("has-landing-page");
-    document.documentElement.style.overflowY = "auto";
-    document.body.style.overflowY = "auto";
-    document.body.style.height = "auto";
-    const root = document.getElementById("root");
-    if (root) {
-      root.style.height = "auto";
-      root.style.minHeight = "100%";
-      root.style.overflow = "visible";
-    }
-    return () => {
-      document.body.classList.remove("has-landing-page");
-      document.documentElement.style.overflowY = "";
-      document.body.style.overflowY = "";
-      document.body.style.height = "";
-      if (root) {
-        root.style.height = "";
-        root.style.minHeight = "";
-        root.style.overflow = "";
-      }
-    };
-  }, []);
-
-  // Polling kiểm tra thanh toán SePay
-  useEffect(() => {
-    if (!paymentData || isPaid) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/subscription/check?code=${paymentData.code}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.paid) {
-            setIsPaid(true);
-            clearInterval(interval);
-          }
-        }
-      } catch (err) {
-        console.error("Lỗi polling kiểm tra hóa đơn:", err);
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [paymentData, isPaid]);
-
   const handleCheckout = async (plan: PlanOption) => {
     setSelectedPlan(plan);
-    setIsPaid(false);
     setPaymentData(null);
+    setActivationSuccess(false);
+    setAuthError(null);
+
     if (plan.tier === "trial") {
       return;
     }
+
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/subscription/create", {
@@ -228,197 +220,438 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
   return (
     <div
       id="landing-page-root"
-      className="min-h-screen w-full bg-[#000000] text-[#ffffff] font-sans antialiased selection:bg-[#0099ff] selection:text-white"
+      className={cn(
+        "min-h-screen w-full font-sans antialiased selection:bg-[#0099ff] selection:text-white transition-colors duration-200",
+        isDark ? "bg-[#000000] text-[#ffffff]" : "bg-[#f8f9fa] text-[#111111]"
+      )}
     >
-      {/* 1. TOP NAVIGATION - Framer Cinematic Style */}
-      <header className="sticky top-0 z-50 w-full bg-[#000000]/90 backdrop-blur-md border-b border-[#242424]/60 transition-all">
+      {/* 1. TOP NAVIGATION - Fixed Sticky & Responsive Framer Style */}
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 w-full transition-all backdrop-blur-md border-b",
+          isDark
+            ? "bg-[#000000]/90 border-[#242424]/60 text-white"
+            : "bg-[#ffffff]/90 border-[#e5e5e5]/80 text-[#111111] shadow-xs"
+        )}
+      >
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
-          {/* Logo trắng trên nền đen, hài hòa cân đối, tuyệt đối không chèn chữ */}
+          {/* Logo */}
           <a href="/" className="flex items-center group py-1">
             <img
-              src="/assets/rai-core-white.png?v=5"
+              src={isDark ? "/assets/rai-core-white.png?v=5" : "/assets/rai-core-black.png?v=5"}
               alt="RAI²"
               className="h-6 sm:h-7 md:h-8 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
           </a>
 
-          {/* 4 Menu ngắn gọn đúng yêu cầu */}
-          <nav className="flex items-center gap-3 sm:gap-6 md:gap-8">
+          {/* Desktop Nav - 4 Menu items */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             <button
               onClick={() => scrollTo("triet-ly")}
-              className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              className={cn(
+                "text-[14px] font-medium transition-colors cursor-pointer",
+                isDark ? "text-[#8c8c8c] hover:text-[#ffffff]" : "text-[#666666] hover:text-[#000000]"
+              )}
             >
               Triết lý
             </button>
             <button
               onClick={() => scrollTo("tinh-nang")}
-              className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              className={cn(
+                "text-[14px] font-medium transition-colors cursor-pointer",
+                isDark ? "text-[#8c8c8c] hover:text-[#ffffff]" : "text-[#666666] hover:text-[#000000]"
+              )}
             >
               Tính năng
             </button>
             <button
               onClick={() => scrollTo("bang-gia")}
-              className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+              className={cn(
+                "text-[14px] font-medium transition-colors cursor-pointer",
+                isDark ? "text-[#8c8c8c] hover:text-[#ffffff]" : "text-[#666666] hover:text-[#000000]"
+              )}
             >
               Bảng giá
             </button>
             {currentUser ? (
               <a
                 href="/app"
-                className="text-[13px] sm:text-[14px] font-medium text-[#0099ff] hover:text-[#ffffff] transition-colors cursor-pointer"
+                className="text-[14px] font-medium text-[#0099ff] hover:underline transition-colors cursor-pointer"
               >
                 Vào Workspace
               </a>
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="text-[13px] sm:text-[14px] font-medium text-[#8c8c8c] hover:text-[#ffffff] transition-colors cursor-pointer"
+                className={cn(
+                  "text-[14px] font-medium transition-colors cursor-pointer",
+                  isDark ? "text-[#8c8c8c] hover:text-[#ffffff]" : "text-[#666666] hover:text-[#000000]"
+                )}
               >
                 Đăng nhập
               </button>
             )}
           </nav>
 
-          {/* Action Button: Vào Workspace hoặc Dùng thử 14 ngày */}
-          <div className="hidden sm:block">
+          {/* Desktop Actions: Theme Toggle + CTA */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => applySkinChoice(isDark ? THEME_SKINS.light : THEME_SKINS.dark)}
+              title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
+              aria-label="Đổi giao diện Sáng/Tối"
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors cursor-pointer",
+                isDark
+                  ? "text-[#8c8c8c] hover:text-[#ffffff] hover:bg-[#1a1a1a]"
+                  : "text-[#666666] hover:text-[#000000] hover:bg-[#eaeaea]"
+              )}
+            >
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+
             {currentUser ? (
               <a
                 href="/app"
-                className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center gap-1.5"
+                className={cn(
+                  "px-5 py-2 rounded-full text-[13px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center gap-1.5",
+                  isDark ? "bg-[#ffffff] text-[#000000] hover:bg-[#e6e6e6]" : "bg-[#000000] text-[#ffffff] hover:bg-[#222222]"
+                )}
               >
                 Vào Hệ Thống RAI² <ArrowRight className="w-3.5 h-3.5" />
               </a>
             ) : (
               <button
                 onClick={() => handleCheckout(PLANS[0])}
-                className="px-5 py-2 rounded-full bg-[#ffffff] text-[#000000] text-[13px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className={cn(
+                  "px-5 py-2 rounded-full text-[13px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
+                  isDark ? "bg-[#ffffff] text-[#000000] hover:bg-[#e6e6e6]" : "bg-[#000000] text-[#ffffff] hover:bg-[#222222]"
+                )}
               >
                 Dùng thử 14 ngày
               </button>
             )}
           </div>
+
+          {/* Mobile Right Controls: Theme Toggle + Hamburger Button */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              type="button"
+              onClick={() => applySkinChoice(isDark ? THEME_SKINS.light : THEME_SKINS.dark)}
+              title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
+              aria-label="Đổi giao diện Sáng/Tối"
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors cursor-pointer",
+                isDark
+                  ? "text-[#8c8c8c] hover:text-[#ffffff] hover:bg-[#1a1a1a]"
+                  : "text-[#666666] hover:text-[#000000] hover:bg-[#eaeaea]"
+              )}
+            >
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu"
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors cursor-pointer",
+                isDark
+                  ? "text-[#ffffff] bg-[#141414] hover:bg-[#222222]"
+                  : "text-[#000000] bg-[#f0f0f0] hover:bg-[#e4e4e4]"
+              )}
+            >
+              {mobileMenuOpen ? <CloseIcon size={18} /> : <MenuIcon size={18} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Drawer */}
+        {mobileMenuOpen && (
+          <div
+            className={cn(
+              "md:hidden w-full border-t px-6 py-5 space-y-4 shadow-2xl animate-fade-in",
+              isDark ? "bg-[#0a0a0a] border-[#242424] text-white" : "bg-[#ffffff] border-[#e5e5e5] text-[#111111]"
+            )}
+          >
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={() => {
+                  scrollTo("triet-ly");
+                  setMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "text-left py-2 text-[15px] font-medium transition-colors",
+                  isDark ? "text-[#cccccc] hover:text-white" : "text-[#444444] hover:text-black"
+                )}
+              >
+                Triết lý RAI²
+              </button>
+              <button
+                onClick={() => {
+                  scrollTo("tinh-nang");
+                  setMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "text-left py-2 text-[15px] font-medium transition-colors",
+                  isDark ? "text-[#cccccc] hover:text-white" : "text-[#444444] hover:text-black"
+                )}
+              >
+                Tính năng
+              </button>
+              <button
+                onClick={() => {
+                  scrollTo("bang-gia");
+                  setMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "text-left py-2 text-[15px] font-medium transition-colors",
+                  isDark ? "text-[#cccccc] hover:text-white" : "text-[#444444] hover:text-black"
+                )}
+              >
+                Bảng giá
+              </button>
+              {currentUser ? (
+                <a
+                  href="/app"
+                  className="text-left py-2 text-[15px] font-medium text-[#0099ff]"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Vào Không Gian Làm Việc
+                </a>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowLoginModal(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    "text-left py-2 text-[15px] font-medium transition-colors",
+                    isDark ? "text-[#cccccc] hover:text-white" : "text-[#444444] hover:text-black"
+                  )}
+                >
+                  Đăng nhập
+                </button>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-hairline/20">
+              {currentUser ? (
+                <a
+                  href="/app"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "w-full py-3 rounded-full text-center text-[14px] font-medium inline-flex items-center justify-center gap-2",
+                    isDark ? "bg-white text-black" : "bg-black text-white"
+                  )}
+                >
+                  Vào Hệ Thống RAI² <ArrowRight className="w-4 h-4" />
+                </a>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleCheckout(PLANS[0]);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    "w-full py-3 rounded-full text-center text-[14px] font-medium",
+                    isDark ? "bg-white text-black" : "bg-black text-white"
+                  )}
+                >
+                  Dùng thử 14 ngày miễn phí
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* 2. HERO SECTION - Editorial Framer Typographic Mass */}
-      <section className="relative pt-24 pb-20 md:pt-36 md:pb-28 overflow-hidden">
-        {/* Subtle radial glow on edges - pointer-events-none đảm bảo không chặn click */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#0099ff]/5 blur-[120px] pointer-events-none rounded-full" />
+      <section className="relative pt-20 sm:pt-24 md:pt-28 pb-16 md:pb-24 overflow-hidden">
+        {/* Subtle radial glow on edges */}
+        <div
+          className={cn(
+            "absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] blur-[120px] pointer-events-none rounded-full",
+            isDark ? "bg-[#0099ff]/5" : "bg-[#0099ff]/10"
+          )}
+        />
 
         <div className="max-w-[1200px] mx-auto px-6 text-center relative z-20">
-          {/* Tagline Announcement */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#242424] bg-[#080808] mb-8 hover:border-[#0099ff]/50 transition-colors">
+          {/* Tagline Announcement: Đưa lên gần menu, hài hòa cân đối */}
+          <div
+            className={cn(
+              "inline-flex items-center gap-2 px-3.5 py-1 rounded-full border mb-4 sm:mb-5 transition-colors",
+              isDark
+                ? "border-[#242424] bg-[#080808] hover:border-[#0099ff]/50"
+                : "border-[#e2e8f0] bg-[#ffffff] hover:border-[#0099ff]/50 shadow-xs"
+            )}
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-[#0099ff] animate-pulse" />
-            <span className="text-[12px] font-medium text-[#8c8c8c] tracking-wide uppercase">
+            <span
+              className={cn(
+                "text-[12px] font-medium tracking-wide uppercase",
+                isDark ? "text-[#8c8c8c]" : "text-[#555555]"
+              )}
+            >
               Retrofit AI Architecture • RAI² First OS
             </span>
           </div>
 
-          {/* Headline Display - GT Walsheim Editorial Style */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-medium tracking-[-0.04em] leading-[0.95] text-white max-w-[1050px] mx-auto mb-8">
+          {/* Headline Display: GT Walsheim Editorial Style */}
+          <h1
+            className={cn(
+              "text-3xl sm:text-5xl md:text-6xl lg:text-[76px] font-medium tracking-[-0.04em] leading-[1.04] sm:leading-[0.98] max-w-[1050px] mx-auto mb-5 sm:mb-6",
+              isDark ? "text-white" : "text-[#111111]"
+            )}
+          >
             Nếu hôm nay Bạn xây lại doanh nghiệp từ đầu, Bạn có tổ chức bộ máy theo cách cũ?
           </h1>
 
           {/* Subhead Dan Kennedy style */}
-          <p className="text-base sm:text-lg md:text-xl text-[#999999] max-w-[800px] mx-auto leading-relaxed mb-10 tracking-[-0.01em]">
-            Đa số các chủ doanh nghiệp đang rơi vào cái bẫy <strong className="text-white font-medium">"chắp vá AI"</strong> trên các quy trình cũ nát. Kết quả: AI khuếch đại sai lầm với tốc độ nhanh gấp 10 lần. Đã đến lúc trang bị một Hệ điều hành tự hành thực thụ cho đội ngũ 5–20 nhân sự.
+          <p
+            className={cn(
+              "text-base sm:text-lg md:text-xl max-w-[800px] mx-auto leading-relaxed mb-8 sm:mb-9 tracking-[-0.01em]",
+              isDark ? "text-[#999999]" : "text-[#4b5563]"
+            )}
+          >
+            Đa số các chủ doanh nghiệp đang rơi vào cái bẫy{" "}
+            <strong className={isDark ? "text-white font-medium" : "text-[#111111] font-medium"}>
+              "chắp vá AI"
+            </strong>{" "}
+            trên các quy trình cũ nát. Kết quả: AI khuếch đại sai lầm với tốc độ nhanh gấp 10 lần. Đã đến lúc trang bị một Hệ điều hành tự hành thực thụ cho đội ngũ 5–20 nhân sự.
           </p>
 
-          {/* CTA Buttons: Bấm mở Popup trực tiếp */}
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-30">
             {currentUser ? (
               <a
                 href="/app"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5 cursor-pointer inline-flex items-center justify-center gap-2"
+                className={cn(
+                  "w-full sm:w-auto px-8 py-3.5 rounded-full text-[15px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer inline-flex items-center justify-center gap-2",
+                  isDark ? "bg-[#ffffff] text-[#000000] hover:bg-[#e6e6e6]" : "bg-[#000000] text-[#ffffff] hover:bg-[#222222]"
+                )}
               >
                 Vào Không Gian Làm Việc RAI² <ArrowRight className="w-4 h-4" />
               </a>
             ) : (
               <button
                 onClick={() => handleCheckout(PLANS[0])}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[15px] font-medium hover:bg-[#e6e6e6] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5 cursor-pointer"
+                className={cn(
+                  "w-full sm:w-auto px-8 py-3.5 rounded-full text-[15px] font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer",
+                  isDark ? "bg-[#ffffff] text-[#000000] hover:bg-[#e6e6e6]" : "bg-[#000000] text-[#ffffff] hover:bg-[#222222]"
+                )}
               >
                 Trải nghiệm 14 ngày miễn phí
               </button>
             )}
             <button
               onClick={() => scrollTo("triet-ly")}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 text-[#ffffff] text-[15px] font-medium hover:border-[#0099ff] hover:text-[#0099ff] transition-all cursor-pointer"
+              className={cn(
+                "w-full sm:w-auto px-8 py-3.5 rounded-full border text-[15px] font-medium transition-all cursor-pointer",
+                isDark
+                  ? "border-white/20 text-[#ffffff] hover:border-[#0099ff] hover:text-[#0099ff]"
+                  : "border-black/20 text-[#111111] hover:border-[#0099ff] hover:text-[#0099ff]"
+              )}
             >
               Khám phá triết lý RAI²
             </button>
           </div>
 
           {/* Metrics micro-bar */}
-          <div className="mt-16 pt-10 border-t border-[#242424]/60 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-[900px] mx-auto text-left">
-            <div className="p-3 border-l border-[#242424]">
-              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Bảo chứng ROI</div>
-              <div className="text-2xl font-medium text-white mt-1">90 Ngày</div>
-              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Cam kết hoàn vốn rõ ràng</div>
+          <div
+            className={cn(
+              "mt-14 pt-8 border-t grid grid-cols-2 md:grid-cols-4 gap-6 max-w-[900px] mx-auto text-left",
+              isDark ? "border-[#242424]/60" : "border-[#e2e8f0]"
+            )}
+          >
+            <div className={cn("p-3 border-l", isDark ? "border-[#242424]" : "border-[#e2e8f0]")}>
+              <div className="text-[12px] text-[#0099ff] uppercase tracking-wider font-medium">Bảo chứng ROI</div>
+              <div className={cn("text-2xl font-medium mt-1", isDark ? "text-white" : "text-[#111111]")}>90 Ngày</div>
+              <div className={cn("text-[12px] mt-0.5", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>Cam kết hoàn vốn rõ ràng</div>
             </div>
-            <div className="p-3 border-l border-[#242424]">
-              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Dữ liệu cốt lõi</div>
-              <div className="text-2xl font-medium text-white mt-1">100% BYOK</div>
-              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Quyền sở hữu key & API tuyệt đối</div>
+            <div className={cn("p-3 border-l", isDark ? "border-[#242424]" : "border-[#e2e8f0]")}>
+              <div className="text-[12px] text-[#0099ff] uppercase tracking-wider font-medium">Dữ liệu cốt lõi</div>
+              <div className={cn("text-2xl font-medium mt-1", isDark ? "text-white" : "text-[#111111]")}>100% BYOK</div>
+              <div className={cn("text-[12px] mt-0.5", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>Quyền sở hữu key & API tuyệt đối</div>
             </div>
-            <div className="p-3 border-l border-[#242424]">
-              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Bộ máy tự hành</div>
-              <div className="text-2xl font-medium text-white mt-1">4 Chuyên Trách</div>
-              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Sales, Ops, Marketing & CAIO</div>
+            <div className={cn("p-3 border-l", isDark ? "border-[#242424]" : "border-[#e2e8f0]")}>
+              <div className="text-[12px] text-[#0099ff] uppercase tracking-wider font-medium">Bộ máy tự hành</div>
+              <div className={cn("text-2xl font-medium mt-1", isDark ? "text-white" : "text-[#111111]")}>4 Chuyên Trách</div>
+              <div className={cn("text-[12px] mt-0.5", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>Sales, Ops, Marketing & CAIO</div>
             </div>
-            <div className="p-3 border-l border-[#242424]">
-              <div className="text-[12px] text-[#666666] uppercase tracking-wider font-medium">Quy mô tối ưu</div>
-              <div className="text-2xl font-medium text-white mt-1">5–20 Người</div>
-              <div className="text-[12px] text-[#8c8c8c] mt-0.5">Thiết kế đo ni đóng giày cho SME</div>
+            <div className={cn("p-3 border-l", isDark ? "border-[#242424]" : "border-[#e2e8f0]")}>
+              <div className="text-[12px] text-[#0099ff] uppercase tracking-wider font-medium">Quy mô tối ưu</div>
+              <div className={cn("text-2xl font-medium mt-1", isDark ? "text-white" : "text-[#111111]")}>5–20 Người</div>
+              <div className={cn("text-[12px] mt-0.5", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>Thiết kế đo ni đóng giày cho SME</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* 3. SECTION: BÓC TRẦN SỰ THẬT - Dan Kennedy Hard-hitting Copy */}
-      <section id="triet-ly" className="py-20 border-t border-[#242424]/60 bg-[#080808]">
+      <section
+        id="triet-ly"
+        className={cn(
+          "py-20 border-t transition-colors",
+          isDark ? "bg-[#080808] border-[#242424]/60" : "bg-[#f8fafc] border-[#e2e8f0]"
+        )}
+      >
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="max-w-[800px] mb-14">
             <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
               Mổ xẻ tử huyệt vận hành
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-6">
+            <h2 className={cn("text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight mb-6", isDark ? "text-white" : "text-[#111111]")}>
               Cơn ác mộng "AI-First" và ảo tưởng nguy hiểm về MeOS
             </h2>
-            <p className="text-base sm:text-lg text-[#999999] leading-relaxed">
+            <p className={cn("text-base sm:text-lg leading-relaxed", isDark ? "text-[#999999]" : "text-[#4b5563]")}>
               Các chuyên gia tự phong đang rao giảng việc biến một cá nhân thành "bản sao AI" (MeOS). Nhưng đây là sự thật cay đắng mà không ai dám nói với bạn:
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1: Ảo tưởng MeOS */}
-            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
-              <div className="w-10 h-10 rounded-full bg-[#000000] border border-[#242424] flex items-center justify-center text-[#ff4444] mb-6">
+            <div
+              className={cn(
+                "p-8 rounded-[15px] border transition-colors",
+                isDark
+                  ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50"
+                  : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+              )}
+            >
+              <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center text-[#ff4444] mb-6", isDark ? "bg-[#000000] border-[#242424]" : "bg-[#fef2f2] border-[#fecaca]")}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-medium text-white mb-3 tracking-[-0.02em]">
+              <h3 className={cn("text-xl font-medium mb-3 tracking-[-0.02em]", isDark ? "text-white" : "text-[#111111]")}>
                 Ảo tưởng MeOS: Đóng gói sự hỗn loạn
               </h3>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Nếu một người làm việc theo cảm hứng, thiếu tính kỷ luật và quy trình chuẩn, thì việc tạo ra một "bản sao AI" chỉ nhân bản sự lộn xộn đó lên gấp hàng trăm lần.
               </p>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed">
+              <p className={cn("text-[14px] leading-relaxed", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Khi công ty mở rộng từ 5 lên 10 hay 20 người, MeOS trở thành cái bẫy giam cầm chính người sáng lập, biến sếp thành điểm nghẽn nghẹt thở nhất của doanh nghiệp.
               </p>
             </div>
 
             {/* Card 2: Cơn ác mộng chắp vá AI */}
-            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
-              <div className="w-10 h-10 rounded-full bg-[#000000] border border-[#242424] flex items-center justify-center text-[#ff8833] mb-6">
+            <div
+              className={cn(
+                "p-8 rounded-[15px] border transition-colors",
+                isDark
+                  ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50"
+                  : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+              )}
+            >
+              <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center text-[#ff8833] mb-6", isDark ? "bg-[#000000] border-[#242424]" : "bg-[#fff7ed] border-[#fed7aa]")}>
                 <Zap className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-medium text-white mb-3 tracking-[-0.02em]">
+              <h3 className={cn("text-xl font-medium mb-3 tracking-[-0.02em]", isDark ? "text-white" : "text-[#111111]")}>
                 Cái bẫy công cụ: Ném AI vào quy trình rác
               </h3>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Mua tài khoản ChatGPT, cài thêm bot trả lời tin nhắn, trang bị tool tự động tạo bài viết... nhưng doanh thu không tăng, chi phí phình to và không một ai chịu trách nhiệm về kết quả cuối cùng.
               </p>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed">
+              <p className={cn("text-[14px] leading-relaxed", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Đưa AI vào một quy trình hỏng chỉ giúp bạn tạo ra rác nhanh hơn, đốt tiền nhanh hơn và làm khách hàng thất vọng nhanh hơn.
               </p>
             </div>
@@ -427,16 +660,21 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       </section>
 
       {/* 4. SECTION: 7 NGUYÊN TẮC CỐT TỬ RAI² FIRST OS */}
-      <section className="py-24 border-t border-[#242424]/60 bg-[#000000]">
+      <section
+        className={cn(
+          "py-24 border-t transition-colors",
+          isDark ? "bg-[#000000] border-[#242424]/60" : "bg-[#ffffff] border-[#e2e8f0]"
+        )}
+      >
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="text-center max-w-[800px] mx-auto mb-16">
             <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
               Triết lý nền tảng
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-5">
+            <h2 className={cn("text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight mb-5", isDark ? "text-white" : "text-[#111111]")}>
               7 Nguyên Tắc Cốt Tử Của RAI² First OS
             </h2>
-            <p className="text-base text-[#999999] leading-relaxed">
+            <p className={cn("text-base leading-relaxed", isDark ? "text-[#999999]" : "text-[#4b5563]")}>
               Khung năng lực biến tổ chức của bạn thành một thực thể số tự hành, có trách nhiệm giải trình và cam kết tỷ suất hoàn vốn.
             </p>
           </div>
@@ -476,30 +714,42 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             ].map((p, idx) => (
               <div
                 key={idx}
-                className="p-7 rounded-[15px] bg-[#080808] border border-[#242424] hover:border-[#0099ff]/60 transition-all group"
+                className={cn(
+                  "p-7 rounded-[15px] border transition-all group",
+                  isDark
+                    ? "bg-[#080808] border-[#242424] hover:border-[#0099ff]/60"
+                    : "bg-[#f8fafc] border-[#e2e8f0] hover:border-[#0099ff]/60 shadow-xs"
+                )}
               >
                 <div className="text-[12px] font-mono text-[#0099ff] mb-4">
                   PRINCIPLE // {p.num}
                 </div>
-                <h3 className="text-lg font-medium text-white mb-2.5 tracking-[-0.01em] group-hover:text-white transition-colors">
+                <h3 className={cn("text-lg font-medium mb-2.5 tracking-[-0.01em] transition-colors", isDark ? "text-white group-hover:text-white" : "text-[#111111] group-hover:text-black")}>
                   {p.title}
                 </h3>
-                <p className="text-[13px] text-[#8c8c8c] leading-relaxed">
+                <p className={cn("text-[13px] leading-relaxed", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                   {p.desc}
                 </p>
               </div>
             ))}
 
             {/* Nguyên tắc 7: Full width highlight */}
-            <div className="md:col-span-2 lg:col-span-3 p-8 rounded-[15px] bg-[#080808] border border-[#0099ff]/30 hover:border-[#0099ff] transition-all relative overflow-hidden">
+            <div
+              className={cn(
+                "md:col-span-2 lg:col-span-3 p-8 rounded-[15px] border transition-all relative overflow-hidden",
+                isDark
+                  ? "bg-[#080808] border-[#0099ff]/30 hover:border-[#0099ff]"
+                  : "bg-[#f0f9ff] border-[#0099ff]/30 hover:border-[#0099ff] shadow-xs"
+              )}
+            >
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#0099ff]/5 blur-3xl pointer-events-none" />
               <div className="text-[12px] font-mono text-[#0099ff] mb-3">
                 PRINCIPLE // 07 — CỐT LÕI
               </div>
-              <h3 className="text-xl sm:text-2xl font-medium text-white mb-3 tracking-[-0.02em]">
+              <h3 className={cn("text-xl sm:text-2xl font-medium mb-3 tracking-[-0.02em]", isDark ? "text-white" : "text-[#111111]")}>
                 Trách Nhiệm Giải Trình & Vai Trò Của CAIO
               </h3>
-              <p className="text-[14px] text-[#999999] leading-relaxed max-w-[950px]">
+              <p className={cn("text-[14px] leading-relaxed max-w-[950px]", isDark ? "text-[#999999]" : "text-[#334155]")}>
                 AI không thể bị thả nổi. Tại RAI², mọi tác vụ số đều có một Giám đốc AI (CAIO) đứng sau giám sát: chịu trách nhiệm về số liệu P&L, kiểm soát rủi ro bảo mật và cam kết kết quả đầu ra cho toàn bộ các phòng ban của doanh nghiệp bạn.
               </p>
             </div>
@@ -508,25 +758,36 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       </section>
 
       {/* 5. SECTION: TÍNH NĂNG - BỘ TỨ NHÂN SỰ SỐ TỰ HÀNH */}
-      <section id="tinh-nang" className="py-24 border-t border-[#242424]/60 bg-[#080808]">
+      <section
+        id="tinh-nang"
+        className={cn(
+          "py-24 border-t transition-colors",
+          isDark ? "bg-[#080808] border-[#242424]/60" : "bg-[#f8fafc] border-[#e2e8f0]"
+        )}
+      >
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="max-w-[800px] mb-16">
             <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
               Năng lực thực thi
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-5">
+            <h2 className={cn("text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight mb-5", isDark ? "text-white" : "text-[#111111]")}>
               Bộ Tứ Nhân Sự Số Vận Hành 24/7
             </h2>
-            <p className="text-base text-[#999999] leading-relaxed">
+            <p className={cn("text-base leading-relaxed", isDark ? "text-[#999999]" : "text-[#4b5563]")}>
               Không chỉ là chatbot trả lời suông. Đây là những trợ lý tự hành sở hữu Sandbox Linux cô lập, có khả năng duyệt web thực tế, đọc tài liệu nội bộ và phối hợp đa nhiệm.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
-              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 01</div>
-              <h3 className="text-xl font-medium text-white mb-2">Trợ Lý Vận Hành & Tự Động Hóa (Ops Bot)</h3>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+            <div
+              className={cn(
+                "p-8 rounded-[15px] border transition-colors",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+              )}
+            >
+              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 01</div>
+              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Trợ Lý Vận Hành & Tự Động Hóa (Ops Bot)</h3>
+              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Chạy định kỳ các routine hàng ngày: thu thập báo cáo bán hàng, đồng bộ đơn hàng về Sheet, kiểm tra lỗi hệ thống và gửi thông báo trực tiếp qua Telegram/Zalo.
               </p>
               <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
@@ -534,10 +795,15 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
               </div>
             </div>
 
-            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
-              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 02</div>
-              <h3 className="text-xl font-medium text-white mb-2">Trợ Lý Nghiên Cứu & Trình Duyệt Web (Browser Bot)</h3>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+            <div
+              className={cn(
+                "p-8 rounded-[15px] border transition-colors",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+              )}
+            >
+              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 02</div>
+              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Trợ Lý Nghiên Cứu & Trình Duyệt Web (Browser Bot)</h3>
+              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Tự động đăng nhập vào cổng thông tin, tải hóa đơn, cào dữ liệu đối thủ cạnh tranh trên Shopee/Tiki và tóm tắt thành các quyết định thực thi.
               </p>
               <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
@@ -545,10 +811,15 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
               </div>
             </div>
 
-            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
-              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 03</div>
-              <h3 className="text-xl font-medium text-white mb-2">Trợ Lý Truyền Thông & Tiếp Thị (Content Bot)</h3>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+            <div
+              className={cn(
+                "p-8 rounded-[15px] border transition-colors",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+              )}
+            >
+              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 03</div>
+              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Trợ Lý Truyền Thông & Tiếp Thị (Content Bot)</h3>
+              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Soạn thảo nội dung theo chuẩn giọng văn thương hiệu của bạn, chuyển đổi bài viết chuyên sâu thành bài đăng đa kênh, chuẩn SEO và không tạo ra nội dung rác.
               </p>
               <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
@@ -556,10 +827,15 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
               </div>
             </div>
 
-            <div className="p-8 rounded-[15px] bg-[#111111] border border-[#242424] hover:border-[#0099ff]/50 transition-colors">
-              <div className="text-[12px] font-mono text-[#8c8c8c] mb-2">AGENT 04</div>
-              <h3 className="text-xl font-medium text-white mb-2">Phòng Họp Multi-Agent & Giám Sát CAIO</h3>
-              <p className="text-[14px] text-[#8c8c8c] leading-relaxed mb-4">
+            <div
+              className={cn(
+                "p-8 rounded-[15px] border transition-colors",
+                isDark ? "bg-[#111111] border-[#242424] hover:border-[#0099ff]/50" : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
+              )}
+            >
+              <div className="text-[12px] font-mono text-[#0099ff] mb-2">AGENT 04</div>
+              <h3 className={cn("text-xl font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>Phòng Họp Multi-Agent & Giám Sát CAIO</h3>
+              <p className={cn("text-[14px] leading-relaxed mb-4", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                 Không gian làm việc chung (AI Rooms) nơi các bot cùng trao đổi, phản biện và hợp tác giải quyết một bài toán hóc búa của ban giám đốc.
               </p>
               <div className="text-[12px] text-[#0099ff] flex items-center gap-1.5 font-medium">
@@ -571,16 +847,22 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       </section>
 
       {/* 6. SECTION: BẢNG GIÁ & ĐĂNG KÝ (PRICING) */}
-      <section id="bang-gia" className="py-24 border-t border-[#242424]/60 bg-[#000000]">
+      <section
+        id="bang-gia"
+        className={cn(
+          "py-24 border-t transition-colors",
+          isDark ? "bg-[#000000] border-[#242424]/60" : "bg-[#ffffff] border-[#e2e8f0]"
+        )}
+      >
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="text-center max-w-[750px] mx-auto mb-16">
             <div className="text-[12px] font-medium text-[#0099ff] tracking-widest uppercase mb-3">
               Minh bạch • Không rủi ro
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight text-white mb-5">
+            <h2 className={cn("text-3xl sm:text-5xl font-medium tracking-[-0.03em] leading-tight mb-5", isDark ? "text-white" : "text-[#111111]")}>
               Bắt Đầu Với Chi Phí Chưa Bằng Một Bữa Trưa
             </h2>
-            <p className="text-base text-[#999999] leading-relaxed">
+            <p className={cn("text-base leading-relaxed", isDark ? "text-[#999999]" : "text-[#4b5563]")}>
               Mô hình BYOK (Bring Your Own Key) giúp bạn nắm 100% quyền kiểm soát chi phí API trực tiếp với nhà cung cấp. Không phụ phí ẩn.
             </p>
           </div>
@@ -589,36 +871,42 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
             {PLANS.map((plan) => (
               <div
                 key={plan.tier}
-                className={`relative flex flex-col justify-between p-7 rounded-[15px] transition-all ${
+                className={cn(
+                  "relative flex flex-col justify-between p-7 rounded-[15px] transition-all",
                   plan.popular
-                    ? "bg-[#080808] border-2 border-[#0099ff] shadow-xl shadow-[#0099ff]/5"
-                    : "bg-[#080808] border border-[#242424] hover:border-[#333333]"
-                }`}
+                    ? isDark
+                      ? "bg-[#080808] border-2 border-[#0099ff] shadow-xl shadow-[#0099ff]/5"
+                      : "bg-[#ffffff] border-2 border-[#0099ff] shadow-xl shadow-[#0099ff]/10"
+                    : isDark
+                    ? "bg-[#080808] border border-[#242424] hover:border-[#333333]"
+                    : "bg-[#f8fafc] border border-[#e2e8f0] hover:border-[#cbd5e1] shadow-xs"
+                )}
               >
                 {plan.badge && (
-                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    plan.popular ? "bg-[#0099ff] text-white" : "bg-white text-black"
-                  }`}>
+                  <div className={cn(
+                    "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                    plan.popular ? "bg-[#0099ff] text-white" : isDark ? "bg-white text-black" : "bg-black text-white"
+                  )}>
                     {plan.badge}
                   </div>
                 )}
 
                 <div>
-                  <div className="text-base font-medium text-white mb-2">{plan.name}</div>
+                  <div className={cn("text-base font-medium mb-2", isDark ? "text-white" : "text-[#111111]")}>{plan.name}</div>
                   <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-2xl sm:text-3xl font-medium tracking-tight text-white">
+                    <span className={cn("text-2xl sm:text-3xl font-medium tracking-tight", isDark ? "text-white" : "text-[#111111]")}>
                       {plan.priceDisplay}
                     </span>
                   </div>
-                  <div className="text-[12px] text-[#666666] mb-5">{plan.periodDisplay}</div>
+                  <div className={cn("text-[12px] mb-5", isDark ? "text-[#666666]" : "text-[#64748b]")}>{plan.periodDisplay}</div>
 
-                  <p className="text-[13px] text-[#8c8c8c] leading-relaxed mb-6 min-h-[55px]">
+                  <p className={cn("text-[13px] leading-relaxed mb-6 min-h-[55px]", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
                     {plan.description}
                   </p>
 
-                  <div className="space-y-3 mb-8 pt-6 border-t border-[#242424]">
+                  <div className={cn("space-y-3 mb-8 pt-6 border-t", isDark ? "border-[#242424]" : "border-[#e2e8f0]")}>
                     {plan.features.map((f, i) => (
-                      <div key={i} className="flex items-start gap-2.5 text-[12px] text-[#cccccc]">
+                      <div key={i} className={cn("flex items-start gap-2.5 text-[12px]", isDark ? "text-[#cccccc]" : "text-[#334155]")}>
                         <Check className="w-3.5 h-3.5 text-[#0099ff] mt-0.5 shrink-0" />
                         <span className="leading-snug">{f}</span>
                       </div>
@@ -628,13 +916,18 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
 
                 <button
                   onClick={() => handleCheckout(plan)}
-                  className={`w-full py-3 rounded-full text-[13px] font-medium transition-all cursor-pointer ${
+                  className={cn(
+                    "w-full py-3 rounded-full text-[13px] font-medium transition-all cursor-pointer",
                     plan.popular
                       ? "bg-[#0099ff] text-white hover:bg-[#0088ee]"
                       : plan.tier === "trial"
-                      ? "bg-white text-black hover:bg-[#e6e6e6]"
-                      : "border border-white/20 text-white hover:border-[#0099ff] hover:text-[#0099ff]"
-                  }`}
+                      ? isDark
+                        ? "bg-white text-black hover:bg-[#e6e6e6]"
+                        : "bg-black text-white hover:bg-[#222222]"
+                      : isDark
+                      ? "border border-white/20 text-white hover:border-[#0099ff] hover:text-[#0099ff]"
+                      : "border border-black/20 text-[#111111] hover:border-[#0099ff] hover:text-[#0099ff]"
+                  )}
                 >
                   {plan.tier === "trial" ? "Bắt đầu dùng thử ngay" : "Chọn gói này"}
                 </button>
@@ -643,46 +936,98 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           </div>
 
           {/* Cam kết hoàn vốn 90 ngày của Dan Kennedy */}
-          <div className="mt-16 p-8 rounded-[15px] bg-[#080808] border border-[#242424] max-w-[900px] mx-auto text-center">
+          <div
+            className={cn(
+              "mt-16 p-8 rounded-[15px] border max-w-[900px] mx-auto text-center transition-colors",
+              isDark ? "bg-[#080808] border-[#242424]" : "bg-[#f8fafc] border-[#e2e8f0] shadow-xs"
+            )}
+          >
             <div className="inline-flex items-center gap-2 text-[#0099ff] text-[13px] font-medium uppercase tracking-wider mb-3">
               <Shield className="w-4 h-4" /> Cam kết không rủi ro
             </div>
-            <h3 className="text-xl sm:text-2xl font-medium text-white mb-3">
+            <h3 className={cn("text-xl sm:text-2xl font-medium mb-3", isDark ? "text-white" : "text-[#111111]")}>
               Bảo Chứng Hoàn Vốn 90 Ngày (Dan Kennedy Style)
             </h3>
-            <p className="text-[14px] text-[#8c8c8c] leading-relaxed max-w-[750px] mx-auto">
+            <p className={cn("text-[14px] leading-relaxed max-w-[750px] mx-auto", isDark ? "text-[#8c8c8c]" : "text-[#64748b]")}>
               Nếu trong vòng 90 ngày kể từ khi triển khai RAI² First OS theo đúng quy trình chuẩn hóa, doanh nghiệp của bạn không tiết kiệm được tối thiểu 30 giờ làm việc vô nghĩa hoặc không nhìn thấy sự gia tăng rõ rệt về hiệu suất P&L, chúng tôi sẽ hoàn trả 100% chi phí đăng ký nền tảng. Không đôi co. Không thủ tục phiền hà.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 7. FOOTER - Minimalist Framer Aesthetic */}
-      <footer className="py-16 border-t border-[#242424]/60 bg-[#000000]">
-        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Logo trắng trên nền đen, hài hòa cân đối, không chèn chữ */}
+      {/* 7. FOOTER - Minimalist Framer Aesthetic & Mobile-Optimized */}
+      <footer
+        className={cn(
+          "py-10 sm:py-14 border-t transition-colors",
+          isDark ? "bg-[#000000] border-[#242424]/60" : "bg-[#f1f5f9] border-[#e2e8f0]"
+        )}
+      >
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+          {/* Logo */}
           <div className="flex items-center">
             <img
-              src="/assets/rai-core-white.png?v=5"
+              src={isDark ? "/assets/rai-core-white.png?v=5" : "/assets/rai-core-black.png?v=5"}
               alt="RAI²"
-              className="h-5 sm:h-6 md:h-7 w-auto object-contain opacity-85"
+              className="h-5 sm:h-6 md:h-7 w-auto object-contain opacity-90"
             />
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-8 text-[13px] text-[#8c8c8c]">
-            <button onClick={() => scrollTo("triet-ly")} className="hover:text-white transition-colors cursor-pointer">Triết lý</button>
-            <button onClick={() => scrollTo("tinh-nang")} className="hover:text-white transition-colors cursor-pointer">Tính năng</button>
-            <button onClick={() => scrollTo("bang-gia")} className="hover:text-white transition-colors cursor-pointer">Bảng giá</button>
+          {/* Links: Clean wrapped flex on mobile with comfortable touch targets */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-[13px] font-medium">
+            <button
+              onClick={() => scrollTo("triet-ly")}
+              className={cn(
+                "py-1 px-1.5 transition-colors cursor-pointer",
+                isDark ? "text-[#8c8c8c] hover:text-white" : "text-[#64748b] hover:text-black"
+              )}
+            >
+              Triết lý
+            </button>
+            <button
+              onClick={() => scrollTo("tinh-nang")}
+              className={cn(
+                "py-1 px-1.5 transition-colors cursor-pointer",
+                isDark ? "text-[#8c8c8c] hover:text-white" : "text-[#64748b] hover:text-black"
+              )}
+            >
+              Tính năng
+            </button>
+            <button
+              onClick={() => scrollTo("bang-gia")}
+              className={cn(
+                "py-1 px-1.5 transition-colors cursor-pointer",
+                isDark ? "text-[#8c8c8c] hover:text-white" : "text-[#64748b] hover:text-black"
+              )}
+            >
+              Bảng giá
+            </button>
             {currentUser ? (
-              <a href="/app" className="text-[#0099ff] hover:text-white transition-colors cursor-pointer">Vào Workspace</a>
+              <a
+                href="/app"
+                className="py-1 px-1.5 text-[#0099ff] hover:underline transition-colors cursor-pointer"
+              >
+                Vào Workspace
+              </a>
             ) : (
-              <button onClick={() => setShowLoginModal(true)} className="hover:text-white transition-colors cursor-pointer">Đăng nhập</button>
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className={cn(
+                  "py-1 px-1.5 transition-colors cursor-pointer",
+                  isDark ? "text-[#8c8c8c] hover:text-white" : "text-[#64748b] hover:text-black"
+                )}
+              >
+                Đăng nhập
+              </button>
             )}
           </div>
 
           {/* Copyright */}
-          <div className="text-[12px] text-[#666666]">
+          <div
+            className={cn(
+              "text-[12px] text-center",
+              isDark ? "text-[#666666]" : "text-[#94a3b8]"
+            )}
+          >
             © {new Date().getFullYear()} RAI² • All rights reserved.
           </div>
         </div>
@@ -718,11 +1063,6 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                   }}
                   className="space-y-4"
                 >
-                  {authError && (
-                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
-                      {authError}
-                    </div>
-                  )}
                   <div>
                     <label className="block text-[12px] font-medium text-[#cccccc] mb-1.5">
                       Email doanh nghiệp của bạn
@@ -737,145 +1077,175 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
                     />
                   </div>
 
+                  {authError && (
+                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
+                      {authError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={activating}
+                    disabled={activating || activationSuccess}
                     className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {activating ? (
                       <>
                         <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                        Đang kích hoạt tài khoản & Đăng nhập...
+                        Đang khởi tạo không gian làm việc...
+                      </>
+                    ) : activationSuccess ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                        Khởi tạo thành công! Đang chuyển hướng...
                       </>
                     ) : (
-                      "Kích hoạt tài khoản & Vào làm việc ngay ->"
+                      "Kích hoạt tài khoản dùng thử ngay ->"
                     )}
                   </button>
                 </form>
+
+                <div className="mt-5 text-center text-[12px] text-[#666666]">
+                  Cam kết bảo mật 100% • Khởi tạo tự động tức thì
+                </div>
+              </div>
+            ) : paymentData ? (
+              /* Modal Mã QR VietQR SePay */
+              <div className="text-center">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-[11px] font-medium uppercase tracking-wide mb-3">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Đơn Hàng #{paymentData.code}
+                </div>
+                <h3 className="text-xl font-medium text-white mb-1">Thanh Toán Kích Hoạt {selectedPlan.name}</h3>
+                <p className="text-[12px] text-[#8c8c8c] mb-5">
+                  Quét mã QR dưới đây bằng app Ngân hàng để kích hoạt tự động trong 30 giây:
+                </p>
+
+                <div className="bg-white p-3 rounded-xl inline-block mb-4 shadow-lg">
+                  <img
+                    src={paymentData.qrUrl}
+                    alt="VietQR SePay"
+                    className="w-[210px] h-[210px] object-contain mx-auto"
+                  />
+                </div>
+
+                <div className="bg-[#0c0c0c] border border-[#242424] rounded-xl p-3.5 text-left text-[13px] space-y-2 mb-5">
+                  <div className="flex justify-between items-center text-[#8c8c8c]">
+                    <span>Số tiền:</span>
+                    <span className="font-semibold text-white text-[15px]">
+                      {paymentData.amount.toLocaleString("vi-VN")} VNĐ
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#8c8c8c]">
+                    <span>Ngân hàng:</span>
+                    <span className="font-medium text-white">{paymentData.bankName}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#8c8c8c]">
+                    <span>Số tài khoản:</span>
+                    <span className="font-mono text-white flex items-center gap-1.5">
+                      {paymentData.bankAccount}
+                      <button
+                        onClick={() => copyToClipboard(paymentData.bankAccount)}
+                        className="text-[#8c8c8c] hover:text-white p-0.5"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#8c8c8c]">
+                    <span>Nội dung CK:</span>
+                    <span className="font-mono text-[#0099ff] font-bold flex items-center gap-1.5">
+                      {paymentData.transferContent}
+                      <button
+                        onClick={() => copyToClipboard(paymentData.transferContent)}
+                        className="text-[#0099ff] hover:text-white p-0.5"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </span>
+                  </div>
+                </div>
+
+                {copied && (
+                  <div className="text-[12px] text-green-400 mb-2">Đã sao chép vào bộ nhớ tạm!</div>
+                )}
+
+                <div className="space-y-2">
+                  <button
+                    onClick={async () => {
+                      await handleInstantAccess(email || "customer@rai2.si", selectedPlan.tier);
+                    }}
+                    disabled={activating || activationSuccess}
+                    className="w-full py-3 rounded-full bg-[#0099ff] text-white text-[13px] font-medium hover:bg-[#0088ee] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {activating ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Đang kết nối & kích hoạt...
+                      </>
+                    ) : activationSuccess ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                        Kích hoạt thành công! Đang vào hệ thống...
+                      </>
+                    ) : (
+                      "Tôi đã chuyển khoản xong -> Vào hệ thống ngay"
+                    )}
+                  </button>
+                  <p className="text-[11px] text-[#666666]">
+                    Hệ thống sẽ tự động quét Webhook SePay và kích hoạt ngay sau khi tiền vào tài khoản.
+                  </p>
+                </div>
               </div>
             ) : (
-              /* Modal Thanh toán VietQR SePay */
+              /* Bước nhập email trước khi sinh mã QR */
               <div>
-                <div className="text-[12px] font-medium text-[#0099ff] uppercase tracking-wider mb-2">
-                  Thanh toán an toàn qua VietQR
-                </div>
-                <h3 className="text-xl sm:text-2xl font-medium text-white mb-1">
-                  Đăng ký {selectedPlan.name}
-                </h3>
-                <div className="text-lg font-medium text-white mb-5">
-                  {selectedPlan.priceDisplay} <span className="text-[12px] text-[#8c8c8c]">{selectedPlan.periodDisplay}</span>
-                </div>
-
-                {isPaid ? (
-                  <div className="py-8 text-center">
-                    <CheckCircle2 className="w-16 h-16 text-[#0099ff] mx-auto mb-4" />
-                    <h4 className="text-xl font-medium text-white mb-2">Thanh Toán Thành Công!</h4>
-                    <p className="text-[13px] text-[#8c8c8c] mb-6">
-                      Hệ thống đã nhận được chuyển khoản tự động. Tài khoản của bạn đã được kích hoạt.
-                    </p>
-                    {authError && (
-                      <div className="p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[13px]">
-                        {authError}
-                      </div>
-                    )}
-                    <button
-                      disabled={activating}
-                      onClick={async () => {
-                        await handleInstantAccess(email || "customer@rai2.si", selectedPlan.tier, paymentData?.transferContent);
-                      }}
-                      className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {activating ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                          Đang mở Không gian làm việc...
-                        </>
-                      ) : (
-                        "Truy cập hệ thống ngay ->"
-                      )}
-                    </button>
-                  </div>
-                ) : isSubmitting ? (
-                  <div className="py-12 text-center text-[#8c8c8c]">
-                    <div className="w-8 h-8 border-2 border-[#0099ff] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-[13px]">Đang khởi tạo mã QR thanh toán...</p>
-                  </div>
-                ) : paymentData ? (
+                <h3 className="text-xl font-medium text-white mb-2">Đăng Ký Gói {selectedPlan.name}</h3>
+                <p className="text-[13px] text-[#8c8c8c] mb-5">
+                  Nhập email để nhận hóa đơn và thông tin tài khoản đăng nhập:
+                </p>
+                <div className="space-y-4">
                   <div>
-                    <div className="bg-[#000000] p-4 rounded-[12px] border border-[#242424] flex flex-col items-center mb-5">
-                      <img
-                        src={paymentData.qrUrl}
-                        alt="VietQR SePay"
-                        className="w-48 h-48 object-contain rounded-[8px] bg-white p-2"
-                      />
-                      <div className="mt-3 text-[11px] text-[#8c8c8c] flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#0099ff] animate-ping" />
-                        Hệ thống tự động kích hoạt ngay khi chuyển khoản
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 text-[12px] bg-[#080808] p-3.5 rounded-[10px] border border-[#242424] mb-5">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8c8c8c]">Ngân hàng:</span>
-                        <span className="font-medium text-white">{paymentData.bankName}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8c8c8c]">Số tài khoản:</span>
-                        <span className="font-mono text-white">{paymentData.bankAccount}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8c8c8c]">Số tiền:</span>
-                        <span className="font-medium text-[#0099ff]">
-                          {paymentData.amount.toLocaleString("vi-VN")} VNĐ
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-[#242424]">
-                        <span className="text-[#8c8c8c]">Nội dung CK:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-white bg-[#171717] px-2 py-0.5 rounded">
-                            {paymentData.transferContent}
-                          </span>
-                          <button
-                            onClick={() => copyToClipboard(paymentData.transferContent)}
-                            className="text-[#8c8c8c] hover:text-white cursor-pointer"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {copied && (
-                      <div className="text-center text-[12px] text-[#0099ff] mb-2">
-                        Đã sao chép nội dung chuyển khoản!
-                      </div>
+                    <label className="block text-[12px] font-medium text-[#cccccc] mb-1.5">
+                      Email của bạn
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="ceo@company.com"
+                      className="w-full px-4 py-3 rounded-[10px] bg-[#000000] border border-[#242424] text-white text-[14px] focus:outline-none focus:border-[#0099ff] transition-colors"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleCheckout(selectedPlan)}
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 rounded-full bg-[#ffffff] text-[#000000] text-[14px] font-medium hover:bg-[#e6e6e6] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        Đang tạo mã QR thanh toán...
+                      </>
+                    ) : (
+                      "Tiếp tục thanh toán VietQR ->"
                     )}
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <p className="text-[13px] text-[#8c8c8c] mb-4">
-                      Vui lòng thử lại nếu mã thanh toán chưa hiển thị.
-                    </p>
-                    <button
-                      onClick={() => handleCheckout(selectedPlan)}
-                      className="px-6 py-2.5 rounded-full bg-white text-black text-[13px] font-medium cursor-pointer"
-                    >
-                      Thử lại
-                    </button>
-                  </div>
-                )}
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* 9. MODAL ĐĂNG NHẬP KHÔNG GIAN LÀM VIỆC */}
+      {/* 9. MODAL ĐĂNG NHẬP NHANH */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="relative w-full max-w-[440px] bg-[#111111] border border-[#242424] rounded-[20px] p-6 sm:p-8 shadow-2xl">
+          <div className="relative w-full max-w-[420px] bg-[#111111] border border-[#242424] rounded-[20px] p-6 sm:p-8 shadow-2xl">
             <button
-              onClick={() => { setShowLoginModal(false); setAuthError(null); }}
+              onClick={() => {
+                setShowLoginModal(false);
+                setAuthError(null);
+              }}
               className="absolute top-5 right-5 text-[#8c8c8c] hover:text-white transition-colors p-1 cursor-pointer"
             >
               <X className="w-5 h-5" />
