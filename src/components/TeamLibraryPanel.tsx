@@ -17,6 +17,7 @@ import { ReadyBotGallery } from "./ReadyBotGallery";
 import { AbsenceReadinessGauge } from "./AbsenceReadinessGauge";
 import { HireAgentDialog } from "./HireAgentDialog";
 import { CompanyFingerprintModal } from "./CompanyFingerprintModal";
+import { TocConstraintModal } from "./TocConstraintModal";
 import { NewBotDialog } from "./lazy-screens";
 import { ShareTeamDialog } from "./ShareTeamDialog";
 import { OrgLibraryTab } from "./TeamLibraryPanelOrg";
@@ -133,6 +134,7 @@ export function TeamLibraryPanel({
   const [pendingOrg, setPendingOrg] = useState<OrgLibraryPackage | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [fingerprintModalOpen, setFingerprintModalOpen] = useState(false);
+  const [tocModalOpen, setTocModalOpen] = useState(false);
   const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const tabChosen = useRef(false);
   // Monotonic scout token: a late response from an older scout must never overwrite a newer one's state.
@@ -675,6 +677,7 @@ export function TeamLibraryPanel({
                     activeBotIds={state.bots.map((b) => b.id)}
                     onHireDepartment={() => setHireDialogOpen(true)}
                     onOpenFingerprint={() => setFingerprintModalOpen(true)}
+                    onOpenTocDiagnostic={() => setTocModalOpen(true)}
                   />
                   <ReadyBotGallery search={search} onDialog={setNestedDialog} onAdded={onClose} />
                   <div className="mb-3 text-[12px] font-medium text-ink-secondary">
@@ -982,6 +985,14 @@ export function TeamLibraryPanel({
       <CompanyFingerprintModal
         isOpen={fingerprintModalOpen}
         onClose={() => setFingerprintModalOpen(false)}
+      />
+      <TocConstraintModal
+        isOpen={tocModalOpen}
+        onClose={() => setTocModalOpen(false)}
+        onSelectAgentKey={(key) => {
+          setTocModalOpen(false);
+          setAddingReadyBotId(key);
+        }}
       />
       {addingReadyBotId &&
         createPortal(

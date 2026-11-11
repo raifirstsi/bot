@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight, Building2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight, Building2, Gauge } from "lucide-react";
 import { RAI2_DEPARTMENTS, type RaiDepartment } from "@/lib/rai2-departments";
 import { loadSavedFingerprint, type CompanyFingerprintData } from "@/components/CompanyFingerprintModal";
 import { cn } from "@/lib/cn";
@@ -20,6 +20,7 @@ export interface AbsenceReadinessGaugeProps {
   className?: string;
   onHireDepartment?: (deptCode: string) => void;
   onOpenFingerprint?: () => void;
+  onOpenTocDiagnostic?: () => void;
 }
 
 const ZONE_WEIGHTS: Record<string, number> = {
@@ -115,6 +116,7 @@ export function AbsenceReadinessGauge({
   className,
   onHireDepartment,
   onOpenFingerprint,
+  onOpenTocDiagnostic,
 }: AbsenceReadinessGaugeProps) {
   const { overallScore, zones, level, gapAlerts } = useMemo(
     () => computeAbsenceReadiness(activeBotIds),
@@ -149,18 +151,28 @@ export function AbsenceReadinessGauge({
           </p>
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2.5 sm:gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2 sm:gap-2.5 w-full sm:w-auto">
+          {onOpenTocDiagnostic && (
+            <button
+              type="button"
+              onClick={onOpenTocDiagnostic}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+            >
+              <Gauge className="size-3.5 text-amber-500 shrink-0" />
+              <span>Bắt Điểm Nghẽn TOC (60s)</span>
+            </button>
+          )}
           {onOpenFingerprint && (
             <button
               type="button"
               onClick={onOpenFingerprint}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-hairline bg-raised/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-raised-hover hover:border-hairline-strong transition-colors order-2 sm:order-1"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-hairline bg-raised/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-raised-hover hover:border-hairline-strong transition-colors"
             >
-              <Building2 className="size-3.5 text-accent" />
+              <Building2 className="size-3.5 text-accent shrink-0" />
               <span>Sổ giá & Rào chắn ngành</span>
             </button>
           )}
-          <div className="flex items-center gap-3 order-1 sm:order-2 ml-auto sm:ml-0">
+          <div className="flex items-center gap-3 ml-auto sm:ml-0">
             <div className="text-right">
               <div className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
                 {overallScore}%

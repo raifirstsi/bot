@@ -2,7 +2,7 @@ import { OrganizationIdentity } from "./OrganizationIdentity";
 import { RaiLogo } from "./RaiLogo";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch } from "react";
 import { createPortal } from "react-dom";
-import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
+import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, Gauge, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
 import { liveActivityLabel, sidebarMessage } from "@/lib/live-activity";
@@ -31,6 +31,7 @@ import { useDesktopCapabilities, windowFramed } from "./DesktopCapabilities";
 import { MIN_QUERY, SearchResults } from "./SearchResults";
 import { NewBotDialog, ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
 import { HireAgentDialog } from "./HireAgentDialog";
+import { TocConstraintModal } from "./TocConstraintModal";
 import { SidebarNewChatPanel } from "./SidebarNewChatPanel";
 import { openCommandPalette } from "./CommandPalette";
 import { TeamSettingsDialog } from "./TeamSettingsDialog";
@@ -980,6 +981,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const [teamLibraryOpen, setTeamLibraryOpen] = useState(false);
   const [teamInstallUrl, setTeamInstallUrl] = useState<string | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
+  const [tocModalOpen, setTocModalOpen] = useState(false);
   const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const [archivedBotsOpen, setArchivedBotsOpen] = useState(false);
   const [teamFeedback, setTeamFeedback] = useState<{
@@ -1217,14 +1219,26 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             <LayoutTemplate size={16} className="text-ink-secondary" />
             {t("sidebar.teamLibrary")}
           </button>}
-          {teamSettingsAllowed !== false && <button
-            onClick={() => { setPlusOpen(false); setHireDialogOpen(true); }}
-            role="menuitem"
-            className={plusItem}
-          >
-            <Sparkles size={16} className="text-accent" />
-            <span className="flex-1 font-medium text-ink">Tuyển Nhân Sự Số (RAI² First OS)</span>
-          </button>}
+          {teamSettingsAllowed !== false && (
+            <>
+              <button
+                onClick={() => { setPlusOpen(false); setTocModalOpen(true); }}
+                role="menuitem"
+                className={plusItem}
+              >
+                <Gauge size={16} className="text-amber-500" />
+                <span className="flex-1 font-medium text-ink">Bắt Điểm Nghẽn TOC (RAI² First OS)</span>
+              </button>
+              <button
+                onClick={() => { setPlusOpen(false); setHireDialogOpen(true); }}
+                role="menuitem"
+                className={plusItem}
+              >
+                <Sparkles size={16} className="text-accent" />
+                <span className="flex-1 font-medium text-ink">Tuyển Nhân Sự Số (RAI² First OS)</span>
+              </button>
+            </>
+          )}
           {advanced && archivedBots.length > 0 && (
             <button
               onClick={() => {
@@ -1684,6 +1698,14 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         onSelectAgent={(agent) => {
           setHireDialogOpen(false);
           setAddingReadyBotId(agent.key);
+        }}
+      />
+      <TocConstraintModal
+        isOpen={tocModalOpen}
+        onClose={() => setTocModalOpen(false)}
+        onSelectAgentKey={(key) => {
+          setTocModalOpen(false);
+          setAddingReadyBotId(key);
         }}
       />
       {addingReadyBotId &&

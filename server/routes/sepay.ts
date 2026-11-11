@@ -272,6 +272,7 @@ export function handleSepayRoutes(
       // Issue an authenticated session with full admin + client scopes for the user
       const issued = sessions.issue({
         label: `RAI² (${email})`,
+        email,
         scopes: ["admin", "client"],
         userId: `rai2:${email}`,
       });

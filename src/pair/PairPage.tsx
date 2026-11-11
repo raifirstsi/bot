@@ -599,7 +599,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
 
                 {ownServer ? (
                   <p className="text-center text-[11px] text-ink-secondary">
-                    {t("pair.noCode")} <code className="select-all rounded bg-inset px-1.5 py-0.5 text-[11px] text-ink">npx openmausbot pair</code>
+                    {t("pair.noCode")} <code className="select-all rounded bg-inset px-1.5 py-0.5 text-[11px] text-ink">pnpm pair</code>
                   </p>
                 ) : null}
               </form>

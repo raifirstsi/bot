@@ -2,9 +2,9 @@
 import type { RuntimeStore } from "./store.ts";
 import { terminal, type Assignee, type Assignment, type Mode, type Owner, type TurnEvidence } from "./types.ts";
 
-export const CUT_TWICE = "Interrupted by another OpenMausBot restart after resuming once; not resumed again. Some of its steps may already have taken effect.";
+export const CUT_TWICE = "Tác vụ bị gián đoạn do hệ thống RAI² khởi động lại; không thể tiếp tục tự động. Một số bước có thể đã được thực thi.";
 
-export const INTERRUPTED_OUTWARD = "Interrupted by an OpenMausBot restart after it already";
+export const INTERRUPTED_OUTWARD = "Tác vụ bị gián đoạn do hệ thống RAI² khởi động lại sau khi đã";
 
 const OUTWARD_SHOWN = 4;
 const OUTWARD_LABEL_MAX = 48;
