@@ -545,7 +545,7 @@ export const ContextVaultModal: React.FC<ContextVaultModalProps> = ({
               className="ui-button ui-button-primary ui-button-lg w-full sm:w-auto"
             >
               <Check size={15} />
-              <span>Lưu & Đồng Bộ Toàn Bộ Bots</span>
+              <span>Lưu & Đồng Bộ Toàn Bộ RAIs</span>
             </button>
           </div>
         </div>
