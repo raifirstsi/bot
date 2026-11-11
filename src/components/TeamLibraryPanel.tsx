@@ -16,6 +16,8 @@ import { TEAM_GLYPHS, TeamImportDetails } from "./TeamImportDetails";
 import { ReadyBotGallery } from "./ReadyBotGallery";
 import { AbsenceReadinessGauge } from "./AbsenceReadinessGauge";
 import { HireAgentDialog } from "./HireAgentDialog";
+import { CompanyFingerprintModal } from "./CompanyFingerprintModal";
+import { NewBotDialog } from "./lazy-screens";
 import { ShareTeamDialog } from "./ShareTeamDialog";
 import { OrgLibraryTab } from "./TeamLibraryPanelOrg";
 import { MAX_TEAM_BACKUP_BYTES } from "../../shared/team-backup";
@@ -130,6 +132,8 @@ export function TeamLibraryPanel({
   const [orgError, setOrgError] = useState("");
   const [pendingOrg, setPendingOrg] = useState<OrgLibraryPackage | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
+  const [fingerprintModalOpen, setFingerprintModalOpen] = useState(false);
+  const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const tabChosen = useRef(false);
   // Monotonic scout token: a late response from an older scout must never overwrite a newer one's state.
   const scoutRequest = useRef(0);
@@ -670,6 +674,7 @@ export function TeamLibraryPanel({
                     className="mb-6"
                     activeBotIds={state.bots.map((b) => b.id)}
                     onHireDepartment={() => setHireDialogOpen(true)}
+                    onOpenFingerprint={() => setFingerprintModalOpen(true)}
                   />
                   <ReadyBotGallery search={search} onDialog={setNestedDialog} onAdded={onClose} />
                   <div className="mb-3 text-[12px] font-medium text-ink-secondary">
@@ -966,7 +971,30 @@ export function TeamLibraryPanel({
         )}
       </div>
       {sharing !== null && <ShareTeamDialog team={sharing} onClose={() => setSharing(null)} />}
-      <HireAgentDialog open={hireDialogOpen} onClose={() => setHireDialogOpen(false)} />
+      <HireAgentDialog
+        open={hireDialogOpen}
+        onClose={() => setHireDialogOpen(false)}
+        onSelectAgent={(agent) => {
+          setHireDialogOpen(false);
+          setAddingReadyBotId(agent.key);
+        }}
+      />
+      <CompanyFingerprintModal
+        isOpen={fingerprintModalOpen}
+        onClose={() => setFingerprintModalOpen(false)}
+      />
+      {addingReadyBotId &&
+        createPortal(
+          <NewBotDialog
+            readyBotId={addingReadyBotId}
+            onClose={() => setAddingReadyBotId(null)}
+            onCreated={() => {
+              setAddingReadyBotId(null);
+              onClose();
+            }}
+          />,
+          document.body,
+        )}
     </div>,
     document.body,
   );

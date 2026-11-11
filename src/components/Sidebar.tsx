@@ -29,7 +29,7 @@ import { LocalComputerAutoWarning } from "./LocalComputerAutoWarning";
 import { nextRename } from "@/lib/rename";
 import { useDesktopCapabilities, windowFramed } from "./DesktopCapabilities";
 import { MIN_QUERY, SearchResults } from "./SearchResults";
-import { ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
+import { NewBotDialog, ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
 import { HireAgentDialog } from "./HireAgentDialog";
 import { SidebarNewChatPanel } from "./SidebarNewChatPanel";
 import { openCommandPalette } from "./CommandPalette";
@@ -980,6 +980,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const [teamLibraryOpen, setTeamLibraryOpen] = useState(false);
   const [teamInstallUrl, setTeamInstallUrl] = useState<string | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
+  const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const [archivedBotsOpen, setArchivedBotsOpen] = useState(false);
   const [teamFeedback, setTeamFeedback] = useState<{
     error: boolean;
@@ -1680,7 +1681,26 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       <HireAgentDialog
         open={hireDialogOpen}
         onClose={() => setHireDialogOpen(false)}
+        onSelectAgent={(agent) => {
+          setHireDialogOpen(false);
+          setAddingReadyBotId(agent.key);
+        }}
       />
+      {addingReadyBotId &&
+        createPortal(
+          <NewBotDialog
+            readyBotId={addingReadyBotId}
+            onClose={() => setAddingReadyBotId(null)}
+            onCreated={(bot) => {
+              setAddingReadyBotId(null);
+              setTeamFeedback({
+                error: false,
+                text: `Đã kích hoạt thành công nhân sự số ${bot.name}!`,
+              });
+            }}
+          />,
+          document.body,
+        )}
       {teamFeedback &&
         createPortal(
           <div

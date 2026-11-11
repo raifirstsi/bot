@@ -1,6 +1,7 @@
-import { useMemo } from "react";
-import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight, Building2 } from "lucide-react";
 import { RAI2_DEPARTMENTS, type RaiDepartment } from "@/lib/rai2-departments";
+import { loadSavedFingerprint, type CompanyFingerprintData } from "@/components/CompanyFingerprintModal";
 import { cn } from "@/lib/cn";
 
 export interface ZoneReadiness {
@@ -18,6 +19,7 @@ export interface AbsenceReadinessGaugeProps {
   activeBotIds?: string[];
   className?: string;
   onHireDepartment?: (deptCode: string) => void;
+  onOpenFingerprint?: () => void;
 }
 
 const ZONE_WEIGHTS: Record<string, number> = {
@@ -112,11 +114,17 @@ export function AbsenceReadinessGauge({
   activeBotIds = [],
   className,
   onHireDepartment,
+  onOpenFingerprint,
 }: AbsenceReadinessGaugeProps) {
   const { overallScore, zones, level, gapAlerts } = useMemo(
     () => computeAbsenceReadiness(activeBotIds),
     [activeBotIds]
   );
+  const [fingerprint, setFingerprint] = useState<CompanyFingerprintData | null>(null);
+
+  useEffect(() => {
+    setFingerprint(loadSavedFingerprint());
+  }, []);
 
   return (
     <div
@@ -142,6 +150,16 @@ export function AbsenceReadinessGauge({
         </div>
 
         <div className="flex items-center gap-3">
+          {onOpenFingerprint && (
+            <button
+              type="button"
+              onClick={onOpenFingerprint}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-hairline bg-raised/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-raised-hover hover:border-hairline-strong transition-colors"
+            >
+              <Building2 className="size-3.5 text-accent" />
+              <span>Sổ giá & Rào chắn ngành</span>
+            </button>
+          )}
           <div className="text-right">
             <div className="text-2xl font-bold tracking-tight text-ink">
               {overallScore}%
@@ -160,6 +178,29 @@ export function AbsenceReadinessGauge({
           </span>
         </div>
       </div>
+
+      {/* Active Fingerprint Summary Banner */}
+      {fingerprint && (
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-accent/5 border border-accent/20 px-3.5 py-2 text-xs text-ink">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-block size-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-semibold text-accent">{fingerprint.companyName}</span>
+            <span className="text-ink-tertiary">·</span>
+            <span className="text-ink-secondary">Biên LN mục tiêu: ≥{fingerprint.targetNetMargin}%</span>
+            <span className="text-ink-tertiary">·</span>
+            <span className="text-ink-secondary">Chiết khấu tối đa: ≤{fingerprint.maxDiscountAllowed}%</span>
+          </div>
+          {onOpenFingerprint && (
+            <button
+              type="button"
+              onClick={onOpenFingerprint}
+              className="text-[11px] font-semibold text-accent hover:underline shrink-0 ml-2"
+            >
+              Cập nhật
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Level Summary Banner */}
       <div className="mt-4 rounded-xl bg-raised/50 p-4 border border-hairline/30">
