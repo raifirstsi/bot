@@ -2,7 +2,7 @@ import { OrganizationIdentity } from "./OrganizationIdentity";
 import { RaiLogo } from "./RaiLogo";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch } from "react";
 import { createPortal } from "react-dom";
-import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, Gauge, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
+import { Archive, BookOpen, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, Gauge, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
 import { liveActivityLabel, sidebarMessage } from "@/lib/live-activity";
@@ -32,6 +32,7 @@ import { MIN_QUERY, SearchResults } from "./SearchResults";
 import { NewBotDialog, ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
 import { HireAgentDialog } from "./HireAgentDialog";
 import { TocConstraintModal } from "./TocConstraintModal";
+import { ContextVaultModal } from "./ContextVaultModal";
 import { SidebarNewChatPanel } from "./SidebarNewChatPanel";
 import { openCommandPalette } from "./CommandPalette";
 import { TeamSettingsDialog } from "./TeamSettingsDialog";
@@ -982,6 +983,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const [teamInstallUrl, setTeamInstallUrl] = useState<string | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [tocModalOpen, setTocModalOpen] = useState(false);
+  const [vaultModalOpen, setVaultModalOpen] = useState(false);
   const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const [archivedBotsOpen, setArchivedBotsOpen] = useState(false);
   const [teamFeedback, setTeamFeedback] = useState<{
@@ -1236,6 +1238,14 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               >
                 <Sparkles size={16} className="text-accent" />
                 <span className="flex-1 font-medium text-ink">Tuyển Nhân Sự Số (RAI² First OS)</span>
+              </button>
+              <button
+                onClick={() => { setPlusOpen(false); setVaultModalOpen(true); }}
+                role="menuitem"
+                className={plusItem}
+              >
+                <BookOpen size={16} className="text-emerald-500" />
+                <span className="flex-1 font-medium text-ink">Két Sắt Ngữ Cảnh 8 Trụ Cột (RAI² First OS)</span>
               </button>
             </>
           )}
@@ -1707,6 +1717,10 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           setTocModalOpen(false);
           setAddingReadyBotId(key);
         }}
+      />
+      <ContextVaultModal
+        isOpen={vaultModalOpen}
+        onClose={() => setVaultModalOpen(false)}
       />
       {addingReadyBotId &&
         createPortal(

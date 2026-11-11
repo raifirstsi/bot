@@ -18,6 +18,7 @@ import { AbsenceReadinessGauge } from "./AbsenceReadinessGauge";
 import { HireAgentDialog } from "./HireAgentDialog";
 import { CompanyFingerprintModal } from "./CompanyFingerprintModal";
 import { TocConstraintModal } from "./TocConstraintModal";
+import { ContextVaultModal } from "./ContextVaultModal";
 import { NewBotDialog } from "./lazy-screens";
 import { ShareTeamDialog } from "./ShareTeamDialog";
 import { OrgLibraryTab } from "./TeamLibraryPanelOrg";
@@ -135,6 +136,7 @@ export function TeamLibraryPanel({
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [fingerprintModalOpen, setFingerprintModalOpen] = useState(false);
   const [tocModalOpen, setTocModalOpen] = useState(false);
+  const [vaultModalOpen, setVaultModalOpen] = useState(false);
   const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const tabChosen = useRef(false);
   // Monotonic scout token: a late response from an older scout must never overwrite a newer one's state.
@@ -678,6 +680,7 @@ export function TeamLibraryPanel({
                     onHireDepartment={() => setHireDialogOpen(true)}
                     onOpenFingerprint={() => setFingerprintModalOpen(true)}
                     onOpenTocDiagnostic={() => setTocModalOpen(true)}
+                    onOpenContextVault={() => setVaultModalOpen(true)}
                   />
                   <ReadyBotGallery search={search} onDialog={setNestedDialog} onAdded={onClose} />
                   <div className="mb-3 text-[12px] font-medium text-ink-secondary">
@@ -993,6 +996,10 @@ export function TeamLibraryPanel({
           setTocModalOpen(false);
           setAddingReadyBotId(key);
         }}
+      />
+      <ContextVaultModal
+        isOpen={vaultModalOpen}
+        onClose={() => setVaultModalOpen(false)}
       />
       {addingReadyBotId &&
         createPortal(

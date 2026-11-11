@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight, Building2, Gauge } from "lucide-react";
+import { CheckCircle2, AlertTriangle, ShieldCheck, ArrowUpRight, Building2, Gauge, BookOpen } from "lucide-react";
 import { RAI2_DEPARTMENTS, type RaiDepartment } from "@/lib/rai2-departments";
 import { loadSavedFingerprint, type CompanyFingerprintData } from "@/components/CompanyFingerprintModal";
 import { cn } from "@/lib/cn";
@@ -21,6 +21,7 @@ export interface AbsenceReadinessGaugeProps {
   onHireDepartment?: (deptCode: string) => void;
   onOpenFingerprint?: () => void;
   onOpenTocDiagnostic?: () => void;
+  onOpenContextVault?: () => void;
 }
 
 const ZONE_WEIGHTS: Record<string, number> = {
@@ -117,6 +118,7 @@ export function AbsenceReadinessGauge({
   onHireDepartment,
   onOpenFingerprint,
   onOpenTocDiagnostic,
+  onOpenContextVault,
 }: AbsenceReadinessGaugeProps) {
   const { overallScore, zones, level, gapAlerts } = useMemo(
     () => computeAbsenceReadiness(activeBotIds),
@@ -170,6 +172,16 @@ export function AbsenceReadinessGauge({
             >
               <Building2 className="size-3.5 text-accent shrink-0" />
               <span>Sổ giá & Rào chắn ngành</span>
+            </button>
+          )}
+          {onOpenContextVault && (
+            <button
+              type="button"
+              onClick={onOpenContextVault}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+            >
+              <BookOpen className="size-3.5 text-emerald-500 shrink-0" />
+              <span>Két Sắt Ngữ Cảnh</span>
             </button>
           )}
           <div className="flex items-center gap-3 ml-auto sm:ml-0">
