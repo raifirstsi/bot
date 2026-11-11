@@ -129,14 +129,11 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
   }, []);
 
   useEffect(() => {
-    try {
-      const sess = readSessionState();
-      if (sess && sess.credential) {
-        setCurrentUser(sess.credential);
+    void readSessionState().then((sess) => {
+      if (sess && sess.kind === "session") {
+        setCurrentUser(sess.label || sess.email || "Active User");
       }
-    } catch {
-      // Ignore
-    }
+    }).catch(() => {});
   }, []);
 
   const handleInstantAccess = async (targetEmail: string, tier: string = "trial") => {
@@ -150,6 +147,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
       const res = await fetch("/api/subscription/instant-access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ email: targetEmail, tier })
       });
       if (res.ok) {
@@ -238,7 +236,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           {/* Logo */}
           <a href="/" className="flex items-center group py-1">
             <img
-              src={isDark ? "/assets/rai-core-white.png?v=5" : "/assets/rai-core-black.png?v=5"}
+              src={isDark ? "/assets/rai-core-white.png?v=6" : "/assets/rai-core-black.png?v=6"}
               alt="RAI²"
               className="h-6 sm:h-7 md:h-8 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
@@ -966,7 +964,7 @@ export function RaiLandingPage({ onAdminSignIn }: { onAdminSignIn: () => void })
           {/* Logo */}
           <div className="flex items-center">
             <img
-              src={isDark ? "/assets/rai-core-white.png?v=5" : "/assets/rai-core-black.png?v=5"}
+              src={isDark ? "/assets/rai-core-white.png?v=6" : "/assets/rai-core-black.png?v=6"}
               alt="RAI²"
               className="h-5 sm:h-6 md:h-7 w-auto object-contain opacity-90"
             />

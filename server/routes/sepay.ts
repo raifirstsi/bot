@@ -249,8 +249,8 @@ export function handleSepayRoutes(
     return true;
   }
 
-  // 5. POST /api/auth/instant-access
-  if (path === "/api/auth/instant-access" && method === "POST") {
+  // 5. POST /api/auth/instant-access or /api/subscription/instant-access
+  if ((path === "/api/auth/instant-access" || path === "/api/subscription/instant-access") && method === "POST") {
     void readBody(req).then((data) => {
       const body = data as { email?: string; tier?: string; code?: string; type?: string };
       const rawEmail = typeof body?.email === "string" ? body.email.trim() : "";

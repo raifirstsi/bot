@@ -25,7 +25,7 @@ export function RaiLogo({
   return (
     <span className={cn("inline-flex items-center select-none shrink-0", className)}>
       <img
-        src="/assets/rai-core-white.png?v=5"
+        src="/assets/rai-core-white.png?v=6"
         alt={alt}
         className={cn(
           "rai-logo-dark h-full w-auto object-contain transition-opacity duration-150",
@@ -33,7 +33,7 @@ export function RaiLogo({
         )}
       />
       <img
-        src="/assets/rai-core-black.png?v=5"
+        src="/assets/rai-core-black.png?v=6"
         alt={alt}
         className={cn(
           "rai-logo-light h-full w-auto object-contain transition-opacity duration-150",
