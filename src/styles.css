@@ -866,8 +866,19 @@
 }
 
 :root[data-skin="daylight"] .bg-accent\/15,
-[data-skin="daylight"] .bg-accent\/15 {
+[data-skin="daylight"] .bg-accent\/15,
+:root[data-skin="daylight"] .bg-accent-soft,
+[data-skin="daylight"] .bg-accent-soft {
   background-color: rgba(0, 153, 255, 0.16) !important;
+  color: #0077cc !important;
+}
+
+:root[data-skin="daylight"] .text-accent-text,
+[data-skin="daylight"] .text-accent-text,
+:root[data-skin="daylight"] a.text-accent-text,
+[data-skin="daylight"] a.text-accent-text,
+:root[data-skin="daylight"] button.text-accent-text,
+[data-skin="daylight"] button.text-accent-text {
   color: #0077cc !important;
 }
 

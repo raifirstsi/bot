@@ -25,7 +25,7 @@ const PANELS: Partial<Record<KeyId, () => ReactNode>> = {
 const EXTRAS: Partial<Record<KeyId, () => ReactNode>> = {
   anthropic: () => <AnthropicEveryClaudeBot />,
   openaiCompat: () => <><OpenAiCompatUrl /><BuiltInReplyWait /><OtherOpenAiCompatServers /></>,
-  box: () => <BoatOfferPanel />,
+  box: () => null,
   liveKey: () => <LiveProviderSettings />,
 };
 

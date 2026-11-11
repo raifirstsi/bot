@@ -37,28 +37,10 @@ function ClaimButton({ onOpened, className }: { onOpened?: () => void; className
   </div>;
 }
 
-export function BoatOfferCard({ onDone }: { onDone: (action: BoatOfferAction) => void }) {
-  return <NoticeCard titleId="boat-offer-title" notice="boat-offer" icon={Gift} title={t("boatOffer.title")} onDismiss={() => onDone("close")}>
-    <BoatOfferWords />
-    <div className="mt-3 flex flex-col gap-2">
-      <LinkButton url={BOAT_OFFER.url} label={t("boatOffer.get")} className={cn(PRIMARY_BUTTON, "w-full")} onOpened={() => onDone("get_boat")} />
-      <ClaimButton className="w-full" onOpened={() => onDone("claim")} />
-      <NotNowButton onClick={() => onDone("not_now")} />
-    </div>
-  </NoticeCard>;
+export function BoatOfferCard({ onDone: _ }: { onDone: (action: BoatOfferAction) => void }) {
+  return null;
 }
 
 export function BoatOfferPanel() {
-  const titleId = useId();
-  if (!boatOfferRuns(Date.now()) || brandStatus().source === "file") return null;
-  return <section data-boat-offer aria-labelledby={titleId} className="rounded-lg bg-ink/[0.04] p-3">
-    <h3 id={titleId} className="flex items-center gap-1.5 text-[13px] font-semibold leading-[18px] text-ink">
-      <Gift size={14} aria-hidden="true" className="shrink-0 text-ink-secondary" />{t("boatOffer.title")}
-    </h3>
-    <BoatOfferWords />
-    <div className="mt-3 flex flex-wrap items-start gap-2">
-      <LinkButton url={BOAT_OFFER.url} label={t("boatOffer.get")} onOpened={() => reportBoatOffer("get_boat", "settings")} />
-      <ClaimButton onOpened={() => reportBoatOffer("claim", "settings")} />
-    </div>
-  </section>;
+  return null;
 }

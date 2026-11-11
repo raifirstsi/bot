@@ -14,6 +14,8 @@ import { catalogCopy, catalogMatches, type TeamCatalog, type TeamCatalogEntry } 
 
 import { TEAM_GLYPHS, TeamImportDetails } from "./TeamImportDetails";
 import { ReadyBotGallery } from "./ReadyBotGallery";
+import { AbsenceReadinessGauge } from "./AbsenceReadinessGauge";
+import { HireAgentDialog } from "./HireAgentDialog";
 import { ShareTeamDialog } from "./ShareTeamDialog";
 import { OrgLibraryTab } from "./TeamLibraryPanelOrg";
 import { MAX_TEAM_BACKUP_BYTES } from "../../shared/team-backup";
@@ -127,6 +129,7 @@ export function TeamLibraryPanel({
   const [orgNotice, setOrgNotice] = useState("");
   const [orgError, setOrgError] = useState("");
   const [pendingOrg, setPendingOrg] = useState<OrgLibraryPackage | null>(null);
+  const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const tabChosen = useRef(false);
   // Monotonic scout token: a late response from an older scout must never overwrite a newer one's state.
   const scoutRequest = useRef(0);
@@ -663,6 +666,11 @@ export function TeamLibraryPanel({
               )}
               {tab === "explore" && (
                 <div>
+                  <AbsenceReadinessGauge
+                    className="mb-6"
+                    activeBotIds={state.bots.map((b) => b.id)}
+                    onHireDepartment={() => setHireDialogOpen(true)}
+                  />
                   <ReadyBotGallery search={search} onDialog={setNestedDialog} onAdded={onClose} />
                   <div className="mb-3 text-[12px] font-medium text-ink-secondary">
                     {search ? t("templates.searchResults") : t("templates.communityTemplates")}
@@ -958,6 +966,7 @@ export function TeamLibraryPanel({
         )}
       </div>
       {sharing !== null && <ShareTeamDialog team={sharing} onClose={() => setSharing(null)} />}
+      <HireAgentDialog open={hireDialogOpen} onClose={() => setHireDialogOpen(false)} />
     </div>,
     document.body,
   );
