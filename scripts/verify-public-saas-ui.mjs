@@ -130,8 +130,8 @@ try {
     const result = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     writeFileSync(join(output, `${landing ? "landing" : "account"}-${name}.png`), Buffer.from(result.data, "base64"));
     if (landing && width < 600) {
-      const teamTop = await evaluate("document.querySelector('#team .section-kicker').getBoundingClientRect().top");
-      assert(teamTop < height - 4, `team heading starts below the ${name} viewport: ${teamTop}px`);
+      const teamTop = await evaluate("document.querySelector('#team').getBoundingClientRect().top");
+      assert(teamTop < height - 4, `team section starts below the ${name} viewport: ${teamTop}px`);
     }
     if (landing && name === "mobile") {
       const full = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true });
