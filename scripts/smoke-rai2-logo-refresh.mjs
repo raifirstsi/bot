@@ -24,10 +24,10 @@ try {
   }
   const oldRoot = join(scratch, "base", "saas");
   const newRoot = join(scratch, "candidate", "saas");
-  for (const file of ["main.mjs", "init.mjs", "reconcile.mjs", "public/app.js"]) {
+  for (const file of ["main.mjs", "init.mjs", "reconcile.mjs", "public/index.html", "public/app.css", "public/app.js"]) {
     assert.deepEqual(readFileSync(join(newRoot, file)), readFileSync(join(oldRoot, file)), `${file} changed`);
   }
-  for (const file of ["landing.html", "landing.css", "landing.js", "index.html", "app.css"]) {
+  for (const file of ["landing.html", "landing.css", "landing.js"]) {
     assert.deepEqual(readFileSync(join(newRoot, "public", file)), readFileSync(join(root, "saas", "public", file)),
       `public/${file} differs from source`);
   }

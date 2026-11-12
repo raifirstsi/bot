@@ -18,7 +18,7 @@ try {
   if (extract.error || extract.status !== 0) throw extract.error ?? new Error("Could not unpack the base release");
   const destination = join(scratch, "saas", "public");
   const source = join(root, "saas", "public");
-  for (const file of ["landing.html", "landing.css", "landing.js", "index.html", "app.css"]) {
+  for (const file of ["landing.html", "landing.css", "landing.js"]) {
     cpSync(join(source, file), join(destination, file));
   }
   for (const file of ["rai-backend-favicon.png", "rai-favicon.svg", "rai-favicon-32.png", "rai-favicon.ico", "rai-touch-180.png"]) {
