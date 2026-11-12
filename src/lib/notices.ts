@@ -13,7 +13,7 @@ export const STAR_NOTICE = "github-star-dismissed";
 export const TWO_PLACES_NOTICE = "two-places";
 export const PRODUCT_HUNT_NOTICE = "product-hunt-launch-2026-10";
 export const PRODUCT_HUNT_URL = "https://www.producthunt.com/products/mausbot";
-export const PRODUCT_HUNT_UNTIL = Date.UTC(2026, 10, 1);
+export const PRODUCT_HUNT_UNTIL = 0;
 export const BOAT_OFFER_NOTICE = "boat-credit-2026-11";
 /** The Move from Grok Bot popup: each person sees it once, first of all, after their welcome. */
 export const GROK_MOVE_NOTICE = "grok-move-2026-11";

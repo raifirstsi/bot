@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily RAI2 encrypted backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+RandomizedDelaySec=30m
+Persistent=true
+Unit=rai2-backup.service
+
+[Install]
+WantedBy=timers.target

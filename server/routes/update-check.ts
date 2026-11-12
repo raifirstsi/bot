@@ -20,5 +20,7 @@ export function createUpdateCheckRoutes(deps: UpdateCheckRouteDeps): RouteHandle
 }
 
 export function serverUpdateChecker(where: { desktopManaged: boolean; managed: boolean }): () => Promise<UpdateCheck> {
-  return createUpdateChecker({ current: serverVersion(), install: installKind({ ...where, serverRoot: SERVER_ROOT }) });
+  return createUpdateChecker({ current: serverVersion(), install: installKind({
+    ...where, managed: where.managed || process.env.OMB_RAI2_TENANT === "1", serverRoot: SERVER_ROOT,
+  }) });
 }

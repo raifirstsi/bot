@@ -471,6 +471,11 @@ if (layerShipped && (!editionReport || editionReport.error || String(editionRepo
   console.error(JSON.stringify(editionReport, null, 2));
   process.exit(1);
 }
+if (process.env.OMB_EXPECT_OSS === "1" && (layerShipped || editionReport?.edition !== "oss")) {
+  console.error("the OSS artifact contains an enterprise layer or did not report the OSS edition:");
+  console.error(JSON.stringify(editionReport, null, 2));
+  process.exit(1);
+}
 
 if (!proxyReport || proxyReport.error || proxyReport.missing.length > 0) {
   console.error("spawned proxy paths do not resolve inside the packaged server dir:");

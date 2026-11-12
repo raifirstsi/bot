@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafd">
+    <title>Tài khoản RAI²</title>
+    <link rel="icon" href="/assets/rai-backend-favicon.png?v=20261113-logo3" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/rai-touch-180.png?v=20261112-logo2" sizes="180x180">
+    <link rel="stylesheet" href="/app.css?v=20261112-workspace-ux">
+    <script src="/app.js?v=20261112-workspace-ux" defer></script>
+    <link rel="stylesheet" href="/portal-dashboard.css?v=dashboard1">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="https://rai2.si/" aria-label="RAI² - Trang chủ"><img class="brand-dark" src="/assets/rai-core-white.png" alt="RAI²"><img class="brand-light" src="/assets/rai-core-black.png" alt=""></a>
+        <div class="header-actions">
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Đổi giao diện sáng tối" title="Đổi giao diện sáng tối">☀</button>
+          <select id="language" aria-label="Ngôn ngữ / Language" hidden>
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+          </select>
+          <button id="logout" class="quiet" type="button" data-i18n="logout" hidden>Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+    <main class="shell page-shell">
+      <div class="page-heading">
+        <p class="eyebrow" data-i18n="eyebrow">TÀI KHOẢN</p>
+        <h1 data-i18n="heading">Không gian RAI² của bạn</h1>
+        <p id="preview-note" class="preview-note" data-i18n="previewNote" hidden>Bản xem trước riêng · Chưa mở thanh toán</p>
+      </div>
+      <p id="message" class="message" role="status" aria-live="polite" hidden></p>
+
+      <section id="signin" class="column" aria-labelledby="signin-title">
+        <p class="signin-badge" data-i18n="signinBadge">14 NGÀY MIỄN PHÍ</p>
+        <h2 id="signin-title" data-i18n="signinTitle">Bắt Đầu Với RAI²</h2>
+        <p class="signin-intro" data-i18n="signinIntro">Xác minh email để nhận workspace riêng trong 14 ngày. Không cần thanh toán trước.</p>
+        <p id="trial-full" class="capacity-note" data-i18n="trialFull" hidden>Suất dùng thử đang đầy. Tài khoản cũ vẫn có thể đăng nhập.</p>
+        <form id="email-form">
+          <label for="email" data-i18n="emailLabel">Email của bạn</label>
+          <input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="ban@congty.vn" data-i18n-placeholder="emailPlaceholder">
+          <button type="submit" class="primary" data-i18n="sendCode">Gửi mã xác nhận</button>
+        </form>
+        <form id="code-form" hidden>
+          <label for="code" data-i18n="codeLabel">Mã xác nhận</label>
+          <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required placeholder="8 chữ số" data-i18n-placeholder="codePlaceholder">
+          <button type="submit" class="primary" data-i18n="verify">Xác nhận</button>
+          <button id="change-email" type="button" class="quiet" data-i18n="changeEmail">Đổi email</button>
+        </form>
+      </section>
+
+      <section id="account" hidden aria-labelledby="account-title">
+        <div class="account-heading">
+          <div>
+            <h2 id="account-title" data-i18n="accountTitle">Tài khoản</h2>
+            <p id="account-email" class="muted"></p>
+          </div>
+          <span id="account-status" class="status"></span>
+        </div>
+        <div class="workspace-row" id="workspace-row" hidden>
+          <div class="workspace-details">
+            <h3 data-i18n="workspace">Workspace</h3>
+            <div class="workspace-address-line">
+              <p id="workspace-address" class="workspace-address"></p>
+              <button id="workspace-handle-edit" type="button" class="workspace-edit-button"
+                aria-expanded="false" aria-controls="workspace-handle-form" data-i18n="workspaceHandleEdit">Đổi đường dẫn</button>
+            </div>
+            <p id="workspace-handle-message" class="field-message" role="status" aria-live="polite" hidden></p>
+            <form id="workspace-handle-form" class="workspace-handle-form" hidden>
+              <label for="workspace-handle" data-i18n="workspaceHandleLabel">Đường dẫn workspace</label>
+              <div class="workspace-handle-control">
+                <input id="workspace-handle" type="text" inputmode="url" autocomplete="off" maxlength="30"
+                  placeholder="cong-ty-an-phat"
+                  aria-describedby="workspace-handle-hint workspace-handle-message" data-i18n-placeholder="workspaceHandlePlaceholder">
+                <span class="workspace-domain">.rai2.si</span>
+              </div>
+              <div class="workspace-handle-footer">
+                <p id="workspace-handle-hint" class="muted" data-i18n="workspaceHandleHint">Dùng 3–30 ký tự: chữ thường, số hoặc dấu gạch ngang.</p>
+                <div class="workspace-handle-actions">
+                  <button id="workspace-handle-cancel" type="button" class="quiet" data-i18n="workspaceHandleCancel">Hủy</button>
+                  <button id="workspace-handle-save" type="submit" class="workspace-save" data-i18n="workspaceHandleSave" disabled>Lưu thay đổi</button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <a id="workspace-link" class="primary link-button" href="#" data-i18n="openWorkspace">Mở workspace</a>
+        </div>
+        <div class="plan-row">
+          <div>
+            <h3 data-i18n="planName">Gói RAI² BYOK</h3>
+            <p class="muted" data-i18n="planDetail">Một workspace riêng · Tự kết nối khóa API AI</p>
+          </div>
+          <p class="price"><span id="price-amount" data-i18n="price">299.000đ</span> <span data-i18n="perMonth">/ tháng</span></p>
+        </div>
+        <p id="paid-through" class="muted" hidden></p>
+        <p id="trial-through" class="muted" hidden></p>
+        <p id="setup-note" class="muted" hidden></p>
+        <button id="order-button" class="primary" type="button" data-i18n="firstPayment">Thanh toán tháng đầu</button>
+      </section>
+
+      <section id="payment" hidden aria-labelledby="payment-title">
+        <div class="section-rule"></div>
+        <h2 id="payment-title" data-i18n="paymentTitle">Thanh toán</h2>
+        <div class="payment-layout">
+          <img id="payment-qr" class="qr" alt="Mã QR chuyển khoản" data-i18n-alt="qrAlt" width="216" height="216">
+          <dl class="payment-details">
+            <div><dt data-i18n="bank">Ngân hàng</dt><dd id="payment-bank"></dd></div>
+            <div><dt data-i18n="bankAccount">Số tài khoản</dt><dd id="payment-account"></dd></div>
+            <div><dt data-i18n="amount">Số tiền</dt><dd data-i18n="price">299.000đ</dd></div>
+            <div><dt data-i18n="transferMemo">Nội dung chuyển khoản</dt><dd id="payment-code" class="mono"></dd></div>
+          </dl>
+        </div>
+        <p id="payment-status" class="muted" role="status" aria-live="polite" data-i18n="awaitingPayment">Đang chờ xác nhận thanh toán</p>
+        <p id="payment-expiry" class="muted" hidden></p>
+      </section>
+    </main>
+    <footer class="shell page-shell legal-footer">
+      <a href="/LICENSE" data-i18n="license">Giấy phép</a>
+      <a href="/NOTICE" data-i18n="notices">Thông báo bản quyền</a>
+    </footer>
+  </body>
+</html>

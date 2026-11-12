@@ -63,3 +63,45 @@ describe("the exchange with the control plane", () => {
     expect(await down.start("a@b.test")).toMatchObject({ ok: false, status: 502 });
   });
 });
+
+describe("RAI2 tenant sign-in", () => {
+  it("uses only its scoped HTTPS token and the tenant's owner allow-list", async () => {
+    const slug = "u-1234567890abcdef1234";
+    const token = "t".repeat(43);
+    const calls: Array<{ url: string; authorization: string; body: Record<string, unknown> }> = [];
+    const fetchImpl: typeof fetch = async (input, init) => {
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      calls.push({ url: String(input), authorization: new Headers(init?.headers).get("authorization") ?? "", body });
+      return new Response(JSON.stringify(body.code ? { email: body.email } : { ok: true }), { status: 200 });
+    };
+    const signIn = createEmailSignIn({ allow: { admins: ["owner@example.test"], members: [] }, fetchImpl,
+      env: { OMB_SIGNIN_TENANT_URL: "https://app.rai2.si", OMB_SIGNIN_TENANT_SLUG: slug,
+        OMB_SIGNIN_TENANT_TOKEN: token, OMB_CONTROL_PLANE_URL: "https://accounts.openmausbot.com" } });
+    expect(signIn.enabled()).toBe(true);
+    expect(await signIn.start("other@example.test")).toMatchObject({ ok: false, status: 403 });
+    expect(await signIn.start("OWNER@example.test")).toEqual({ ok: true });
+    expect(await signIn.verify("owner@example.test", "12345678")).toEqual({
+      ok: true, email: "owner@example.test", userId: `tenant:${slug}:owner@example.test`, scopes: ["admin", "client"],
+    });
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toMatchObject({ url: "https://app.rai2.si/api/tenant-auth/start",
+      authorization: `Bearer ${token}`, body: { slug, email: "owner@example.test" } });
+    expect(calls[1]?.body.code).toBe("12345678");
+  });
+
+  it("fails closed on incomplete configuration or a mismatched verification", async () => {
+    const partial = createEmailSignIn({ allow: { admins: ["owner@example.test"], members: [] },
+      env: { OMB_SIGNIN_TENANT_URL: "https://app.rai2.si" } });
+    expect(partial.enabled()).toBe(false);
+    const missing = createEmailSignIn({ allow: { admins: ["owner@example.test"], members: [] },
+      env: { OMB_RAI2_TENANT: "1", OMB_CONTROL_PLANE_URL: "https://accounts.openmausbot.com" },
+      fetchImpl: async () => { throw new Error("upstream must not be called"); } });
+    expect(missing.enabled()).toBe(false);
+    expect(await missing.start("owner@example.test")).toMatchObject({ ok: false, status: 503 });
+    const mismatched = createEmailSignIn({ allow: { admins: ["owner@example.test"], members: [] },
+      env: { OMB_SIGNIN_TENANT_URL: "https://app.rai2.si", OMB_SIGNIN_TENANT_SLUG: "u-1234567890abcdef1234",
+        OMB_SIGNIN_TENANT_TOKEN: "t".repeat(43) },
+      fetchImpl: async () => new Response(JSON.stringify({ email: "someone@example.test" }), { status: 200 }) });
+    expect(await mismatched.verify("owner@example.test", "12345678")).toMatchObject({ ok: false, status: 503 });
+  });
+});

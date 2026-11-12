@@ -14,6 +14,12 @@ import { catalogCopy, catalogMatches, type TeamCatalog, type TeamCatalogEntry } 
 
 import { TEAM_GLYPHS, TeamImportDetails } from "./TeamImportDetails";
 import { ReadyBotGallery } from "./ReadyBotGallery";
+import { AbsenceReadinessGauge } from "./AbsenceReadinessGauge";
+import { HireAgentDialog } from "./HireAgentDialog";
+import { CompanyFingerprintModal } from "./CompanyFingerprintModal";
+import { TocConstraintModal } from "./TocConstraintModal";
+import { ContextVaultModal } from "./ContextVaultModal";
+import { NewBotDialog } from "./lazy-screens";
 import { ShareTeamDialog } from "./ShareTeamDialog";
 import { OrgLibraryTab } from "./TeamLibraryPanelOrg";
 import { MAX_TEAM_BACKUP_BYTES } from "../../shared/team-backup";
@@ -127,6 +133,11 @@ export function TeamLibraryPanel({
   const [orgNotice, setOrgNotice] = useState("");
   const [orgError, setOrgError] = useState("");
   const [pendingOrg, setPendingOrg] = useState<OrgLibraryPackage | null>(null);
+  const [hireDialogOpen, setHireDialogOpen] = useState(false);
+  const [fingerprintModalOpen, setFingerprintModalOpen] = useState(false);
+  const [tocModalOpen, setTocModalOpen] = useState(false);
+  const [vaultModalOpen, setVaultModalOpen] = useState(false);
+  const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const tabChosen = useRef(false);
   // Monotonic scout token: a late response from an older scout must never overwrite a newer one's state.
   const scoutRequest = useRef(0);
@@ -439,18 +450,19 @@ export function TeamLibraryPanel({
   return createPortal(
     // Dim only: a full-window backdrop blur is redrawn every frame without a GPU and keeps the page laggy while it is open.
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 sm:p-6"
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/55 p-0 sm:items-center sm:p-6"
       onMouseDown={(event) => event.target === event.currentTarget && !importing && onClose()}
     >
       <div
+        data-team-library=""
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-library-title"
         tabIndex={-1}
-        className="animate-pop-in flex h-[min(780px,calc(100dvh-2rem))] w-full max-w-[1040px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel shadow-2xl shadow-black/50 outline-none"
+        className="animate-pop-in flex h-dvh w-full max-w-[1040px] flex-col overflow-hidden border-0 bg-panel outline-none sm:h-[min(780px,calc(100dvh-2rem))] sm:rounded-2xl sm:border sm:border-hairline/50 sm:shadow-2xl sm:shadow-black/50"
       >
-        <header className="flex items-start justify-between gap-4 px-6 pb-3 pt-6 sm:px-8 sm:pt-7">
+        <header className="flex items-start justify-between gap-3 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] sm:gap-4 sm:px-8 sm:pt-7">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               {pending && (
@@ -467,11 +479,11 @@ export function TeamLibraryPanel({
                   <ArrowLeft size={18} />
                 </button>
               )}
-              <h2 id="team-library-title" className="truncate text-[22px] font-semibold tracking-[-0.01em] text-ink">
+              <h2 id="team-library-title" className="truncate text-[20px] font-semibold text-ink sm:text-[22px]">
                 {pending ? pending.name : t("templates.title")}
               </h2>
             </div>
-            <p className={cn("mt-1 text-[13px] text-ink-secondary", pending && "ml-9")}>
+            <p className={cn("mt-1 text-[13px] leading-relaxed text-ink-secondary", pending && "ml-9")}>
                 {pending
                   ? pending.kind === "backup"
                     ? t("templates.backupSummary", { bots: pending.members.length, conversations: pending.conversations ?? 0 })
@@ -489,7 +501,7 @@ export function TeamLibraryPanel({
             {!pending && (
               <button
                 onClick={() => void openExternal(catalog?.repositoryUrl ?? COMMUNITY_TEAMS_REPOSITORY)}
-                className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] text-ink-secondary hover:bg-raised hover:text-ink"
+                className="hidden items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] text-ink-secondary hover:bg-raised hover:text-ink sm:flex"
                 title={t("templates.openRepository")}
               >
                 <Github size={16} />
@@ -500,7 +512,7 @@ export function TeamLibraryPanel({
             <button
               onClick={onClose}
               disabled={importing}
-              className="rounded-lg p-2 text-ink-secondary hover:bg-raised hover:text-ink disabled:opacity-50"
+              className="ui-icon-button shrink-0 disabled:opacity-50"
               aria-label={t("templates.close")}
             >
               <X size={21} />
@@ -556,8 +568,8 @@ export function TeamLibraryPanel({
           </>
         ) : (
           <>
-            <div className="flex flex-col gap-3 px-6 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-              <div className="flex w-fit rounded-xl bg-raised/70 p-1" role="tablist" aria-label={t("templates.source") }>
+            <div className="flex flex-col gap-2 px-4 pb-3 pt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-8 sm:pb-4 sm:pt-5">
+              <div className="flex w-full overflow-x-auto rounded-lg bg-raised/70 p-1 scrollbar-none sm:w-fit sm:rounded-xl" role="tablist" aria-label={t("templates.source") }>
                 {orgListing?.organization && (
                   <button
                     role="tab"
@@ -568,7 +580,7 @@ export function TeamLibraryPanel({
                       setError("");
                     }}
                     className={cn(
-                      "max-w-[220px] truncate rounded-lg px-4 py-2 text-[14px] transition-colors",
+                      "max-w-[220px] shrink-0 truncate whitespace-nowrap rounded-md px-3 py-2 text-[13px] transition-colors sm:rounded-lg sm:px-4 sm:text-[14px]",
                       tab === "org" ? "bg-card text-ink shadow-sm" : "text-ink-secondary hover:text-ink",
                     )}
                   >
@@ -584,7 +596,7 @@ export function TeamLibraryPanel({
                     setError("");
                   }}
                   className={cn(
-                    "rounded-lg px-4 py-2 text-[14px] transition-colors",
+                    "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] transition-colors sm:rounded-lg sm:px-4 sm:text-[14px]",
                     tab === "explore" ? "bg-card text-ink shadow-sm" : "text-ink-secondary hover:text-ink",
                   )}
                 >
@@ -599,7 +611,7 @@ export function TeamLibraryPanel({
                     setError("");
                   }}
                   className={cn(
-                    "rounded-lg px-4 py-2 text-[14px] transition-colors",
+                    "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] transition-colors sm:rounded-lg sm:px-4 sm:text-[14px]",
                     tab === "import" ? "bg-card text-ink shadow-sm" : "text-ink-secondary hover:text-ink",
                   )}
                 >
@@ -614,7 +626,7 @@ export function TeamLibraryPanel({
                     setError("");
                   }}
                   className={cn(
-                    "rounded-lg px-4 py-2 text-[14px] transition-colors",
+                    "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] transition-colors sm:rounded-lg sm:px-4 sm:text-[14px]",
                     tab === "scout" ? "bg-card text-ink shadow-sm" : "text-ink-secondary hover:text-ink",
                   )}
                 >
@@ -629,7 +641,7 @@ export function TeamLibraryPanel({
                     setError("");
                   }}
                   className={cn(
-                    "rounded-lg px-4 py-2 text-[14px] transition-colors",
+                    "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] transition-colors sm:rounded-lg sm:px-4 sm:text-[14px]",
                     tab === "share" ? "bg-card text-ink shadow-sm" : "text-ink-secondary hover:text-ink",
                   )}
                 >
@@ -637,7 +649,7 @@ export function TeamLibraryPanel({
                 </button>
               </div>
               {tab === "explore" && (
-                <label className="flex h-11 w-full items-center gap-2.5 rounded-xl bg-raised/70 px-3.5 sm:w-[320px]">
+                <label className="flex h-10 w-full items-center gap-2.5 rounded-lg bg-raised/70 px-3.5 sm:h-11 sm:w-[320px] sm:rounded-xl">
                   <Search size={17} className="shrink-0 text-ink-secondary" />
                   <input
                     value={search}
@@ -650,7 +662,7 @@ export function TeamLibraryPanel({
               )}
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-7 pt-5 sm:px-8">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:px-8 sm:pb-7 sm:pt-5">
               {tab === "org" && orgListing?.organization && (
                 <OrgLibraryTab
                   listing={orgListing as OrgLibraryListing & { organization: { id: string; name: string } }}
@@ -663,6 +675,14 @@ export function TeamLibraryPanel({
               )}
               {tab === "explore" && (
                 <div>
+                  <AbsenceReadinessGauge
+                    className="mb-5 sm:mb-6"
+                    activeBotIds={state.bots.map((b) => b.id)}
+                    onHireDepartment={() => setHireDialogOpen(true)}
+                    onOpenFingerprint={() => setFingerprintModalOpen(true)}
+                    onOpenTocDiagnostic={() => setTocModalOpen(true)}
+                    onOpenContextVault={() => setVaultModalOpen(true)}
+                  />
                   <ReadyBotGallery search={search} onDialog={setNestedDialog} onAdded={onClose} />
                   <div className="mb-3 text-[12px] font-medium text-ink-secondary">
                     {search ? t("templates.searchResults") : t("templates.communityTemplates")}
@@ -958,6 +978,42 @@ export function TeamLibraryPanel({
         )}
       </div>
       {sharing !== null && <ShareTeamDialog team={sharing} onClose={() => setSharing(null)} />}
+      <HireAgentDialog
+        open={hireDialogOpen}
+        onClose={() => setHireDialogOpen(false)}
+        onSelectAgent={(agent) => {
+          setHireDialogOpen(false);
+          setAddingReadyBotId(agent.key);
+        }}
+      />
+      <CompanyFingerprintModal
+        isOpen={fingerprintModalOpen}
+        onClose={() => setFingerprintModalOpen(false)}
+      />
+      <TocConstraintModal
+        isOpen={tocModalOpen}
+        onClose={() => setTocModalOpen(false)}
+        onSelectAgentKey={(key) => {
+          setTocModalOpen(false);
+          setAddingReadyBotId(key);
+        }}
+      />
+      <ContextVaultModal
+        isOpen={vaultModalOpen}
+        onClose={() => setVaultModalOpen(false)}
+      />
+      {addingReadyBotId &&
+        createPortal(
+          <NewBotDialog
+            readyBotId={addingReadyBotId}
+            onClose={() => setAddingReadyBotId(null)}
+            onCreated={() => {
+              setAddingReadyBotId(null);
+              onClose();
+            }}
+          />,
+          document.body,
+        )}
     </div>,
     document.body,
   );

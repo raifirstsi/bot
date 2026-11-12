@@ -1,6 +1,32 @@
 OpenMausBot
 Copyright 2026 Milind Soni and OpenMausBot contributors
 
+RAI2 is a modified distribution developed by RAI FIRST in 2026. The changes
+include account and payment services, authentication hardening, tenant fleet
+integration, packaging, user interface and product branding. OpenMausBot and
+third-party notices remain below; RAI2 does not claim ownership of their work.
+
+The RAI2 account service bundles Nodemailer, Copyright (c) 2011-2023 Andris
+Reinman, under the MIT License. Its license is distributed at
+third_party/nodemailer/LICENSE in the SaaS archive.
+
+The RAI2 website bundles Inter, Copyright 2020 The Inter Project Authors,
+under the SIL Open Font License 1.1. Its license is distributed at
+third_party/inter/LICENSE in the SaaS archive.
+
+The RAI2 website bundles Geist, Copyright 2024 The Geist Project Authors,
+under the SIL Open Font License 1.1. Its license is distributed at
+third_party/geist/LICENSE in the SaaS archive.
+
+The runtime's diagram UI bundles elkjs 0.9.3, Copyright the elkjs
+contributors, under the Eclipse Public License 2.0. Its license is at
+third_party/elkjs/LICENSE.md. The corresponding source is available from
+https://github.com/kieler/elkjs/tree/0.9.3.
+
+The runtime's color utilities bundle khroma 2.1.0, Copyright (c)
+2019-present Fabio Spampinato and Andrew Maney, under the MIT License
+(third_party/khroma/LICENSE).
+
 OpenMausBot was relicensed from the MIT License to the Apache License,
 Version 2.0, with the consent of all contributors whose copyright was
 incorporated before the transition.

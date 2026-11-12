@@ -2,7 +2,7 @@ import { OrganizationIdentity } from "./OrganizationIdentity";
 import { RaiLogo } from "./RaiLogo";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch } from "react";
 import { createPortal } from "react-dom";
-import { Archive, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
+import { Archive, BookOpen, Bot as BotIcon, Check, ChevronRight, ClipboardCopy, Crown, FolderPlus, Gauge, LayoutTemplate, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, Phone, Pin, Plus, Search, Sparkles, SquarePen, TextQuote, Trash2, Users, X } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
 import { liveActivityLabel, sidebarMessage } from "@/lib/live-activity";
@@ -29,8 +29,10 @@ import { LocalComputerAutoWarning } from "./LocalComputerAutoWarning";
 import { nextRename } from "@/lib/rename";
 import { useDesktopCapabilities, windowFramed } from "./DesktopCapabilities";
 import { MIN_QUERY, SearchResults } from "./SearchResults";
-import { ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
+import { NewBotDialog, ShareTeamDialog, TeamLibraryPanel } from "./lazy-screens";
 import { HireAgentDialog } from "./HireAgentDialog";
+import { TocConstraintModal } from "./TocConstraintModal";
+import { ContextVaultModal } from "./ContextVaultModal";
 import { SidebarNewChatPanel } from "./SidebarNewChatPanel";
 import { openCommandPalette } from "./CommandPalette";
 import { TeamSettingsDialog } from "./TeamSettingsDialog";
@@ -980,6 +982,9 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const [teamLibraryOpen, setTeamLibraryOpen] = useState(false);
   const [teamInstallUrl, setTeamInstallUrl] = useState<string | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
+  const [tocModalOpen, setTocModalOpen] = useState(false);
+  const [vaultModalOpen, setVaultModalOpen] = useState(false);
+  const [addingReadyBotId, setAddingReadyBotId] = useState<string | null>(null);
   const [archivedBotsOpen, setArchivedBotsOpen] = useState(false);
   const [teamFeedback, setTeamFeedback] = useState<{
     error: boolean;
@@ -1165,7 +1170,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     {plusMotion.shown && (
       <>
         <div role="menu" aria-label={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")} onKeyDown={navigateThreadMenu} className={cn(
-          "absolute z-40 w-max min-w-[200px] overflow-hidden", MENU_SHEET,
+          "absolute z-40 w-[220px] overflow-hidden shadow-lg", MENU_SHEET,
           rail ? "left-full top-0 ml-4" : cn("top-full", advanced ? "mt-1" : "mt-1.5", density === "icons" ? "left-0" : "right-0"),
           plusMotion.className,
         )} {...plusMotion.exitProps}>
@@ -1216,14 +1221,34 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             <LayoutTemplate size={16} className="text-ink-secondary" />
             {t("sidebar.teamLibrary")}
           </button>}
-          {teamSettingsAllowed !== false && <button
-            onClick={() => { setPlusOpen(false); setHireDialogOpen(true); }}
-            role="menuitem"
-            className={plusItem}
-          >
-            <Sparkles size={16} className="text-accent" />
-            <span className="flex-1 font-medium text-ink">Tuyển Nhân Sự Số (RAI² First OS)</span>
-          </button>}
+          {teamSettingsAllowed !== false && (
+            <>
+              <button
+                onClick={() => { setPlusOpen(false); setTocModalOpen(true); }}
+                role="menuitem"
+                className={plusItem}
+              >
+                <Gauge size={16} className="text-amber-500 shrink-0" />
+                <span className="flex-1 font-medium text-ink truncate">Bắt Điểm Nghẽn TOC</span>
+              </button>
+              <button
+                onClick={() => { setPlusOpen(false); setHireDialogOpen(true); }}
+                role="menuitem"
+                className={plusItem}
+              >
+                <Sparkles size={16} className="text-accent shrink-0" />
+                <span className="flex-1 font-medium text-ink truncate">Tuyển Nhân Sự Số</span>
+              </button>
+              <button
+                onClick={() => { setPlusOpen(false); setVaultModalOpen(true); }}
+                role="menuitem"
+                className={plusItem}
+              >
+                <BookOpen size={16} className="text-emerald-500 shrink-0" />
+                <span className="flex-1 font-medium text-ink truncate">Két Sắt Ngữ Cảnh</span>
+              </button>
+            </>
+          )}
           {advanced && archivedBots.length > 0 && (
             <button
               onClick={() => {
@@ -1680,7 +1705,38 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       <HireAgentDialog
         open={hireDialogOpen}
         onClose={() => setHireDialogOpen(false)}
+        onSelectAgent={(agent) => {
+          setHireDialogOpen(false);
+          setAddingReadyBotId(agent.key);
+        }}
       />
+      <TocConstraintModal
+        isOpen={tocModalOpen}
+        onClose={() => setTocModalOpen(false)}
+        onSelectAgentKey={(key) => {
+          setTocModalOpen(false);
+          setAddingReadyBotId(key);
+        }}
+      />
+      <ContextVaultModal
+        isOpen={vaultModalOpen}
+        onClose={() => setVaultModalOpen(false)}
+      />
+      {addingReadyBotId &&
+        createPortal(
+          <NewBotDialog
+            readyBotId={addingReadyBotId}
+            onClose={() => setAddingReadyBotId(null)}
+            onCreated={(bot) => {
+              setAddingReadyBotId(null);
+              setTeamFeedback({
+                error: false,
+                text: `Đã kích hoạt thành công nhân sự số ${bot.name}!`,
+              });
+            }}
+          />,
+          document.body,
+        )}
       {teamFeedback &&
         createPortal(
           <div

@@ -36,6 +36,12 @@ describe("openmausbot command line", () => {
     expect(parseArgs(["fleet", "users", "acme", "add", "bob@acme.test", "--chat-only"], {})).toMatchObject({ command: "fleet", fleetAction: "users", slug: "acme", fleetUserAction: "add", email: "bob@acme.test", chatOnly: true });
     expect(parseArgs(["fleet", "delete", "acme", "--yes", "--keep-data"], {})).toMatchObject({ fleetAction: "delete", slug: "acme", yes: true, keepData: true });
     expect(parseArgs(["fleet", "init", "--domain", "AgentAda.cc", "--operator", "maus"], {})).toMatchObject({ fleetAction: "init", domain: "agentada.cc", operator: "maus" });
+    expect(parseArgs(["fleet", "init", "--domain", "rai2.si", "--internal-edge", "--control-plane-port", "8812"], {}))
+      .toMatchObject({ fleetAction: "init", internalEdge: true, controlPlanePort: 8812 });
+    expect(parseArgs(["fleet", "init", "--domain", "rai2.si", "--node", "/opt/node", "--script", "/opt/rai2.mjs"], {}))
+      .toMatchObject({ fleetAction: "init", fleetNode: "/opt/node", fleetScript: "/opt/rai2.mjs" });
+    expect(parseArgs(["fleet", "create", "acme", "--internal-edge"], {}))
+      .toEqual({ error: "--internal-edge, --control-plane-port, --node and --script belong to fleet init" });
     expect(parseArgs(["fleet", "agent", "--socket", "/run/x.sock", "--group", "maus"], {})).toMatchObject({ fleetAction: "agent", socket: "/run/x.sock", group: "maus" });
     expect(parseArgs(["fleet"], {})).toMatchObject({ error: expect.stringContaining("fleet needs one of") });
     expect(parseArgs(["fleet", "create"], {})).toMatchObject({ error: "fleet create needs a workspace name" });

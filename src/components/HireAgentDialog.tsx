@@ -1,8 +1,18 @@
-import { useState } from "react";
-import { Check, Sparkles, X, ChevronRight, ShieldCheck, Zap } from "lucide-react";
+import { useState, useId } from "react";
+import {
+  Check,
+  Sparkles,
+  X,
+  ChevronRight,
+  ShieldCheck,
+  ArrowLeft,
+  Users,
+  Target,
+  Briefcase,
+  AlertCircle,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { RAI2_DEPARTMENTS, type RaiAgentDefinition } from "@/lib/rai2-departments";
-import { RaiLogo } from "./RaiLogo";
 
 interface HireAgentDialogProps {
   open: boolean;
@@ -10,225 +20,340 @@ interface HireAgentDialogProps {
   onSelectAgent?: (agent: RaiAgentDefinition) => void;
 }
 
+const SHORT_ZONE_NAMES: Record<number, string> = {
+  1: "Z1 Điều Hành",
+  2: "Z2 Marketing",
+  3: "Z3 Bán Hàng",
+  4: "Z4 Vận Hành",
+  5: "Z5 CSKH",
+  6: "Z6 Tài Chính",
+  7: "Z7 Nhân Sự",
+};
+
 export function HireAgentDialog({ open, onClose, onSelectAgent }: HireAgentDialogProps) {
+  const dialogTitleId = useId();
   const [selectedZone, setSelectedZone] = useState<number>(2);
   const [activeAgent, setActiveAgent] = useState<RaiAgentDefinition | null>(
-    RAI2_DEPARTMENTS[0]?.agents[0] ?? null
+    RAI2_DEPARTMENTS[1]?.agents[0] ?? RAI2_DEPARTMENTS[0]?.agents[0] ?? null
   );
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
   if (!open) return null;
 
-  const currentDepartment = RAI2_DEPARTMENTS.find((d) => d.zone === selectedZone) ?? RAI2_DEPARTMENTS[0];
+  const currentDepartment =
+    RAI2_DEPARTMENTS.find((d) => d.zone === selectedZone) ?? RAI2_DEPARTMENTS[0];
+
+  const handleSelectZone = (zone: number) => {
+    setSelectedZone(zone);
+    const dept = RAI2_DEPARTMENTS.find((d) => d.zone === zone);
+    if (dept && dept.agents.length > 0) {
+      setActiveAgent(dept.agents[0]);
+    }
+    setMobileView("list");
+  };
+
+  const handleAgentClick = (agent: RaiAgentDefinition) => {
+    setActiveAgent(agent);
+    setMobileView("detail");
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
-        className="relative w-full max-w-5xl h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden"
+    <div
+      className="ui-scrim fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={dialogTitleId}
+      onClick={onClose}
+    >
+      <div
+        className="ui-modal relative flex h-[min(760px,94dvh)] w-full max-w-[1000px] flex-col overflow-hidden outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Header */}
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-gradient-to-b from-sky-50/50 to-transparent dark:from-sky-950/20">
-          <div className="flex items-center gap-3">
-            <RaiLogo className="h-6 w-auto" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                  Bàn Tuyển Dụng Nhân Sự Số 7 Phòng Ban
-                </h2>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
-                  RAI² FIRST OS
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Kích hoạt 1–2 nhân sự số giải phóng đúng điểm nghẽn ràng buộc (TOC) của doanh nghiệp bạn.
-              </p>
-            </div>
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-hairline/40 px-5 py-4">
+          <div className="min-w-0">
+            <h2 id={dialogTitleId} className="truncate text-[17px] font-semibold text-ink">
+              Bàn Tuyển Dụng Nhân Sự Số
+            </h2>
+            <p className="mt-0.5 hidden truncate text-[13px] text-ink-secondary sm:block">
+              Chọn một RAI theo đúng vùng nghiệp vụ và điểm nghẽn doanh nghiệp.
+            </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="ui-icon-button shrink-0"
+            aria-label="Đóng"
           >
-            <X className="w-5 h-5" />
+            <X size={18} className="pointer-events-none" />
           </button>
         </div>
 
-        {/* Main Content Body */}
+        {/* Mobile Horizontal Zone Pills */}
+        <div className="flex shrink-0 snap-x gap-1 overflow-x-auto border-b border-hairline/40 p-2 scrollbar-none md:hidden">
+          {RAI2_DEPARTMENTS.map((dept) => {
+            const isSelected = dept.zone === selectedZone;
+            const label = SHORT_ZONE_NAMES[dept.zone] || `Z${dept.zone}`;
+            return (
+              <button
+                key={dept.code}
+                type="button"
+                onClick={() => handleSelectZone(dept.zone)}
+                className={cn(
+                  "shrink-0 snap-start whitespace-nowrap rounded-lg px-3 py-2 text-[13px] transition-colors",
+                  isSelected
+                    ? "bg-control font-medium text-ink"
+                    : "text-ink-secondary hover:bg-control/50 hover:text-ink"
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile Back Bar */}
+        {mobileView === "detail" && (
+          <div className="flex shrink-0 items-center justify-between border-b border-hairline/40 px-4 py-2 md:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileView("list")}
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent-text"
+            >
+              <ArrowLeft size={14} />
+              <span>Quay lại {currentDepartment.name.replace(/^Phòng\s+/i, "")}</span>
+            </button>
+            <span className="text-[13px] text-ink-secondary">
+              {currentDepartment.agents.length} nhân sự
+            </span>
+          </div>
+        )}
+
+        {/* Main Content Layout */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Left Column: 7 Departments Navigation */}
-          <div className="w-72 border-r border-slate-100 dark:border-slate-800 overflow-y-auto p-3 space-y-1 bg-slate-50/50 dark:bg-slate-950/30 shrink-0">
-            <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              7 Vùng Kinh Doanh Chuẩn Sách
+          {/* Left Column: 7 Departments Navigation (Desktop only) */}
+          <div className="hidden w-[200px] shrink-0 flex-col overflow-y-auto border-r border-hairline/40 p-3 md:flex">
+            <div className="flex items-center justify-between px-2 pb-2 pt-1 text-[12px] font-medium text-ink-tertiary">
+              <span>7 Vùng Nghiệp Vụ</span>
+              <Users size={13} className="text-ink-tertiary" />
             </div>
-            {RAI2_DEPARTMENTS.map((dept) => {
-              const isSelected = dept.zone === selectedZone;
-              return (
-                <button
-                  key={dept.code}
-                  onClick={() => {
-                    setSelectedZone(dept.zone);
-                    setActiveAgent(dept.agents[0] ?? null);
-                  }}
-                  className={cn(
-                    "w-full text-left p-3 rounded-2xl transition-all flex items-start gap-3 relative text-sm",
-                    isSelected
-                      ? "bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800/50"
-                  )}
-                >
-                  <div className={cn(
-                    "w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 mt-0.5",
-                    isSelected 
-                      ? "bg-sky-500 text-white shadow-sm" 
-                      : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                  )}>
-                    Z{dept.zone}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-semibold text-xs text-slate-800 dark:text-slate-200">
+            <div className="space-y-0.5">
+              {RAI2_DEPARTMENTS.map((dept) => {
+                const isSelected = dept.zone === selectedZone;
+                return (
+                  <button
+                    key={dept.code}
+                    type="button"
+                    onClick={() => handleSelectZone(dept.zone)}
+                    className={cn(
+                      "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors",
+                      isSelected
+                        ? "bg-control font-medium text-ink"
+                        : "text-ink-secondary hover:bg-control/60 hover:text-ink"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold",
+                        isSelected
+                          ? "bg-ink/10 text-ink"
+                          : "bg-control text-ink-secondary"
+                      )}
+                    >
+                      Z{dept.zone}
+                    </div>
+                    <div className="flex-1 min-w-0 truncate">
                       {dept.name}
                     </div>
-                    <div className="text-[11px] text-slate-400 truncate">
-                      {dept.agents.length} nhân sự số
-                    </div>
-                  </div>
-                  {isSelected && (
-                    <ChevronRight className="w-4 h-4 text-sky-500 shrink-0 self-center" />
-                  )}
-                </button>
-              );
-            })}
+                    {isSelected && (
+                      <ChevronRight size={14} className="text-ink-tertiary shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Center Column: Agents List in Department */}
-          <div className="w-80 border-r border-slate-100 dark:border-slate-800 overflow-y-auto p-4 space-y-3 shrink-0">
-            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
-              Nhân Sự Thuộc {currentDepartment.name}
+          {/* Center Column: Department Agents List */}
+          <div
+            className={cn(
+              "space-y-2 overflow-y-auto p-3",
+              mobileView === "list" ? "flex-1 w-full" : "hidden md:block",
+              "border-hairline/40 md:w-72 md:shrink-0 md:border-r lg:w-80"
+            )}
+          >
+            {/* Department Summary Header Card */}
+            <div className="rounded-xl border border-hairline/40 bg-card p-3">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[11px] font-semibold text-accent-text uppercase tracking-wide">
+                  Vùng {currentDepartment.zone}
+                </span>
+                <span className="text-[11px] text-ink-secondary">
+                  {currentDepartment.agents.length} nhân sự
+                </span>
+              </div>
+              <h3 className="text-[13px] font-semibold text-ink">
+                {currentDepartment.name}
+              </h3>
+              <p className="text-[12px] text-ink-secondary leading-snug mt-0.5">
+                {currentDepartment.description}
+              </p>
             </div>
 
-            {currentDepartment.agents.map((agent) => {
-              const isActive = activeAgent?.key === agent.key;
-              return (
-                <div
-                  key={agent.key}
-                  onClick={() => setActiveAgent(agent)}
-                  className={cn(
-                    "p-4 rounded-2xl border transition-all cursor-pointer relative",
-                    isActive
-                      ? "border-sky-500 bg-sky-50/40 dark:bg-sky-950/20 shadow-sm ring-1 ring-sky-500"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
-                  )}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-slate-900 dark:text-white text-sm">
-                      {agent.name}
-                    </span>
-                    <span className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-full capitalize",
-                      agent.color === "green" && "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300",
-                      agent.color === "blue" && "bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-300",
-                      agent.color === "purple" && "bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300",
-                      agent.color === "orange" && "bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300",
-                      agent.color === "yellow" && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/60 dark:text-yellow-300",
-                      agent.color === "teal" && "bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300",
-                      agent.color === "pink" && "bg-pink-100 text-pink-800 dark:bg-pink-900/60 dark:text-pink-300",
-                      agent.color === "cyan" && "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/60 dark:text-cyan-300",
-                      agent.color === "coral" && "bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300",
-                      agent.color === "silver" && "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
-                      agent.color === "chrome" && "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300"
-                    )}>
-                      Zone {agent.zone}
-                    </span>
+            {/* List of Agents */}
+            <div className="space-y-1.5">
+              {currentDepartment.agents.map((agent) => {
+                const isActive = activeAgent?.key === agent.key;
+
+                return (
+                  <div
+                    key={agent.key}
+                    onClick={() => handleAgentClick(agent)}
+                    className={cn(
+                       "cursor-pointer rounded-xl border p-3 transition-colors",
+                      isActive
+                         ? "border-hairline/60 bg-raised"
+                         : "border-hairline/40 bg-card hover:bg-raised/50"
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                       <span className="size-1.5 shrink-0 rounded-full bg-ink/35" />
+                        <span className="font-semibold text-ink text-[13px] truncate">
+                          {agent.name}
+                        </span>
+                      </div>
+                       <span className="ui-chip shrink-0 bg-control text-ink-secondary">
+                        Z{agent.zone}
+                      </span>
+                    </div>
+
+                    <div className="text-[12px] text-ink-secondary mb-1 truncate">
+                      {agent.title}
+                    </div>
+
+                    <p className="text-[12px] text-ink-secondary line-clamp-2 leading-relaxed mb-1.5">
+                      {agent.tagline}
+                    </p>
+
+                     <div className="mb-1.5">
+                       <span className="inline-block rounded-md bg-inset px-2 py-0.5 text-[11px] text-ink-secondary">
+                        KPI: {agent.kpiCommitment}
+                      </span>
+                    </div>
+
+                    <div className="md:hidden pt-1.5 border-t border-hairline flex items-center justify-between text-[12px] text-accent-text font-medium">
+                      <span>Xem chi tiết & Kích hoạt</span>
+                      <ChevronRight size={13} />
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 font-medium">
-                    {agent.title}
-                  </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                    {agent.tagline}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
-          {/* Right Column: Deep Profile & Activation Preview */}
-          <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30 dark:bg-slate-950/10">
+          {/* Right Column: Deep Agent Profile */}
+          <div
+            className={cn(
+              "flex flex-1 flex-col overflow-y-auto",
+              mobileView === "detail" ? "w-full block" : "hidden md:flex"
+            )}
+          >
             {activeAgent ? (
-              <div className="space-y-6 max-w-xl">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
-                      {activeAgent.departmentName}
-                    </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-xs text-slate-400 font-medium">
-                      Mã nhân sự: {activeAgent.key.toUpperCase()}
-                    </span>
+              <div className="flex-1 flex flex-col justify-between">
+                <div className="p-4 sm:p-5 space-y-3 max-w-2xl">
+                  {/* Agent Header Hero */}
+                  <div className="rounded-xl border border-hairline/40 bg-card p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[11px] font-semibold text-accent-text uppercase tracking-wide">
+                        {activeAgent.departmentName}
+                      </span>
+                      <span className="text-ink-tertiary">·</span>
+                      <span className="text-[11px] text-ink-tertiary font-mono">
+                        {activeAgent.key.toUpperCase()}
+                      </span>
+                    </div>
+                    <h3 className="text-[17px] font-semibold text-ink tracking-tight">
+                      {activeAgent.name}
+                    </h3>
+                    <p className="text-[13px] text-ink-secondary mt-0.5">
+                      {activeAgent.title}
+                    </p>
+                    <p className="text-[13px] text-ink-secondary mt-1 leading-relaxed">
+                      {activeAgent.tagline}
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    {activeAgent.name}
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
-                    {activeAgent.title}
-                  </p>
+
+                  {/* Pain Point */}
+                  <div className="rounded-xl border border-hairline/40 bg-card p-3.5">
+                    <div className="text-[13px] font-semibold text-ink mb-1 flex items-center gap-1.5">
+                      <AlertCircle size={14} className="text-accent-text shrink-0" />
+                      <span>Vấn Đề Giải Quyết:</span>
+                    </div>
+                    <p className="text-[13px] text-ink-secondary leading-relaxed">
+                      {activeAgent.painPoint}
+                    </p>
+                  </div>
+
+                  {/* KPI Output Commitment */}
+                  <div className="rounded-xl border border-hairline/40 bg-card p-3.5">
+                    <div className="text-[13px] font-semibold text-ink mb-1 flex items-center gap-1.5">
+                      <Target size={14} className="text-accent shrink-0" />
+                      <span>Cam Kết Đầu Ra (KPI):</span>
+                    </div>
+                    <p className="text-[13px] text-accent-text leading-relaxed font-medium">
+                      {activeAgent.kpiCommitment}
+                    </p>
+                  </div>
+
+                  {/* 80% Prebaked Operating DNA */}
+                  <div className="space-y-2 rounded-xl border border-hairline/40 bg-card p-3.5">
+                    <div className="text-[13px] font-semibold text-ink flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-accent shrink-0" />
+                      <span>80% Nghiệp Vụ Nạp Sẵn:</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {activeAgent.prebakedDna.map((dna, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2 text-[13px] text-ink-secondary"
+                        >
+                          <Check size={13} className="text-accent shrink-0 mt-0.5" />
+                          <span className="leading-snug">{dna}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Single-Task Boundary */}
+                  <div className="flex items-center gap-2 rounded-lg bg-inset p-3 text-[13px] text-ink-secondary">
+                    <Briefcase size={13} className="text-ink-tertiary shrink-0" />
+                    <span>Đơn nhiệm chuyên sâu, log kiểm toán minh bạch dưới quyền CAIO.</span>
+                  </div>
                 </div>
 
-                {/* Practical Pain Point */}
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40">
-                  <div className="text-xs font-bold text-amber-800 dark:text-amber-400 mb-1 flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5" />
-                    Nỗi Đau Thực Tế Của Doanh Nghiệp SME:
+                {/* Sticky Action Footer CTA */}
+                <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-hairline/40 bg-panel p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:p-4">
+                  <div className="max-w-2xl mx-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectAgent?.(activeAgent);
+                        onClose();
+                      }}
+                      className="ui-button ui-button-primary ui-button-lg w-full"
+                    >
+                      <Sparkles size={14} />
+                      <span>Kích Hoạt {activeAgent.name} Ngay</span>
+                    </button>
+                    <p className="text-[11px] text-center text-ink-tertiary mt-1.5">
+                      Chuẩn RAI² OS · Tối ưu điểm nghẽn TOC · Kích hoạt 1-Click
+                    </p>
                   </div>
-                  <p className="text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
-                    {activeAgent.painPoint}
-                  </p>
-                </div>
-
-                {/* 80% Prebaked Operating DNA */}
-                <div className="space-y-2">
-                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                    80% Bộ Gen Nghiệp Vụ Nạp Sẵn Từ Sách:
-                  </div>
-                  <div className="space-y-2">
-                    {activeAgent.prebakedDna.map((dna, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-2xs">
-                        <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>{dna}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* KPI Commitment */}
-                <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900/30">
-                  <div className="text-xs font-bold text-sky-800 dark:text-sky-300 mb-1">
-                    🎯 Cam Kết Hiệu Suất Đầu Ra (KPI):
-                  </div>
-                  <p className="text-xs text-sky-900 dark:text-sky-200 leading-relaxed font-medium">
-                    {activeAgent.kpiCommitment}
-                  </p>
-                </div>
-
-                {/* Action CTA Button */}
-                <div className="pt-2">
-                  <button
-                    onClick={() => {
-                      onSelectAgent?.(activeAgent);
-                      onClose();
-                    }}
-                    className="w-full py-3.5 px-6 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-sky-500 dark:hover:bg-sky-400 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Tuyển & Kích Hoạt {activeAgent.name} Ngay
-                  </button>
-                  <p className="text-[11px] text-center text-slate-400 mt-2">
-                    Cấu hình tự động theo chuẩn RAI² FIRST OS · Có thể hủy hoặc đổi vai trò bất kỳ lúc nào.
-                  </p>
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                Chọn một nhân sự số bên trái để xem chi tiết
+              <div className="h-full flex items-center justify-center text-ink-tertiary text-[13px] p-6">
+                Chọn một nhân sự số để xem chi tiết
               </div>
             )}
           </div>

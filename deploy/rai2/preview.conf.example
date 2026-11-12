@@ -1,0 +1,3 @@
+[Service]
+Environment=RAI2_SAAS_PREVIEW_EMAIL=owner@example.com
+Environment=RAI2_SAAS_PAYMENTS_ENABLED=0

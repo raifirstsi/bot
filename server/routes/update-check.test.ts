@@ -1,15 +1,16 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { json, readBody } from "../harness/http.ts";
 import { requiredScope } from "../request-auth.ts";
 import type { UpdateCheck } from "../update-check.ts";
 import { dispatchRoutes } from "./table.ts";
-import { createUpdateCheckRoutes } from "./update-check.ts";
+import { createUpdateCheckRoutes, serverUpdateChecker } from "./update-check.ts";
 
 const servers: Server[] = [];
 afterEach(async () => {
+  vi.unstubAllEnvs();
   await Promise.all(servers.splice(0).map((server) => new Promise((done) => server.close(done))));
 });
 
@@ -29,6 +30,12 @@ async function serve(check: () => Promise<UpdateCheck>): Promise<string> {
 }
 
 describe("update check route", () => {
+  it("treats a RAI2 tenant as operator-managed and never suggests an upstream install", async () => {
+    vi.stubEnv("OMB_RAI2_TENANT", "1");
+    const result = await serverUpdateChecker({ desktopManaged: false, managed: false })();
+    expect(result).toMatchObject({ install: "managed", available: false });
+    expect(result.command).toBeUndefined();
+  });
   it("is open to chat-only sessions: it only reads a version", () => {
     expect(requiredScope("GET", "/api/updates/check")).toBe("client");
   });

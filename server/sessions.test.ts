@@ -93,6 +93,20 @@ describe("the native-app encoding of a pairing window", () => {
   });
 });
 
+it("revokes sessions minted by the public RAI2 signup and guest paths after restart", () => {
+  const unsafe = [
+    registry.issue({ label: "signup", scopes: ["admin", "client"], email: "guest@example.test", userId: "rai2:guest@example.test" }),
+    registry.issue({ label: "guest", scopes: ["admin", "client"], userId: "guest:fake" }),
+    registry.issue({ label: "admin", scopes: ["admin", "client"], userId: "admin:owner" }),
+  ];
+  const legitimate = registry.issue({ label: "paired", scopes: ["admin", "client"] });
+  registry.close();
+  const restarted = new SessionRegistry({ file: file(), now: () => clock });
+  for (const issued of unsafe) expect(restarted.authenticate(issued.token)).toBeNull();
+  expect(restarted.authenticate(legitimate.token)?.id).toBe(legitimate.session.id);
+  restarted.close();
+});
+
 describe("a browser sign-in window (an OMB Cloud page's \"Use in your browser\")", () => {
   it("is redeemed only by a browser sign-in, only by its credential, and only once", () => {
     const { code, credential } = registry.openPairing({ scopes: ["admin", "client"], label: "Web browser", browser: true });

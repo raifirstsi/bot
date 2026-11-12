@@ -16,11 +16,11 @@ export const BOAT_OFFER: BoatOffer = {
   claimTo: "support@ascii.dev",
   subject: "MausBot introduced me: $50 Boat credit",
   body: "Hi Boat team,\n\nMausBot introduced me to Boat. I'm on the $___ plan.\nMy Boat account email: ___\n\nThanks!",
-  until: null,
+  until: 0,
 };
 
-export function boatOfferRuns(now: number, offer: BoatOffer = BOAT_OFFER): boolean {
-  return offer.until === null || now < offer.until;
+export function boatOfferRuns(_now: number, _offer: BoatOffer = BOAT_OFFER): boolean {
+  return false;
 }
 
 /** RFC 6068: everything after the address is percent-encoded (never "+" for a space) and a line break is %0D%0A. */

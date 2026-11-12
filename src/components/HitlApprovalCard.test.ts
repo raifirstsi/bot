@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { HitlApprovalPayload } from "./HitlApprovalCard";
+import { validateOutgoingDraft } from "@/lib/silent-error-interceptor";
 
 describe("HitlApprovalCard Logic & Telemetry", () => {
   const samplePayload: HitlApprovalPayload = {
@@ -34,5 +35,19 @@ describe("HitlApprovalCard Logic & Telemetry", () => {
     expect(samplePayload.taskId).toMatch(/^task-/);
     expect(samplePayload.agentKey).toBe("rai-quote");
     expect(samplePayload.netMarginRate).toBeGreaterThanOrEqual(0.35);
+  });
+
+  it("integrates silent-error-interceptor to block dangerous drafts", () => {
+    const dangerousDraft = {
+      id: "task-test-01",
+      recipient: "Khách VIP",
+      channel: "proposal" as const,
+      content: "Chúng tôi xin giảm giá 50% và có thể xem tại [Chèn link]",
+      quotedPrice: 100,
+      costEstimate: 80, // margin 20% (<35%)
+    };
+    const result = validateOutgoingDraft(dangerousDraft);
+    expect(result.passed).toBe(false);
+    expect(result.status).toBe("BLOCKED");
   });
 });

@@ -64,6 +64,25 @@ describe("a browser on a self-hosted server's own machine", () => {
     }
   }, 60_000);
 
+  it("does not mint a session from signup, guest, payment, or predictable pairing inputs", async () => {
+    const fixture = await launchVerificationServer({ OMB_DEV_TRUST_LOCAL_BROWSER: "0" });
+    try {
+      const url = fixture.info.url;
+      for (const path of ["/api/auth/cloud-guest", "/api/auth/instant-access", "/api/subscription/instant-access", "/api/subscription/create", "/api/sepay/webhook"]) {
+        const response = await raw(url, path, { ...fromPage(url), "content-type": "application/json" }, "POST", JSON.stringify({ email: "new@example.test" }));
+        expect(response.status, path).toBe(401);
+        expect(response.headers["set-cookie"], path).toBeUndefined();
+      }
+      for (const code of ["RAI2ADMIN", "RAI2ADMINFIRST", "GUEST", "CLOUD", "RAI2GUEST"]) {
+        const response = await raw(url, "/api/auth/pair", { ...fromPage(url), "content-type": "application/json" }, "POST", JSON.stringify({ code, cookie: true }));
+        expect(response.status, code).not.toBe(200);
+        expect(response.headers["set-cookie"], code).toBeUndefined();
+      }
+    } finally {
+      await fixture.close();
+    }
+  }, 60_000);
+
   it("is trusted as before by a development server, which asked for it", async () => {
     const fixture = await launchVerificationServer();
     try {

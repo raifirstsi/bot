@@ -7,6 +7,7 @@ dist-native
 # which package:prepare runs before electron-builder stages it
 dist-companion
 dist-server
+dist-saas
 *.local
 .DS_Store
 *.tsbuildinfo
@@ -41,3 +42,5 @@ deploy/podman/.env.*
 !deploy/podman/.env.example
 /.env
 tunnel-token.txt
+__pycache__/
+*.pyc

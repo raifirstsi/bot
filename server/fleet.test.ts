@@ -16,6 +16,7 @@ import {
   MANAGED_OPENROUTER,
   instanceEnv,
   parseRegistry,
+  publicHostPlan,
   resumePlan,
   suspendPlan,
   templateUnit,
@@ -80,6 +81,9 @@ describe("rendered files", () => {
     expect(fenceRules([{ ...incomplete, accountCreated: true }])).toContain("omb-pending");
     expect(fenceRules([{ ...incomplete, status: "error", accountCreated: true }])).toContain("omb-pending");
     expect(fenceRules([{ ...incomplete, status: "retained" }])).toContain("omb-pending");
+    expect(fenceRules([{ ...incomplete, accountCreated: true }], 8812))
+      .toContain("oif lo tcp dport { 8081, 8812 } meta skuid omb-pending reject");
+    expect(fenceRules([incomplete], 8812)).not.toContain("dport { 8081, 8812 }");
   });
 
   it("serves a running workspace and answers 503 for a suspended one", () => {
@@ -92,6 +96,39 @@ describe("rendered files", () => {
     for (const status of ["provisioning", "error", "retained"] as const) {
       expect(caddySite({ host: "acme.agentada.cc", port: 8810, webhookPort: 8811, status })).toContain("503");
     }
+    const internal = caddySite({ host: "acme.agentada.cc", port: 8810, webhookPort: 8811, status: "running" }, true);
+    expect(internal).toContain("http://acme.agentada.cc:8081 {");
+    expect(internal).toContain("bind 127.0.0.1");
+    expect(internal).toContain("header_up X-Forwarded-For {http.request.header.X-Real-IP}");
+    expect(internal.match(/header_up X-Forwarded-Proto https/g)).toHaveLength(2);
+    expect(internal).not.toContain("https://");
+    expect(caddySite({ host: "acme.agentada.cc", port: 8810, webhookPort: 8811, status: "suspended" }, true))
+      .toContain("http://acme.agentada.cc:8081 {\n\tbind 127.0.0.1");
+  });
+
+  it("routes a friendly workspace host and keeps prior addresses as redirects", () => {
+    const registry = initPlan({ domain: "rai2.si", node: "/usr/bin/node", script: "/opt/rai2/bin/rai2.mjs",
+      internalEdge: true, controlPlanePort: 8812, layout }).registry;
+    const created = createPlan({ registry, slug: "u-1234567890abcdef1234",
+      seed: { admins: ["owner@example.test"], members: [], rai2Tenant: true,
+        tenantAuthOrigin: "https://app.rai2.si", tenantAuthToken: "t".repeat(43) }, layout });
+    const environment = (created.steps.find((step) => step.kind === "write" && step.path.endsWith(".env")) as
+      Extract<FleetStep, { kind: "write" }>).content;
+    const legacyEnvironment = environment.replace(/^OMB_SIGNIN_TENANT_DOMAIN=.*\n/m, "");
+    const changed = publicHostPlan({ registry: created.registry, slug: created.workspace.slug,
+      publicHost: "an-phat.rai2.si", legacyHosts: ["ten-cu.rai2.si"], currentEnv: legacyEnvironment, layout });
+    expect(changed.workspace).toMatchObject({ publicHost: "an-phat.rai2.si", legacyHosts: ["ten-cu.rai2.si"] });
+    const caddy = changed.steps.find((step) => step.kind === "write" && step.path.endsWith(".caddy"));
+    expect(caddy).toMatchObject({ content: expect.stringContaining("http://an-phat.rai2.si:8081") });
+    expect(caddy).toMatchObject({ content: expect.stringContaining("redir https://an-phat.rai2.si{uri} permanent") });
+    expect(String((changed.steps.find((step) => step.kind === "write" && step.path.endsWith(".env")) as
+      Extract<FleetStep, { kind: "write" }>).content)).toContain("OMB_PUBLIC_URL=https://an-phat.rai2.si");
+    expect(String((changed.steps.find((step) => step.kind === "write" && step.path.endsWith(".env")) as
+      Extract<FleetStep, { kind: "write" }>).content)).toContain("OMB_SIGNIN_TENANT_DOMAIN=rai2.si");
+    expect(changed.rollbackSteps.find((step) => step.kind === "write" && step.path.endsWith(".env")))
+      .toMatchObject({ content: legacyEnvironment });
+    expect(() => publicHostPlan({ registry: created.registry, slug: created.workspace.slug,
+      publicHost: "app.rai2.si", legacyHosts: [], currentEnv: legacyEnvironment, layout })).toThrow("invalid");
   });
 
   it("writes the environment, the first config and the sign-in edits the server reads live", () => {
@@ -117,6 +154,28 @@ describe("rendered files", () => {
     expect(() => applySignIn(demoted.config, "add", "bob@acme.test", true)).toThrow("at least one admin");
     expect(() => applySignIn(demoted.config, "remove", "bob@acme.test", false)).toThrow("at least one admin");
   });
+
+  it("seeds a SaaS workspace with a tenant-scoped sign-in token and no SMTP credential", () => {
+    const tenantAuthOrigin = "https://app.rai2.si";
+    const tenantAuthToken = "t".repeat(43);
+    const plan = createPlan({ registry: emptyRegistry("rai2.si"), slug: "u-1234567890abcdef1234",
+      seed: { admins: ["owner@example.test"], members: [], rai2Tenant: true, tenantAuthOrigin, tenantAuthToken }, layout });
+    const environment = plan.steps.find((step) => step.kind === "write" && step.path.endsWith(".env"));
+    expect(environment).toMatchObject({ mode: 0o600, content: expect.stringContaining(`OMB_SIGNIN_TENANT_URL=${tenantAuthOrigin}`) });
+    expect(environment).toMatchObject({ content: expect.stringContaining("OMB_RAI2_TENANT=1") });
+    expect(environment).toMatchObject({ content: expect.stringContaining(`OMB_SIGNIN_TENANT_TOKEN=${tenantAuthToken}`) });
+    expect(environment).toMatchObject({ content: expect.not.stringContaining("OMB_SIGNIN_SMTP_URL=") });
+    expect(environment).toMatchObject({ content: expect.not.stringContaining("OMB_ADMIN_URL=") });
+    for (const settings of [
+      { tenantAuthOrigin, tenantAuthToken: undefined },
+      { rai2Tenant: true, tenantAuthOrigin: undefined, tenantAuthToken: undefined },
+      { tenantAuthOrigin: "https://app.rai2.si\nOMB_LICENSE_KEY=forged", tenantAuthToken },
+      { tenantAuthOrigin: "http://app.rai2.si", tenantAuthToken },
+    ]) {
+      expect(() => createPlan({ registry: emptyRegistry("rai2.si"), slug: "u-1234567890abcdef1234",
+        seed: { admins: ["owner@example.test"], members: [], ...settings }, layout })).toThrow();
+    }
+  });
 });
 
 describe("plans", () => {
@@ -134,6 +193,36 @@ describe("plans", () => {
     expect(agent).toMatchObject({ content: expect.stringContaining("RuntimeDirectory=openmausbot") });
     expect(argvOf(withAgent.steps)).toContain("systemctl enable --now openmausbot-fleet.service");
     expect(() => initPlan({ domain: "agentada.cc", node: "n", script: "s", operator: "Not A User", layout })).toThrow("Unix user");
+    const shared = initPlan({ domain: "rai2.si", node: "/usr/bin/node", script: "/opt/rai2/bin/rai2.mjs",
+      operator: "rai2", internalEdge: true, controlPlanePort: 8812, layout });
+    expect(shared.registry).toMatchObject({ domain: "rai2.si", internalEdge: true, controlPlanePort: 8812 });
+    expect(shared.steps.at(-2)).toMatchObject({ kind: "note", text: expect.stringContaining("127.0.0.1:8081") });
+    for (const port of [0, 443, 8081, 8810, 8811, 8820]) {
+      expect(() => initPlan({ domain: "rai2.si", node: "n", script: "s", controlPlanePort: port, layout })).toThrow("control plane port");
+    }
+    expect(() => parseRegistry(JSON.stringify({ ...shared.registry, internalEdge: false }))).toThrow("edge mode");
+    expect(() => parseRegistry(JSON.stringify({ ...shared.registry, controlPlanePort: 8810 }))).toThrow("control plane port");
+    expect(() => initPlan({ domain: "rai2.si", node: "n", script: "s", internalEdge: true, layout })).toThrow("internal edge mode");
+  });
+
+  it("keeps internal edge routing and the control plane fence through workspace lifecycle", () => {
+    const registry = initPlan({ domain: "rai2.si", node: "/usr/bin/node", script: "/opt/rai2/bin/rai2.mjs",
+      internalEdge: true, controlPlanePort: 8812, layout }).registry;
+    const created = createPlan({ registry, slug: "acme", seed: { admins: ["owner@example.test"], members: [] }, layout });
+    const site = created.steps.find((step) => step.kind === "write" && step.path.endsWith("acme.caddy"));
+    expect(site).toMatchObject({ content: expect.stringContaining("http://acme.rai2.si:8081") });
+    expect(site).toMatchObject({ content: expect.stringContaining("header_up X-Forwarded-Proto https") });
+    const fence = created.steps.find((step) => step.kind === "write" && step.path === layout.fenceFile);
+    expect(fence).toMatchObject({ content: expect.stringContaining("dport { 8081, 8812 } meta skuid omb-acme reject") });
+    const suspended = suspendPlan({ registry: created.registry, slug: "acme", layout });
+    expect(suspended.steps.find((step) => step.kind === "write" && step.path.endsWith("acme.caddy")))
+      .toMatchObject({ content: expect.stringContaining("http://acme.rai2.si:8081") });
+    const resumed = resumePlan({ registry: suspended.registry, slug: "acme", layout });
+    expect(resumed.steps.find((step) => step.kind === "write" && step.path.endsWith("acme.caddy")))
+      .toMatchObject({ content: expect.stringContaining("http://acme.rai2.si:8081") });
+    const deleted = deletePlan({ registry: resumed.registry, slug: "acme", keepData: true, layout });
+    expect(deleted.steps.find((step) => step.kind === "write" && step.path === layout.fenceFile))
+      .toMatchObject({ content: expect.stringContaining("dport { 8081, 8812 } meta skuid omb-acme reject") });
   });
 
   it("creates a workspace as its own account with private data, a fenced port, a unit and a site", () => {
@@ -197,7 +286,13 @@ describe("plans", () => {
       expect(() => deletePlan({ registry: incomplete, slug: "acme", keepData: false, layout })).toThrow("operator recovery");
     }
     const two = createPlan({ registry: created.registry, slug: "globex", seed: { admins: ["g@x.test"], members: [] }, now, layout }).registry;
-    expect(argvOf(upgradePlan({ registry: suspendPlan({ registry: two, slug: "globex", layout }).registry }))).toEqual(["npm install -g openmausbot@latest", "systemctl restart openmausbot@acme.service"]);
+    const releaseFile = "/opt/rai2/releases/rai2-runtime-0.1.151.tgz";
+    const releaseSha256 = "a".repeat(64);
+    expect(argvOf(upgradePlan({ registry: suspendPlan({ registry: two, slug: "globex", layout }).registry, releaseFile, releaseSha256 })))
+      .toEqual([`npm install -g --ignore-scripts ${releaseFile}`, "systemctl restart openmausbot@acme.service"]);
+    expect(upgradePlan({ registry: two, releaseFile, releaseSha256 })[0]).toEqual({ kind: "verify", path: releaseFile, sha256: releaseSha256 });
+    expect(() => upgradePlan({ registry: two, releaseFile: "openmausbot@latest", releaseSha256 })).toThrow("absolute pinned");
+    expect(() => upgradePlan({ registry: two, releaseFile, releaseSha256: "bad" })).toThrow("SHA-256");
   });
 
   it("seeds only the trusted portal gateway and reserves the portal hostname", () => {

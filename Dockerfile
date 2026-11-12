@@ -59,7 +59,9 @@ COPY scripts/install-git-hooks.mjs ./scripts/install-git-hooks.mjs
 RUN pnpm install --frozen-lockfile
 COPY . .
 # The Cloud home runs these as root, so nobody else may write them.
-RUN pnpm build:server && pnpm exec vite build && chmod -R go-w dist dist-server skills
+ARG OMB_OSS_ONLY=0
+RUN if [ "$OMB_OSS_ONLY" = "1" ]; then pnpm build:oss-server; else pnpm build:server; fi \
+ && pnpm exec vite build && chmod -R go-w dist dist-server skills
 # The Data engine's native modules (server/data/engine.ts), staged like the
 # desktop app's extraResources for the image's CPU (amd64 -> x64, arm64), into
 # one tree the runtime stages copy. pnpm installed both CPUs' packages
@@ -218,11 +220,13 @@ CMD ["node", "/app/dist-server/cloud-home-start.js"]
 
 # The self-hosted server, last so a plain `docker build .` builds it.
 FROM runtime AS server
+ARG OMB_OSS_ONLY=0
 # Optional engine CLIs baked into the image (space-separated npm packages).
 ARG ENGINES=""
 RUN if [ -n "$ENGINES" ]; then HOME=/tmp/omb-build-home npm install -g $ENGINES && rm -rf /tmp/omb-build-home /tmp/node-compile-cache; fi
 COPY --from=build --chown=maus:maus /src/dist-native/duckdb/target ./duckdb
 COPY --from=build --chown=maus:maus /src/dist-server ./dist-server
+RUN if [ "$OMB_OSS_ONLY" = "1" ]; then test ! -e /app/dist-server/enterprise; fi
 COPY --from=build --chown=maus:maus /src/dist ./dist
 COPY --from=build --chown=maus:maus /src/skills ./skills
 # `docker compose exec omb openmausbot pair`: the commands the CLI prints start the same way.

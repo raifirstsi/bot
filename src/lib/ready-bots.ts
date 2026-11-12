@@ -3,6 +3,7 @@ import type { MascotBodyId } from "../../shared/mascot-bodies";
 import type { MausColor } from "../../shared/wire";
 import { t, tFromServer } from "@/lib/i18n";
 import { getBotMascotUrl } from "@/lib/mascot-mapping";
+import { RAI_READY_BOTS } from "./rai-ready-bots";
 
 export type ReadyBotCategory = "everyday" | "work" | "writing" | "design" | "sales" | "personal";
 
@@ -29,6 +30,7 @@ const paused = (name: string, prompt: string, time: string, weekdays: number[]):
   ({ name, prompt, schedule: { type: "daily", time, weekdays }, enabled: false, overlap: "skip" });
 
 export const READY_BOTS: ReadyBot[] = [
+  ...RAI_READY_BOTS,
   {
     id: "assistant",
     category: "everyday",

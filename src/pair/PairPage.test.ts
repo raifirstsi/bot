@@ -30,7 +30,7 @@ it("opening My Cloud from the app needs no click and no code to type", async () 
   vi.stubGlobal("window", { ogb: { workspaces: {} } });
   f.pair.mockResolvedValue({ ok: true });
   const html = render(code);
-  expect(html).toContain("Connecting to this MausBot…");
+  expect(html).toContain("Connecting to this RAI²…");
   expect(html).not.toContain("Pairing code"); expect(html).not.toContain("<form");
   f.effects[0](); await flush();
   expect(f.pair).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ code }));
@@ -53,7 +53,7 @@ it("a browser keeps the code in the form for the person to confirm", () => {
 
 it("My Cloud says where its connection starts, never 'the code shown on the server'", () => {
   const cloud = pairIntro({ mode: "code", sent: false, email: "", cloudHome: true });
-  expect(cloud).toContain(`choose ${en["cloudHome.connect"]} in the MausBot app`);
+  expect(cloud).toContain(`choose ${en["cloudHome.connect"]} in the RAI² app`);
   expect(cloud).toContain(`Settings → ${en["settings.section.cloudAccount"]}`);
   expect(cloud).toContain("on your Plan page");
   expect(cloud).not.toContain("from the server");
@@ -66,7 +66,7 @@ it("a team's Cloud is called by the team's name, a person's own Cloud My Cloud",
   expect(pairTitle(descriptor({ cloudHome: true, cloudTeam: true }), "code")).toBe("Acme Labs");
   expect(pairTitle(descriptor({ cloudHome: true }), "code")).toBe("My Cloud");
   expect(pairTitle(descriptor({}), "email")).toBe("Sign in to Acme Labs");
-  expect(pairTitle(null, "code")).toBe("Connect to this MausBot");
+  expect(pairTitle(null, "code")).toBe("Connect to this RAI²");
 });
 
 it("names a wrong kind of code instead of letting it be sent as a wrong one", () => {
@@ -76,6 +76,8 @@ it("names a wrong kind of code instead of letting it be sent as a wrong one", ()
   expect(codeProblem("7KQ2-M9XD")).toBeNull();
   expect(codeReady("7kq2 m9xd h4tp")).toBe(true);
   expect(codeReady("1234 5678")).toBe(false);
+  expect(codeReady("RAI2-ADMIN")).toBe(false);
+  expect(codeReady("GUEST")).toBe(false);
 });
 
 it("opens the phone app at this server with the code filled in", () => {
@@ -89,14 +91,15 @@ it("warns only on plain http across the open internet", () => {
   expect(unencryptedPublic({ protocol: "https:", hostname: "maus.example.com" })).toBe(false);
 });
 
-it("asks for the code first, with email sign-in as a link below, and says how to get a code", async () => {
+it("asks for a real pairing code and links new customers to the separate account portal", async () => {
   vi.stubGlobal("window", {});
   vi.stubGlobal("location", { replace: () => {}, protocol: "http:", hostname: "203.0.113.9", origin: "http://203.0.113.9:8799" });
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ environmentId: "e", label: "hetzner-1", platform: "linux", version: "1", capabilities: { emailSignIn: true } }) }));
   const html = render(code);
   expect(html).toContain(en["pair.notEncrypted"].replace("'", "&#x27;"));
-  expect(html).toContain(en["pair.fromLink"]);
   expect(html).toContain("openmausbot://pair?address=http%3A%2F%2F203.0.113.9%3A8799&amp;code=ABCD-EFGH-JK23");
   expect(html).toContain("npx openmausbot pair");
-  expect(html.indexOf("<form")).toBeLessThan(html.indexOf(en["pair.code"]));
+  expect(html).toContain('href="https://app.rai2.si"');
+  expect(html).not.toContain("RAI2-ADMIN");
+  expect(html).not.toContain("1-Click");
 });

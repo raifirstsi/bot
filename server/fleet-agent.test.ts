@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { readBody, startFleetAgent } from "./fleet-agent.ts";
+import { executeWithRollback, readBody, startFleetAgent } from "./fleet-agent.ts";
 import { fleetAvailable, fleetRequest } from "./fleet-client.ts";
 import type { FleetDeps } from "./fleet-cli.ts";
 import { emptyRegistry, fleetLayout, MANAGED_OPENROUTER } from "./fleet.ts";
@@ -40,6 +40,21 @@ function machine(root: string, options: { failing?: string[]; beforeRun?: (argv:
   };
   return { deps, files, calls, root };
 }
+
+describe("fleet agent rollback", () => {
+  it("runs the recovery plan after a host mutation step fails", async () => {
+    const m = machine("/", { failing: ["fail"] });
+    const errors: string[] = [];
+    const result = await executeWithRollback(
+      [{ kind: "run", argv: ["fail"], why: "apply address" }],
+      [{ kind: "write", path: "/restored", content: "old", mode: 0o600 }],
+      m.deps, { log: () => {}, error: (line) => errors.push(line) },
+    );
+    expect(result).toEqual({ code: 1, rollbackFailed: false });
+    expect(m.files.get("/restored")).toBe("old");
+    expect(errors[0]).toContain("apply address");
+  });
+});
 
 // The agent is a Linux service; Windows cannot bind a Unix socket in a temp folder.
 describe.skipIf(process.platform === "win32")("fleet agent over its socket", () => {

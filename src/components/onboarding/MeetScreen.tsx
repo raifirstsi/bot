@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUp, Check, Plus } from "lucide-react";
 import { engineReady } from "@/components/EngineLibrary";
 import { usePrefersReducedMotion } from "@/components/mascot-clock";
-import { brand, productName } from "@/lib/brand";
+import { RaiLogo } from "@/components/RaiLogo";
+import { productName } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { activeLocale, t } from "@/lib/i18n";
 import { aiChoices, aiWorks } from "@/lib/onboarding";
@@ -76,10 +77,8 @@ export function MeetScreen({ hosted, onNext }: { hosted: boolean; onNext: () => 
       <h1 id="welcome-title" className="absolute left-1/2 top-[calc(50%-264px)] w-max max-w-[min(560px,calc(100%-32px))] -translate-x-1/2 text-[28px] font-normal leading-[34px] tracking-[-0.02em] text-ink">
         {t("onboarding.meet.title", { app: productName() })}
       </h1>
-      <span className="absolute left-1/2 top-[calc(50%-75px)] flex -translate-x-1/2 -translate-y-1/2" style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }}>
-        <picture className="size-full flex items-center justify-center">
-          <img src={brand().logo || "/assets/rai-logo.png"} alt={productName()} width={MASCOT_SIZE} height={MASCOT_SIZE} className="size-full object-contain" />
-        </picture>
+      <span className="absolute left-1/2 top-[calc(50%-75px)] flex -translate-x-1/2 -translate-y-1/2 items-center justify-center" style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }}>
+        <RaiLogo className="h-16 w-auto object-contain" />
       </span>
       <DemoComposer reduced={reduced} onTyping={setTyping} />
       {hosted && (

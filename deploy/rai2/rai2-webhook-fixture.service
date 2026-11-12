@@ -1,0 +1,23 @@
+[Unit]
+Description=RAI2 isolated SePay webhook verification fixture
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rai2
+Group=rai2
+WorkingDirectory=/opt/rai2/fixture
+EnvironmentFile=/etc/rai2/saas.env
+Environment=TMPDIR=/run/rai2-webhook-fixture
+ExecStart=/opt/rai2/node/bin/node --experimental-strip-types /opt/rai2/fixture/webhook-fixture.ts
+RuntimeDirectory=rai2-webhook-fixture
+RuntimeDirectoryMode=0700
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=yes
+PrivateDevices=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/rai2-webhook-fixture

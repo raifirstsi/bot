@@ -41,6 +41,26 @@ const registryFile = "/etc/openmausbot/fleet.json";
 const withRegistry = (workspaces = {}) => ({ [registryFile]: JSON.stringify({ ...emptyRegistry("agentada.cc"), workspaces }) });
 
 describe("openmausbot fleet", () => {
+  it("refuses a mismatched runtime archive before installing or restarting tenants", async () => {
+    const archive = "/opt/rai2/releases/rai2-runtime-0.1.151.tgz";
+    const workspace: FleetWorkspace = { slug: "acme", host: "acme.agentada.cc", port: 8810,
+      webhookPort: 8811, status: "running", createdAt: "" };
+    const m = machine({ root: true, files: { ...withRegistry({ acme: workspace }), [archive]: "archive" } });
+    const input: FleetInput = { ...base, action: "upgrade", releaseFile: archive, releaseSha256: "a".repeat(64) };
+    const originalRun = m.deps.run;
+    m.deps.run = async (argv) => argv[0] === "sha256sum"
+      ? (m.calls.push(`run ${argv.join(" ")}`), { code: 0, output: `${"b".repeat(64)}  ${archive}\n` })
+      : originalRun(argv);
+    expect(await runFleetCommand(input, io().io, m.deps)).toBe(1);
+    expect(m.calls).toEqual([`run sha256sum ${archive}`]);
+    m.calls.length = 0;
+    m.deps.run = async (argv) => argv[0] === "sha256sum"
+      ? (m.calls.push(`run ${argv.join(" ")}`), { code: 0, output: `${"a".repeat(64)}  ${archive}\n` })
+      : originalRun(argv);
+    expect(await runFleetCommand(input, io().io, m.deps)).toBe(0);
+    expect(m.calls).toContain(`run npm install -g --ignore-scripts ${archive}`);
+    expect(m.calls).toContain("run systemctl restart openmausbot@acme.service");
+  });
   it("updates only managed OpenRouter models and rejects missing, malformed or redirected config", async () => {
     const workspace: FleetWorkspace = { slug: "acme", host: "acme.agentada.cc", port: 8810, webhookPort: 8811, status: "running", createdAt: "" };
     const path = "/var/lib/openmausbot/acme/.config/opencode/opencode.json";
@@ -171,13 +191,32 @@ describe("openmausbot fleet", () => {
     const prior = { ...emptyRegistry("agentada.cc"), operator: "maus", nextPort: 8840, workspaces };
     const ready = machine({ root: true, files: { [registryFile]: JSON.stringify(prior) } });
     const result = io();
-    expect(await runFleetCommand({ ...base, action: "init", domain: "fresh.example.test", yes: true }, result.io, ready.deps)).toBe(0);
-    expect(JSON.parse(ready.files.get(registryFile)!)).toEqual({ ...prior, domain: "fresh.example.test" });
+    expect(await runFleetCommand({ ...base, action: "init", domain: "agentada.cc", yes: true }, result.io, ready.deps)).toBe(0);
+    expect(JSON.parse(ready.files.get(registryFile)!)).toEqual(prior);
     expect(ready.files.get("/etc/openmausbot/fence.nft")).toBe(fenceRules(Object.values(workspaces)));
     expect(ready.files.get("/etc/systemd/system/openmausbot-fleet.service")).toContain("--group maus");
     expect(ready.calls).toContain("run nft -f /etc/openmausbot/fence.nft");
-    expect(await runFleetCommand({ ...base, action: "init", domain: "fresh.example.test", operator: "newadmin", yes: true }, io().io, ready.deps)).toBe(0);
+    expect(await runFleetCommand({ ...base, action: "init", domain: "agentada.cc", operator: "newadmin", yes: true }, io().io, ready.deps)).toBe(0);
     expect(JSON.parse(ready.files.get(registryFile)!).operator).toBe("newadmin");
+    const refused = io();
+    expect(await runFleetCommand({ ...base, action: "init", domain: "fresh.example.test", yes: true }, refused.io, ready.deps)).toBe(2);
+    expect(refused.err.join("\n")).toContain("cannot change the fleet domain");
+  });
+
+  it("preserves the internal edge and control plane fence on re-init", async () => {
+    const workspace: FleetWorkspace = { slug: "acme", host: "acme.rai2.si", port: 8810,
+      webhookPort: 8811, status: "running", createdAt: "" };
+    const registry = { ...emptyRegistry("rai2.si"), internalEdge: true, controlPlanePort: 8812,
+      nextPort: 8820, workspaces: { acme: workspace } };
+    const ready = machine({ root: true, files: { [registryFile]: JSON.stringify(registry) } });
+    expect(await runFleetCommand({ ...base, action: "init", domain: "rai2.si", yes: true }, io().io, ready.deps)).toBe(0);
+    expect(JSON.parse(ready.files.get(registryFile)!)).toEqual(registry);
+    expect(ready.files.get("/etc/openmausbot/fence.nft"))
+      .toContain("dport { 8081, 8812 } meta skuid omb-acme reject");
+    const refused = io();
+    expect(await runFleetCommand({ ...base, action: "init", domain: "rai2.si", yes: true,
+      controlPlanePort: 8813 }, refused.io, ready.deps)).toBe(2);
+    expect(refused.err.join("\n")).toContain("cannot change the fleet domain, edge or control plane port");
   });
 
   it.each(["/var/lib/openmausbot/acme", "/etc/openmausbot/instances/acme.env", "/etc/caddy/omb.d/acme.caddy", "/etc/systemd/system/openmausbot@acme.service.d"])("refuses residual customer path %s before taking action", async (path) => {

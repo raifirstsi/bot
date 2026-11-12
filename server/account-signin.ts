@@ -54,6 +54,10 @@ export function createEmailSignIn(options: {
 }): EmailSignIn {
   const env = options.env ?? process.env;
   const allow = () => (typeof options.allow === "function" ? options.allow() : options.allow);
+  if (env.OMB_RAI2_TENANT === "1" || env.OMB_SIGNIN_TENANT_URL !== undefined ||
+    env.OMB_SIGNIN_TENANT_SLUG !== undefined || env.OMB_SIGNIN_TENANT_TOKEN !== undefined) {
+    return tenantSignIn(allow, env, options.fetchImpl ?? fetch);
+  }
   const smtpUrl = env.OMB_SIGNIN_SMTP_URL?.trim();
   if (smtpUrl) {
     return mailedSignIn(allow, createSignInMail({ url: smtpUrl, from: env.OMB_SIGNIN_SMTP_FROM,
@@ -106,6 +110,55 @@ export function createEmailSignIn(options: {
       const scopes = allowedScopes(verified.user.email, allow());
       if (!scopes) return NOT_WELCOME;
       return { ok: true, email: verified.user.email, userId: verified.user.id, scopes };
+    },
+  };
+}
+
+function tenantSignIn(allow: () => SignInAllowList, env: NodeJS.ProcessEnv, fetchImpl: typeof fetch): EmailSignIn {
+  let origin: URL;
+  try { origin = new URL(env.OMB_SIGNIN_TENANT_URL ?? ""); }
+  catch { origin = new URL("https://invalid.invalid"); }
+  const slug = env.OMB_SIGNIN_TENANT_SLUG ?? "";
+  const token = env.OMB_SIGNIN_TENANT_TOKEN ?? "";
+  const configured = origin.protocol === "https:" && origin.origin === env.OMB_SIGNIN_TENANT_URL &&
+    !origin.username && !origin.password && /^u-[a-f0-9]{20}$/.test(slug) && /^[A-Za-z0-9_-]{43}$/.test(token);
+  const request = async (action: "start" | "verify", email: string, code?: string) => {
+    if (!configured) return { ok: false as const, status: 503, ...userError("serverError.email.unavailable", { detail: "tenant sign-in is not configured" }) };
+    try {
+      const response = await fetchImpl(new URL(`/api/tenant-auth/${action}`, origin), {
+        method: "POST", redirect: "error", signal: AbortSignal.timeout(5_000),
+        headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+        body: JSON.stringify({ slug, email, ...(code ? { code } : {}) }),
+      });
+      if (!response.ok) {
+        const key = response.status === 429 ? "serverError.email.tooMany" : response.status === 401 ? "serverError.email.codeWrong" : "serverError.email.unavailable";
+        return { ok: false as const, status: response.status === 429 ? 429 : response.status === 401 ? 401 : 503,
+          ...userError(key, { detail: "tenant sign-in unavailable" }) };
+      }
+      const data: unknown = await response.json();
+      if (action === "verify" && Reflect.get(Object(data), "email") !== email) {
+        return { ok: false as const, status: 503, ...userError("serverError.email.unavailable", { detail: "tenant sign-in mismatch" }) };
+      }
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const, status: 503, ...userError("serverError.email.unavailable", { detail: "tenant sign-in unavailable" }) };
+    }
+  };
+  return {
+    enabled: () => configured && signInEnabled(allow()),
+    async start(rawEmail) {
+      const email = normalizeAccountEmail(rawEmail);
+      if (!email) return { ok: false, status: 400, ...userError("serverError.email.invalid") };
+      if (!allowedScopes(email, allow())) return NOT_WELCOME;
+      return request("start", email);
+    },
+    async verify(rawEmail, code) {
+      const email = normalizeAccountEmail(rawEmail);
+      if (!email || !allowedScopes(email, allow())) return NOT_WELCOME;
+      const result = await request("verify", email, code);
+      if (!result.ok) return result;
+      const scopes = allowedScopes(email, allow());
+      return scopes ? { ok: true, email, userId: `tenant:${slug}:${email}`, scopes } : NOT_WELCOME;
     },
   };
 }

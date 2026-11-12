@@ -19,6 +19,7 @@ import {
   MANAGED_OPENROUTER,
   managedOpenRouterModels,
   parseRegistry,
+  publicHostPlan,
   resumePlan,
   suspendPlan,
   upgradePlan,
@@ -30,11 +31,13 @@ import {
 } from "./fleet.ts";
 
 export interface FleetInput {
-  action: "init" | "create" | "list" | "users" | "providers" | "suspend" | "resume" | "delete" | "upgrade";
+  action: "init" | "create" | "list" | "users" | "providers" | "host" | "suspend" | "resume" | "delete" | "upgrade";
   slug?: string;
   domain?: string;
   /** The operator's Unix user: the one workspace allowed to talk to the fleet agent. */
   operator?: string;
+  internalEdge?: boolean;
+  controlPlanePort?: number;
   admins: string[];
   members: string[];
   brandFile?: string;
@@ -47,9 +50,16 @@ export interface FleetInput {
   openrouterModels?: string[];
   openrouterDefault?: boolean;
   portalUrl?: string;
+  publicHost?: string;
+  legacyHosts?: string[];
+  tenantAuthOrigin?: string;
+  tenantAuthToken?: string;
   cap?: number;
   licenseKey?: string;
   memory?: string;
+  releaseFile?: string;
+  releaseSha256?: string;
+  rai2Tenant?: boolean;
   dryRun: boolean;
   yes: boolean;
   keepData: boolean;
@@ -268,6 +278,13 @@ export async function executePlan(steps: FleetStep[], deps: FleetDeps, io: Fleet
         if (result.code !== 0) return failed(io, `${step.why} (${step.argv[0]} exited ${result.code ?? "without a code"})`, result.output);
         break;
       }
+      case "verify": {
+        const result = await deps.run(["sha256sum", step.path]);
+        if (result.code !== 0 || result.output.trim().split(/\s+/)[0]?.toLowerCase() !== step.sha256) {
+          return failed(io, "verify the reviewed runtime archive", "SHA-256 mismatch or unreadable archive");
+        }
+        break;
+      }
       case "health":
         if (!(await deps.health(step.url, HEALTH_TIMEOUT_MS))) return failed(io, step.why, `${step.url} did not answer within ${HEALTH_TIMEOUT_MS / 1000}s; check journalctl -u openmausbot@<slug>`);
         break;
@@ -303,13 +320,21 @@ export function planFleetAction(input: FleetInput, deps: FleetDeps): FleetStep[]
       const existing = deps.readText(layout.registryFile);
       if (existing !== null && !input.yes) throw new Error(`${layout.registryFile} exists; pass --yes to rewrite the template unit and fence (workspaces are kept)`);
       const kept = existing !== null ? parseRegistry(existing) : undefined;
-      const plan = initPlan({ domain: input.domain, node: input.node, script: input.script, operator: input.operator ?? kept?.operator, layout });
+      if (kept && Object.keys(kept.workspaces).length &&
+        (input.domain !== kept.domain ||
+          (input.internalEdge && !kept.internalEdge) ||
+          (input.controlPlanePort !== undefined && input.controlPlanePort !== kept.controlPlanePort))) {
+        throw new Error("cannot change the fleet domain, edge or control plane port while workspaces exist");
+      }
+      const plan = initPlan({ domain: input.domain, node: input.node, script: input.script,
+        operator: input.operator ?? kept?.operator, internalEdge: input.internalEdge || kept?.internalEdge,
+        controlPlanePort: input.controlPlanePort ?? kept?.controlPlanePort, layout });
       if (kept) {
         // Reinitializing templates must not erase reservations or open sibling ports.
         const registry = { ...kept, ...plan.registry, workspaces: kept.workspaces, nextPort: kept.nextPort };
         return plan.steps.flatMap((step): FleetStep[] => {
           if (step.kind === "write" && step.path === layout.registryFile) return [{ ...step, content: `${JSON.stringify(registry, null, 2)}\n` }];
-          if (step.kind === "write" && step.path === layout.fenceFile) return [{ ...step, content: fenceRules(Object.values(registry.workspaces)) }];
+          if (step.kind === "write" && step.path === layout.fenceFile) return [{ ...step, content: fenceRules(Object.values(registry.workspaces), registry.controlPlanePort) }];
           if (step.kind === "run" && step.argv.join(" ") === "systemctl enable --now openmausbot-fence.service") return [step, { kind: "run", argv: ["nft", "-f", layout.fenceFile], why: "reapply the preserved workspace fence" }];
           return [step];
         });
@@ -332,7 +357,7 @@ export function planFleetAction(input: FleetInput, deps: FleetDeps): FleetStep[]
       return createPlan({
         registry,
         slug: input.slug,
-        seed: { admins: input.admins, members: input.members, ...(anthropicKey ? { anthropicKey } : {}), ...(input.anthropicUrl ? { anthropicUrl: input.anthropicUrl } : {}), ...(input.portalUrl ? { portalUrl: input.portalUrl } : {}), ...(input.cap !== undefined ? { monthlyCapUsd: input.cap } : {}), ...(brandJson ? { brandJson } : {}), openrouterKey: input.openrouterKey, openrouterUrl: input.openrouterUrl, openrouterModels: input.openrouterModels, openrouterDefault: input.openrouterDefault },
+        seed: { admins: input.admins, members: input.members, ...(anthropicKey ? { anthropicKey } : {}), ...(input.anthropicUrl ? { anthropicUrl: input.anthropicUrl } : {}), ...(input.portalUrl ? { portalUrl: input.portalUrl } : {}), rai2Tenant: input.rai2Tenant, tenantAuthOrigin: input.tenantAuthOrigin, tenantAuthToken: input.tenantAuthToken, ...(input.cap !== undefined ? { monthlyCapUsd: input.cap } : {}), ...(brandJson ? { brandJson } : {}), openrouterKey: input.openrouterKey, openrouterUrl: input.openrouterUrl, openrouterModels: input.openrouterModels, openrouterDefault: input.openrouterDefault },
         ...(input.licenseKey ? { licenseKey: input.licenseKey } : {}),
         ...(input.memory ? { memoryMax: input.memory } : {}),
         layout,
@@ -381,6 +406,14 @@ export function planFleetAction(input: FleetInput, deps: FleetDeps): FleetStep[]
         { kind: "note", text: next.summary },
       ];
     }
+    case "host": {
+      if (!input.slug || !input.publicHost) throw new Error("fleet host needs a workspace name and public host");
+      const registry = loadRegistry(layout, deps);
+      const environment = deps.readText(posix.join(layout.instancesDir, `${input.slug}.env`));
+      if (environment === null) throw new Error("workspace environment is missing; operator recovery is required");
+      return publicHostPlan({ registry, slug: input.slug, publicHost: input.publicHost,
+        legacyHosts: input.legacyHosts ?? [], currentEnv: environment, layout }).steps;
+    }
     case "suspend":
     case "resume": {
       if (!input.slug) throw new Error(`fleet ${input.action} needs a workspace name`);
@@ -394,7 +427,8 @@ export function planFleetAction(input: FleetInput, deps: FleetDeps): FleetStep[]
       return deletePlan({ registry, slug: input.slug, keepData: input.keepData, layout }).steps;
     }
     case "upgrade":
-      return upgradePlan({ registry: loadRegistry(layout, deps) });
+      if (!input.releaseFile || !deps.pathExists(input.releaseFile)) throw new Error("fleet upgrade needs an existing --release-file tarball");
+      return upgradePlan({ registry: loadRegistry(layout, deps), releaseFile: input.releaseFile, releaseSha256: input.releaseSha256 ?? "" });
     case "list":
       return [];
   }

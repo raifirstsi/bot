@@ -9478,7 +9478,7 @@
   "native.talk.dismiss": "Dismiss",
   "native.talk.releaseToSend": "Let go to send",
   "native.talk.voiceBusy": "Voice is in use in RAI² SI",
-  "native.talk.openMausBot": "Open RAI² SI to talk",
+  "native.talk.openMausBot": "Open RAI² to talk",
   "native.talk.starting": "RAI² SI is still starting. Try again in a moment.",
   "native.talk.setUpFirst": "Set up RAI² SI first, then try again.",
   "native.talk.movedToCloud": "RAI² SI lives on My Cloud now — talk to it there",

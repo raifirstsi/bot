@@ -1,0 +1,12 @@
+http://app.rai2.si:8081 {
+	bind 127.0.0.1
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8812
+}
+
+import /etc/caddy/omb.d/*.caddy
+
+http://:8081 {
+	bind 127.0.0.1
+	respond 404
+}
