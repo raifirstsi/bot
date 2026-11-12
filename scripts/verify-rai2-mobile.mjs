@@ -113,7 +113,7 @@ try {
         actionsLeft:actions.getBoundingClientRect().left, actionsRight:actions.getBoundingClientRect().right }; })()`);
     assert.equal(header.logo, width <= 640 ? 54 : 60);
     assert(header.markRight + 8 <= header.actionsLeft && header.actionsRight <= width, `header overlap at ${width}px`);
-    assert.equal(await evaluate(`getComputedStyle(document.querySelector('${width <= 640 ? ".header-signup-compact" : ".header-signup-wide"}')).display !== 'none'`), true);
+    assert.equal(await evaluate("document.querySelector('.header-signup').textContent.trim()"), "Workspace");
     assert.equal(await evaluate("getComputedStyle(document.querySelector('.mobile-menu-toggle')).display !== 'none'"), width <= 960);
     if (width <= 640) {
       const mobileHeader = await evaluate(`(() => {

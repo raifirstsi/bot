@@ -98,8 +98,7 @@ try {
     assert((await evaluate("document.body.scrollWidth")) <= await evaluate("document.documentElement.clientWidth"), `${name} has horizontal overflow`);
     if (landing) {
       assert.equal(await evaluate("document.querySelector('.header-signup').getBoundingClientRect().right <= window.innerWidth"), true);
-      assert.equal(await evaluate(`(() => [...document.querySelectorAll('.header-signup span:not([aria-hidden])')]
-        .find((span) => getComputedStyle(span).display !== 'none')?.textContent.trim())()`), width < 600 ? "Bắt đầu" : "Vào Workspace");
+      assert.equal(await evaluate("document.querySelector('.header-signup').textContent.trim()"), "Workspace");
       const logoWidth = await evaluate("document.querySelector('.logo-link').getBoundingClientRect().width");
       assert(name === "desktop" ? logoWidth === 60 : logoWidth >= 50 && logoWidth <= 54,
         `${name} logo width is not balanced: ${logoWidth}px`);

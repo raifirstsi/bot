@@ -136,8 +136,8 @@ img { display: block; }
 .theme-toggle {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -169,8 +169,6 @@ img { display: block; }
 .header-signup:hover {
   background: var(--blue-hover);
 }
-.header-signup-compact { display: none; }
-
 .mobile-menu-toggle { display: none; }
 .menu-icon {
   position: relative;
@@ -788,9 +786,8 @@ h2 {
   .header-row { min-height: 64px; gap: 8px; }
   .logo-link img { width: 54px; }
   .header-actions { gap: 6px; }
+  .theme-toggle { width: 44px; height: 44px; }
   .header-signup { min-height: 44px; padding: 8px 13px; font-size: 12px; }
-  .header-signup-wide { display: none; }
-  .header-signup-compact { display: inline; }
   .mobile-menu-toggle { border-radius: 50%; background: var(--panel); }
   .mobile-dialog { top: 72px; max-height: calc(100dvh - 84px); }
   .hero-inner { padding-top: 42px; padding-bottom: 32px; }
