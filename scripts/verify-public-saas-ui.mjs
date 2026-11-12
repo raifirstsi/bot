@@ -85,8 +85,9 @@ try {
       assert.equal(await evaluate("document.querySelectorAll('nav a[href=\"#cam-ket\"]').length"), 0);
       assert.equal(await evaluate("getComputedStyle(document.querySelector('.theme-toggle')).borderTopStyle"), "none");
       assert.equal(await evaluate("getComputedStyle(document.querySelector('.theme-toggle')).backgroundColor"), "rgba(0, 0, 0, 0)");
-      assert((await evaluate("document.querySelector('.theme-toggle').getBoundingClientRect().width")) <= 32,
-        `${name} theme toggle is not compact`);
+      const themeToggleWidth = await evaluate("document.querySelector('.theme-toggle').getBoundingClientRect().width");
+      assert(name === "desktop" ? themeToggleWidth <= 32 : themeToggleWidth >= 44,
+        `${name} theme toggle has the wrong target size: ${themeToggleWidth}px`);
     } else {
       await waitFor("document.getElementById('signin')?.hidden === false");
       await waitFor("document.getElementById('preview-note')?.hidden === true");
