@@ -83,7 +83,7 @@ try {
       assert.deepEqual(await evaluate("[...document.querySelectorAll('.desktop-nav a')].map(link => link.textContent.trim())"),
         ["Triết lý", "Nhân sự số", "Hệ thống", "Bảng giá"]);
       assert.equal(await evaluate("document.querySelectorAll('nav a[href=\"#cam-ket\"]').length"), 0);
-      assert.equal(await evaluate("getComputedStyle(document.querySelector('.theme-toggle')).borderTopStyle"), "none");
+      assert.equal(await evaluate("getComputedStyle(document.querySelector('.theme-toggle')).borderTopWidth"), "0px");
       assert.equal(await evaluate("getComputedStyle(document.querySelector('.theme-toggle')).backgroundColor"), "rgba(0, 0, 0, 0)");
       const themeToggleWidth = await evaluate("document.querySelector('.theme-toggle').getBoundingClientRect().width");
       assert(name === "desktop" ? themeToggleWidth <= 32 : themeToggleWidth >= 44,
