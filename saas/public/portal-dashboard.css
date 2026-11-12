@@ -1,0 +1,69 @@
+/* Portal presentation layer: the account page follows the dashboard's quiet, card-based settings rhythm. */
+:root {
+  --portal-content-max: 1180px;
+  --portal-card-radius: 16px;
+  --portal-card-shadow: 0 1px 3px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.035);
+}
+
+.page-shell { width: min(100% - 48px, var(--portal-content-max)); }
+.page-heading { padding: 48px 0 24px; }
+.page-heading h1 { max-width: none; font-size: 34px; font-weight: 600; letter-spacing: -0.025em; }
+.page-heading .eyebrow { margin-bottom: 8px; }
+
+#account, #billing {
+  padding: 0 24px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--portal-card-radius);
+  background: var(--panel);
+  box-shadow: var(--portal-card-shadow);
+}
+#account { margin-bottom: 24px; }
+#billing { margin-bottom: 40px; }
+
+.account-heading, .billing-heading {
+  margin-inline: -24px;
+  padding: 22px 24px;
+  border-top: 0;
+  border-bottom: 1px solid var(--line);
+}
+.account-heading h2, .billing-heading h2 { margin-bottom: 4px; font-size: 20px; letter-spacing: -0.015em; }
+.account-heading .muted { font-size: 13px; }
+.workspace-row, .plan-row {
+  margin-inline: 0;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.workspace-row:last-child, .plan-row:last-child { border-bottom: 0; }
+.workspace-address { font-size: 14px; font-weight: 600; }
+.workspace-edit-button { background: var(--panel-alt); }
+.primary.link-button { min-width: 148px; }
+.billing-heading { align-items: center; }
+.billing-heading .eyebrow { margin-bottom: 4px; }
+.billing-heading h2 { font-size: 20px; }
+.plan-row { padding-block: 20px; }
+.plan-row h3 { font-size: 16px; }
+.plan-row .price { font-size: 22px; }
+.payment-panel { margin-inline: 0; border-radius: 12px; }
+.transaction-heading { margin-top: 24px; padding-top: 20px; }
+.transaction-row { border-radius: 10px; background: var(--panel-alt); }
+
+body:has(#signin:not([hidden])) .page-heading { display: none; }
+body:has(#signin:not([hidden])) .page-shell { max-width: 520px; }
+
+@media (max-width: 640px) {
+  .page-shell { width: min(100% - 32px, 560px); }
+  .page-heading { padding: 32px 0 20px; }
+  .page-heading h1 { font-size: 30px; }
+  #account, #billing { padding-inline: 16px; border-radius: 14px; }
+  .account-heading, .billing-heading { margin-inline: -16px; padding-inline: 16px; }
+  .workspace-row, .plan-row { padding-block: 18px; }
+  .billing-heading { align-items: flex-start; }
+  .transaction-row { gap: 10px; }
+}
+
+@media (max-width: 375px) {
+  .page-shell { width: min(100% - 24px, 560px); }
+  .page-heading h1 { font-size: 28px; }
+  #account, #billing { padding-inline: 14px; }
+  .account-heading, .billing-heading { margin-inline: -14px; padding-inline: 14px; }
+}

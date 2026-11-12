@@ -222,7 +222,7 @@ const loadStatus = async () => {
     const status = await request("/api/status");
     paymentsEnabled = status.paymentsEnabled === true;
     privatePreview = status.privatePreview === true;
-    show("trial-full", status.trialDays > 0 && status.trialAvailable === false);
+    show("trial-full", false);
   } catch {
     paymentsEnabled = false;
   }
