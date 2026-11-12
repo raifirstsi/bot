@@ -25,10 +25,10 @@ try {
     const path = join(dir, entry.name);
     return entry.isDirectory() ? walk(root, path) : [relative(root, path)];
   });
-  const files = walk(baseRoot).filter((file) => !["public/index.html", "public/portal-dashboard.css"].includes(file.replaceAll("\\", "/")));
+  const files = walk(baseRoot).filter((file) => !["public/index.html", "public/app.css", "public/portal-dashboard.css"].includes(file.replaceAll("\\", "/")));
   for (const file of files) assert.deepEqual(readFileSync(join(candidateRoot, file)), readFileSync(join(baseRoot, file)), `${file} changed`);
-  assert.match(readFileSync(join(candidateRoot, "public", "index.html"), "utf8"), /portal-dashboard\.css/);
-  assert.match(readFileSync(join(candidateRoot, "public", "portal-dashboard.css"), "utf8"), /#account, #billing/);
+  assert.doesNotMatch(readFileSync(join(candidateRoot, "public", "index.html"), "utf8"), /portal-dashboard\.css/);
+  assert.match(readFileSync(join(candidateRoot, "public", "app.css"), "utf8"), /--portal-content-max/);
   console.log(`RAI2 portal style release preserved ${files.length} production files`);
 } finally {
   rmSync(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
