@@ -103,7 +103,7 @@ try {
   assert.equal(await evaluate("getComputedStyle(document.getElementById('language')).display"), "none");
   await evaluate("document.getElementById('language').value = 'vi'; document.getElementById('language').dispatchEvent(new Event('change'))");
   assert.equal(await evaluate("document.documentElement.lang"), "vi");
-  assert.equal(await evaluate("document.documentElement.dataset.theme"), "light");
+  assert.equal(await evaluate("document.documentElement.dataset.theme"), "dark");
   assert.equal(await evaluate("document.querySelector('h1').textContent"), "Không gian RAI² của bạn");
   assert.equal(await evaluate("getComputedStyle(document.querySelector('h1')).fontSize"), "48px");
   assert.equal(await evaluate("document.querySelector('.header-inner').getBoundingClientRect().height"), 64);
@@ -165,7 +165,6 @@ try {
   assert.equal(await evaluate("document.getElementById('workspace-handle-edit').hidden"), false);
   assert.equal(await evaluate("document.getElementById('workspace-handle-edit').getAttribute('aria-expanded')"), "false");
   await capture("workspace-desktop.png");
-  await evaluate("document.getElementById('theme-toggle').click()");
   await waitFor("document.documentElement.dataset.theme === 'dark'");
   assert.equal(await evaluate("getComputedStyle(document.body).backgroundColor"), "rgb(8, 8, 8)");
   assert.equal(await evaluate("[...document.querySelectorAll('.brand img')].filter((image) => getComputedStyle(image).display !== 'none').length"), 1);

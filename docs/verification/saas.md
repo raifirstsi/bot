@@ -573,3 +573,74 @@ release and verification gates were checked.
   `PRAGMA quick_check` was `ok`, three workspace reservations remained active,
   and the paid-order count remained zero. No customer record was mutated for
   visual verification.
+
+## Account workspace-address UX (2026-11-12, Asia/Saigon)
+
+- The account portal now shows the active workspace address before exposing an
+  on-demand editor. The editor normalizes Vietnamese input, joins the hostname
+  suffix to the field, disables unchanged or invalid saves, reports busy,
+  success and error states, restores focus after Save or Cancel, and rejects
+  missing or legacy `undefined` handle values in the renderer.
+- The isolated SaaS API suite passed 12 tests; SaaS type-check and scoped lint
+  passed. The authenticated Chrome fixture exercised Save and Cancel at
+  1440x900, 390x844 and 320x720 with no horizontal overflow. Screenshots are
+  under `.omb-scratch/workspace-handle-ui-final/`.
+- A first candidate correctly refused activation when another release changed
+  the production symlink after staging. The workspace UX was rebased onto each
+  new production base instead of overwriting concurrent logo and font work.
+  File manifests proved every file outside the intended account assets remained
+  byte-identical to its base before activation.
+- The final cache-busting candidate was based on
+  `/opt/rai2/releases/saas-8f006c551548c8a2/saas` and changed only the account
+  HTML references to versioned workspace-UX CSS and JS URLs. The active archive
+  is `rai2-saas-0.1.151-3b1bc787798ef764.tgz`, SHA-256
+  `3b1bc787798ef764473dffa2eb8b1e827c72e901cd47d6c454cd4c6192079214`.
+  It passed the full packaged SaaS checksum, inventory and runtime smoke.
+- The encrypted backup immediately before activation was copied locally and
+  matched the VPS at SHA-256
+  `3ded503e5e5dd41e3fcbf378f6f8c0b88a215c4e3e897c2fc525107cc9a8564f`.
+  Restoring the previous symlink to
+  `/opt/rai2/releases/saas-8f006c551548c8a2/saas` and restarting `rai2-saas`
+  is the application rollback.
+- The public HTML referenced `app.css?v=20261112-workspace-ux` and
+  `app.js?v=20261112-workspace-ux`; both assets matched the candidate
+  byte-for-byte. Cloudflare added only its analytics beacon to the account HTML.
+  Public Chrome passed the account page at 1440x900, 390x844 and 320x720;
+  evidence is under
+  `.omb-scratch/account-workspace-ux-public-production-final-3b1bc787798ef764/`.
+  SaaS, fleet, Nginx and Caddy were active, SQLite `PRAGMA quick_check` was
+  `ok`, and four live trials remained active. No production login or account
+  mutation was used for release verification.
+
+## Friendly workspace hosts (2026-11-12, Asia/Saigon)
+
+- Workspace owners can set a 3–30 character friendly address such as
+  `an-phat.rai2.si` from the account portal. The opaque `u-…` slug remains the
+  tenant identity for its Unix account, data directory, registry entry and
+  signing token. Earlier addresses stay reserved and redirect to the current
+  address; changes are limited to once per hour.
+- The isolated SaaS suite passed 13 tests and the focused fleet/handoff suite
+  passed 22 tests with 8 Linux-only tests skipped on Windows. SaaS and server
+  typechecks, scoped lint, package smoke, checksum verification, authenticated
+  Chrome at 1440x900 and 390x844, and the Linux artifact probes passed.
+- Deployment repeatedly refused to activate while a concurrent landing release
+  changed the production symlink. The final candidate was rebased onto
+  `/opt/rai2/releases/saas-7093885f0a06d55d/saas`; its landing, account JS/CSS
+  and assets matched that base byte-for-byte before activation.
+- The runtime archive is `rai2-runtime-0.1.151-2566e5aed899da9e.tgz`, SHA-256
+  `2566e5aed899da9e4b1a4fda357cd7495a4a4cce240a80efa25ffa4bab957622`.
+  The active control-plane archive is
+  `rai2-saas-0.1.151-b55155eab50dec1b.tgz`, SHA-256
+  `b55155eab50dec1b16f47bd6b21fb5718244ba354785a493138137866248977a`.
+- Before activation, the encrypted backup was copied locally and matched the
+  VPS at SHA-256
+  `f03e1436401ac27b7f36f159eb61d1d490128330c2160339deb4fd29c43b14e3`.
+  The deployment also packed the previously installed runtime and copied all
+  four tenant environment files for immediate rollback.
+- After activation, SaaS, fleet, Nginx and Caddy were active. SQLite
+  `PRAGMA quick_check` returned `ok`, both new account columns and the alias
+  table existed, and no account had been assigned a friendly handle. All four
+  existing opaque tenant hosts returned 200 for health and sign-in claim.
+  Public account JS/CSS matched the candidate byte-for-byte and unauthenticated
+  handle mutation was denied. No customer account or workspace was mutated for
+  production verification.
