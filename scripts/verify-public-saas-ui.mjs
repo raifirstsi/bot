@@ -72,7 +72,9 @@ try {
   await send("Network.setCacheDisabled", { cacheDisabled: true });
   for (const [name, width, height] of [["desktop", 1440, 900], ["mobile", 390, 844], ["compact", 320, 720]]) {
     await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 600 });
+    await evaluate("document.documentElement.dataset.qaViewport = 'stale'");
     await send("Page.navigate", { url: origin });
+    await waitFor("document.readyState === 'complete' && document.documentElement.dataset.qaViewport !== 'stale'");
     if (landing) {
       await waitFor("document.querySelectorAll('.team-card img').length === 8");
       await waitFor("[...document.images].every(image => image.complete)");
