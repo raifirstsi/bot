@@ -1,4 +1,4 @@
-import { useState, useId } from "react";
+import { useState, useId, type CSSProperties } from "react";
 import {
   X,
   Sparkles,
@@ -19,6 +19,13 @@ export interface TocConstraintModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectAgentKey?: (agentKey: string) => void;
+}
+
+type TocRangeStyle = CSSProperties & { "--toc-range-progress": string };
+
+function tocRangeStyle(value: number, min: number, max: number): TocRangeStyle {
+  const progress = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  return { "--toc-range-progress": `${progress}%` };
 }
 
 export function TocConstraintModal({
@@ -158,7 +165,8 @@ export function TocConstraintModal({
                 step={5}
                 value={deliveryCapacity}
                 onChange={(e) => setDeliveryCapacity(Number(e.target.value))}
-                className="h-1.5 w-full cursor-pointer accent-accent"
+                className="toc-range"
+                style={tocRangeStyle(deliveryCapacity, 20, 100)}
               />
               <div className="mt-1 flex justify-between text-[10px] text-ink-tertiary">
                 <span>Dư sức (20%)</span>
@@ -182,7 +190,8 @@ export function TocConstraintModal({
                 step={1}
                 value={quoteDays}
                 onChange={(e) => setQuoteDays(Number(e.target.value))}
-                className="h-1.5 w-full cursor-pointer accent-accent"
+                className="toc-range"
+                style={tocRangeStyle(quoteDays, 1, 10)}
               />
               <div className="mt-1 flex justify-between text-[10px] text-ink-tertiary">
                 <span>Nhanh (≤1 ngày)</span>
@@ -206,7 +215,8 @@ export function TocConstraintModal({
                 step={2}
                 value={ownerHours}
                 onChange={(e) => setOwnerHours(Number(e.target.value))}
-                className="h-1.5 w-full cursor-pointer accent-accent"
+                className="toc-range"
+                style={tocRangeStyle(ownerHours, 0, 30)}
               />
               <div className="mt-1 flex justify-between text-[10px] text-ink-tertiary">
                 <span>Tự hành (&lt;5h)</span>

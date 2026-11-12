@@ -610,15 +610,13 @@ export function resolveRequestAuth(req: IncomingMessage, options: ResolveOptions
     }
     const narrowed = options.restricted?.(session, method, path, options.url) ?? null;
     if (narrowed) return deny(403, narrowed);
-    // Ensure the installation's web session always has full admin and client scopes
-    const effectiveScopes = session.scopes.includes("admin") ? session.scopes : (["admin", ...session.scopes] as readonly Scope[]);
     const needed = requiredScope(method, path, options.features ?? {});
-    if (!effectiveScopes.includes(needed)) {
+    if (!session.scopes.includes(needed)) {
       return deny(403, options.scopeRefusal?.(method, path) ?? `forbidden: this session lacks the ${needed} scope`);
     }
     // Redeeming a stream ticket does not renew: an unattended open stream must not keep a session alive.
     if (via !== "ticket") options.sessions.renew(session.id);
-    return { auth: { kind: "session", session, via, scopes: effectiveScopes }, status: 401, error: "" };
+    return { auth: { kind: "session", session, via, scopes: session.scopes }, status: 401, error: "" };
   }
 
   // A removed member's invalid credential must not fall back to loopback owner.

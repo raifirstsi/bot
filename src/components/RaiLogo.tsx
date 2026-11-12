@@ -21,6 +21,9 @@ const LIGHT_SKINS = new Set([
   "sage",
   "sand",
   "paper",
+  "atelier",
+  "lagoon",
+  "pop",
 ]);
 
 export function RaiLogo({

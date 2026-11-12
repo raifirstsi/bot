@@ -3,8 +3,9 @@
 import { appendFileSync, chmodSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { dirname } from "node:path";
-import { defaultFleetDeps, executePlan, loadRegistry, markProvisioningFailed, planFleetAction, type FleetDeps, type FleetInput } from "./fleet-cli.ts";
-import { assertSlug, fleetLayout, fleetUser, openRouterModelIds, workspaceDataDir, type FleetLayout, type FleetWorkspace } from "./fleet.ts";
+import { defaultFleetDeps, executePlan, loadRegistry, markProvisioningFailed, planFleetAction,
+  type FleetDeps, type FleetInput, type FleetIo } from "./fleet-cli.ts";
+import { assertSlug, fleetLayout, fleetUser, openRouterModelIds, publicHostPlan, workspaceDataDir, type FleetLayout, type FleetStep, type FleetWorkspace } from "./fleet.ts";
 
 export interface FleetAgentOptions {
   socketPath: string;
@@ -25,6 +26,13 @@ export interface FleetWorkspaceView extends FleetWorkspace {
 }
 
 const MAX_BODY = 256 * 1024;
+
+export async function executeWithRollback(steps: FleetStep[], rollbackSteps: FleetStep[] | undefined,
+  deps: FleetDeps, io: FleetIo): Promise<{ code: number; rollbackFailed: boolean }> {
+  const code = await executePlan(steps, deps, io);
+  if (code === 0 || !rollbackSteps) return { code, rollbackFailed: false };
+  return { code, rollbackFailed: await executePlan(rollbackSteps, deps, io) !== 0 };
+}
 
 export function readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
@@ -95,16 +103,28 @@ export function createFleetAgent(options: FleetAgentOptions): Server {
     const log: string[] = [];
     const errors: string[] = [];
     const io = { log: (line: string) => log.push(line), error: (line: string) => errors.push(line) };
-    let steps;
+    let steps: FleetStep[];
+    let rollbackSteps: FleetStep[] | undefined;
     try {
-      steps = planFleetAction(input, deps);
+      if (input.action === "host" && input.slug && input.publicHost) {
+        const environment = deps.readText(`${layout.instancesDir}/${input.slug}.env`);
+        if (environment === null) throw new Error("workspace environment is missing; operator recovery is required");
+        const plan = publicHostPlan({ registry: loadRegistry(layout, deps), slug: input.slug,
+          publicHost: input.publicHost, legacyHosts: input.legacyHosts ?? [], currentEnv: environment, layout });
+        steps = plan.steps;
+        rollbackSteps = plan.rollbackSteps;
+      } else {
+        steps = planFleetAction(input, deps);
+      }
     } catch (error) {
       audit({ action: input.action, slug: input.slug, ok: false, error: error instanceof Error ? error.message : String(error) });
       return { status: 400, body: { error: error instanceof Error ? error.message : String(error) } };
     }
     let code = 1;
     try {
-      code = await executePlan(steps, deps, io);
+      const result = await executeWithRollback(steps, rollbackSteps, deps, io);
+      code = result.code;
+      if (result.rollbackFailed) errors.push("workspace address rollback failed; operator recovery is required");
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
     }
@@ -152,18 +172,21 @@ export function createFleetAgent(options: FleetAgentOptions): Server {
         const body = await readBody(req);
         const result = await act({
           ...base(), action: "create", slug: text(body.slug), admins: strings(body.admins), members: strings(body.members),
+          rai2Tenant: body.rai2Tenant === true,
           cap: number(body.cap), memory: text(body.memory), brandJson: text(body.brandJson), anthropicKey: text(body.anthropicKey),
           portalUrl: text(body.portalUrl), anthropicUrl: text(body.anthropicUrl),
+          tenantAuthOrigin: text(body.tenantAuthOrigin), tenantAuthToken: text(body.tenantAuthToken),
           openrouterKey: text(body.openrouterKey), openrouterUrl: text(body.openrouterUrl),
           openrouterModels: body.openrouterModels === undefined ? undefined : models(body.openrouterModels), openrouterDefault: body.openrouterDefault === true,
         });
         return send(result.status, result.body);
       }
       if (method === "POST" && url.pathname === "/upgrade") {
-        const result = await act({ ...base(), action: "upgrade" });
+        const body = await readBody(req);
+        const result = await act({ ...base(), action: "upgrade", releaseFile: text(body.releaseFile), releaseSha256: text(body.releaseSha256) });
         return send(result.status, result.body);
       }
-      const match = /^\/workspaces\/([a-z0-9-]+)(?:\/(users|providers|suspend|resume))?$/.exec(url.pathname);
+      const match = /^\/workspaces\/([a-z0-9-]+)(?:\/(users|providers|host|suspend|resume))?$/.exec(url.pathname);
       if (match) {
         const slug = match[1]!;
         assertSlug(slug);
@@ -177,6 +200,12 @@ export function createFleetAgent(options: FleetAgentOptions): Server {
           const body = await readBody(req);
           const action = body.action === "remove" ? "remove" : body.action === "add" ? "add" : undefined;
           const result = await act({ ...base(), action: "users", slug, userAction: action, email: text(body.email), chatOnly: body.chatOnly === true });
+          return send(result.status, result.body);
+        }
+        if (method === "POST" && sub === "host") {
+          const body = await readBody(req);
+          const result = await act({ ...base(), action: "host", slug, publicHost: text(body.host),
+            legacyHosts: strings(body.legacyHosts) });
           return send(result.status, result.body);
         }
         if (method === "POST" && (sub === "suspend" || sub === "resume")) {

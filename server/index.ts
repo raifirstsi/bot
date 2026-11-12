@@ -1,5 +1,4 @@
 // Import first: it reads a Cloud home's secrets off the launcher's pipe before any module can start a process.
-import { SubscriptionStore, handleSepayRoutes } from "./routes/sepay.ts";
 import { BOOT_CLOUD_SECRETS } from "./cloud-secrets-boot.ts";
 import { startFailureText } from "./start-failure-text.ts";
 import { reserveGmailDrafts } from "./gmail-draft-policy.ts";
@@ -85,6 +84,7 @@ import { refusalBody, userError, userErrorFields, userErrorThrown } from "./user
 import { chatNotice, failedNoticeTool, noticeTool, runtimeNoticeTool } from "./chat-notices.ts";
 import type { ServerErrorBody } from "../shared/server-text.ts";
 import { emailSignInRoute } from "./routes/email-sign-in.ts";
+import { rai2HandoffRoute } from "./routes/rai2-handoff.ts";
 import { createPersonStop } from "./host/person-stop.ts";
 import { createTurnOrder } from "./host/turn-order.ts";
 import { createQueuedNotes, createWaitWords } from "./host/wait-words.ts";
@@ -678,7 +678,6 @@ if (existsSync(join(DATA_DIR, ".backups"))) {
 const workspaceMaintenance = new WorkspaceBackupMaintenance(), moveFreeze = createMoveFreeze({ dataDir: DATA_DIR, exportOnly: (process.env.OMB_CLOUD_ROLE === "home" || process.env.OMB_CLOUD_ROLE === "team") && process.env.OMB_CLOUD_EXPORT_ONLY === "1" });
 // Only after ensureDirs(), whose one-time legacy data-dir rename must not find ~/.openmausbot already there.
 const ENVIRONMENT_ID = loadEnvironmentId(DATA_DIR);
-const subscriptionStore = new SubscriptionStore(DATA_DIR);
 const signInAllowList = cacheUntilConfigChanges((config) => ({
   admins: parseAllowList(config.signIn?.admins?.join(",")),
   members: parseAllowList(config.signIn?.members?.join(",")),
@@ -1061,7 +1060,7 @@ function cloudCardRefusal(auth: RequestAuth & { kind: "session" }): string | nul
 function cardAnswerRefusal(auth: RequestAuth, threadId: string, requestId: string, behavior: string): string | null {
   if (auth.kind === "loopback") {
     return auth.trust === "service" && behavior !== "deny"
-      ? "A local service can only decline this request. Approve or answer it in OpenMausBot while signed in."
+      ? "A local service can only decline this request. Approve or answer it in RAI² while signed in."
       : null;
   }
   const reviewed = auth.scopes.includes("admin") ? undefined : store.messagesFor(threadId).find(message => message.card?.requestId === requestId && (message.card.teamMemoryRequest || message.card.outsideWrite))?.card;
@@ -1928,12 +1927,12 @@ const directFollowupSettlers = new Map<string, { threadId: string; settle?: () =
 const directCoordinationSettlers = new Map<string, { nodeId: string; settle: (outcome: DirectTurnOutcome) => void }>();
 const computerParks = new Map<string, string>();
 const parkedSeats = new Map<string, string>();
-const COMPUTER_FREE_NOTE = "OpenMausBot computer update: the computer this conversation waited for is free again. Continue the task that parked waiting for it.";
+const COMPUTER_FREE_NOTE = "RAI² computer update: the computer this conversation waited for is free again. Continue the task that parked waiting for it.";
 const STEP_CAP_NOTE = "Your previous turn stopped at the step limit; continue from where it stopped.";
 const teamSetupDecisionText = (request: TeamSetupRequest): string =>
-  `OpenMausBot team setup decision ${request.requestId}: ${JSON.stringify(request.result)}. Report this exact result and continue the user's already requested work. Do not ask for confirmation again or repeat this setup/deletion. A denied or cancelled operation did not authorize any substitute action. Existing thread models were not changed.`;
+  `RAI² team setup decision ${request.requestId}: ${JSON.stringify(request.result)}. Report this exact result and continue the user's already requested work. Do not ask for confirmation again or repeat this setup/deletion. A denied or cancelled operation did not authorize any substitute action. Existing thread models were not changed.`;
 const connectionUpdateText = (labels: readonly string[]): string =>
-  `OpenMausBot connection update: the user securely connected ${labels.join(", ")}. Continue the task that paused for this connection. Do not ask them to connect it again.`;
+  `RAI² connection update: the user securely connected ${labels.join(", ")}. Continue the task that paused for this connection. Do not ask them to connect it again.`;
 
 function resumableCards(threadId: string, since: number, memberId?: string) { return cardsWaitedOn(store, threadId, since, memberId); }
 
@@ -12613,6 +12612,17 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       res.end(answer.text);
       return;
     }
+    if (process.env.OMB_RAI2_TENANT === "1" && method === "GET" && path === "/" &&
+      !sessions.authenticate(parseCookies(req.headers.cookie).get(SESSION_COOKIE))) {
+      let portal: URL;
+      try { portal = new URL(process.env.OMB_SIGNIN_TENANT_URL ?? ""); }
+      catch { return json(res, 503, { error: "workspace sign-in unavailable" }); }
+      if (portal.protocol !== "https:" || portal.origin !== process.env.OMB_SIGNIN_TENANT_URL ||
+        portal.username || portal.password) return json(res, 503, { error: "workspace sign-in unavailable" });
+      res.writeHead(302, { location: `${portal.origin}/?open=1`, "cache-control": "no-store", "referrer-policy": "no-referrer" });
+      res.end();
+      return;
+    }
     // Two public routes come first; everything else needs the loopback owner or a paired session with the right scope.
     if (method === "GET" && !path.startsWith("/api/") && !path.startsWith("/.well-known/") && (moveFreeze.screen(path) ? (res.writeHead(302, { location: moveFreeze.screen(path)!, "cache-control": "no-store" }).end(), true) : serveStatic(res, path, STATIC_DIR))) return;
     if (method === "GET" && path === "/.well-known/openmausbot/environment") {
@@ -12626,18 +12636,8 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
     }
     if (await emailSignInRoute({ cloudHome: Boolean(CLOUD_HOME), emailSignIn, sessions, cookieName: SESSION_COOKIE, target: (r) => signInMailTarget(publicUrl(), requestOrigin(r)),
       environment: () => environmentDescriptor({ environmentId: ENVIRONMENT_ID, ...TEAM_LABEL, desktopManaged: DESKTOP_MANAGED, emailSignIn: true, sharedComputers: lendingEnabled() }) }, req, res, path, method)) return;
+    if (await rai2HandoffRoute({ env: process.env, sessions, cookieName: SESSION_COOKIE, allow: signInAllowList }, req, res, path, method)) return;
     if ((cloudSigned && await cloudSigned({ req, res, url, path, method })) || chatApps.serveFile(req, res, path, method)) return;
-    if (method === "POST" && path === "/api/auth/cloud-guest") {
-      const issued = sessions.issue({
-        label: `Khách Cloud (${new Date().toLocaleDateString("vi-VN")})`,
-        scopes: ["admin", "client"],
-        userId: `guest:${randomUUID()}`,
-      });
-      const secure = requestOrigin(req)?.startsWith("https://") === true || req.headers["x-forwarded-proto"] === "https";
-      res.setHeader("set-cookie", serializeSessionCookie(SESSION_COOKIE, issued.token, { secure, maxAgeSeconds: cookieMaxAgeSeconds(issued.session) }));
-      const environment = environmentDescriptor({ environmentId: ENVIRONMENT_ID, ...TEAM_LABEL, desktopManaged: DESKTOP_MANAGED, emailSignIn: !CLOUD_HOME && emailSignIn.enabled(), sharedComputers: lendingEnabled(), cloudHome: Boolean(CLOUD_HOME), cloudTeam: CLOUD_TEAM !== null, ownHome: ownHome.takesMove() });
-      return json(res, 200, { ok: true, session: issued.session, token: issued.token, environment });
-    }
     if (method === "POST" && path === "/api/auth/pair") {
       // JSON only: a cross-site HTML form cannot send this content type without a preflight, so no unused code is planted as a session.
       if (!/^application\/json\b/i.test(String(req.headers["content-type"] ?? ""))) {
@@ -12645,29 +12645,6 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       }
       const body = await readBody(req);
       const code = typeof body?.code === "string" ? body.code : "";
-      const cleanCode = code.toUpperCase().replace(/[\s-]/g, "");
-      if (cleanCode === "RAI2ADMIN" || cleanCode === "RAI2ADMINFIRST") {
-        const issued = sessions.issue({
-          label: "Quản Trị Viên RAI² (Admin)",
-          scopes: ["admin", "client"],
-          userId: "admin:owner",
-        });
-        const secure = requestOrigin(req)?.startsWith("https://") === true || req.headers["x-forwarded-proto"] === "https";
-        res.setHeader("set-cookie", serializeSessionCookie(SESSION_COOKIE, issued.token, { secure, maxAgeSeconds: cookieMaxAgeSeconds(issued.session) }));
-        const environment = environmentDescriptor({ environmentId: ENVIRONMENT_ID, ...TEAM_LABEL, desktopManaged: DESKTOP_MANAGED, emailSignIn: !CLOUD_HOME && emailSignIn.enabled(), sharedComputers: lendingEnabled(), cloudHome: Boolean(CLOUD_HOME), cloudTeam: CLOUD_TEAM !== null, ownHome: ownHome.takesMove() });
-        return json(res, 200, { ok: true, session: issued.session, token: issued.token, environment });
-      }
-      if (cleanCode === "GUEST" || cleanCode === "CLOUD" || cleanCode === "RAI2GUEST") {
-        const issued = sessions.issue({
-          label: `Khách Cloud (${new Date().toLocaleDateString("vi-VN")})`,
-          scopes: ["admin", "client"],
-          userId: `guest:${randomUUID()}`,
-        });
-        const secure = requestOrigin(req)?.startsWith("https://") === true || req.headers["x-forwarded-proto"] === "https";
-        res.setHeader("set-cookie", serializeSessionCookie(SESSION_COOKIE, issued.token, { secure, maxAgeSeconds: cookieMaxAgeSeconds(issued.session) }));
-        const environment = environmentDescriptor({ environmentId: ENVIRONMENT_ID, ...TEAM_LABEL, desktopManaged: DESKTOP_MANAGED, emailSignIn: !CLOUD_HOME && emailSignIn.enabled(), sharedComputers: lendingEnabled(), cloudHome: Boolean(CLOUD_HOME), cloudTeam: CLOUD_TEAM !== null, ownHome: ownHome.takesMove() });
-        return json(res, 200, { ok: true, session: issued.session, token: issued.token, environment });
-      }
       const wantsCookie = body?.cookie === true;
       const label = typeof body?.label === "string" ? body.label : "";
       const attemptId = typeof body?.attemptId === "string" ? body.attemptId : undefined;
@@ -12742,15 +12719,11 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
     }
     // Public reachability probe: a stranger learns only the app name; pid and the static flag stay behind the gate.
     if (method === "GET" && path === "/api/health" && !gate.auth) {
-      return json(res, 200, { app: "rai2" });
+      return json(res, 200, { app: "openmausbot" });
     }
     // Public: the sign-in page needs the deployment's name and icon, and it holds nothing secret.
     if (method === "GET" && path === "/api/brand" && !gate.auth) {
       return json(res, 200, loadBrand());
-    }
-    // Public: SePay VietQR payment endpoints & webhook
-    if (handleSepayRoutes(req, res, path, method, subscriptionStore, sessions, SESSION_COOKIE)) {
-      return;
     }
     if (!gate.auth) return json(res, gate.status, { error: gate.error });
     if (cloudPower && gate.auth.kind === "session") cloudPower.request(path, req.headers, res); // someone using a Cloud home keeps it awake

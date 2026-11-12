@@ -10,7 +10,6 @@ import {
   pairWithCode,
   readSessionState,
   reasonWorthShowing,
-  startCloudGuestSession,
   startEmailSignIn,
   verifyEmailSignIn,
   type EnvironmentDescriptor,
@@ -38,15 +37,11 @@ export function pairIntro({ mode, sent, email, cloudHome }: { mode: "email" | "c
 
 /** The sentence for a wrong kind of code (an email's sign-in code, an old six-digit code, a script key), else null. */
 export function codeProblem(code: string): string | null {
-  const norm = code.trim().toUpperCase().replace(/[\s-]/g, "");
-  if (norm.startsWith("RAI2") || norm === "ADMIN" || norm === "GUEST" || norm === "CLOUD") return null;
   const read = readPairingInput(code);
   return read.kind === "wrong" && read.problem !== "notACode" ? t(PAIRING_INPUT_PROBLEM_KEY[read.problem]) : null;
 }
 
 export function codeReady(code: string): boolean {
-  const norm = code.trim().toUpperCase().replace(/[\s-]/g, "");
-  if (norm.startsWith("RAI2") || norm === "ADMIN" || norm === "GUEST" || norm === "CLOUD") return true;
   const kind = readPairingInput(code).kind;
   return kind === "code" || kind === "credential";
 }
@@ -81,7 +76,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
   // Register state
   const [regEmail, setRegEmail] = useState("");
   const [regName, setRegName] = useState("");
-  const [regTier, setRegTier] = useState<"trial" | "starter" | "pro">("trial");
+  const [regTier, setRegTier] = useState<"trial" | "starter" | "pro" | "team">("trial");
 
   // Login state
   const [loginEmail, setLoginEmail] = useState(initialEmail ?? "");
@@ -200,16 +195,8 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
     }
   }
 
-  async function handleCloudGuest() {
-    setBusy(true);
-    setError(null);
-    const result = await startCloudGuestSession();
-    setBusy(false);
-    if (result.ok) {
-      location.replace("/app");
-      return;
-    }
-    setError(result.error);
+  function handleCloudGuest() {
+    location.assign("https://app.rai2.si/");
   }
 
   async function submitCode(e: React.FormEvent) {
@@ -240,10 +227,10 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
             ← Trang chủ RAI²
           </a>
           <a
-            href="/#bang-gia"
+            href="https://app.rai2.si"
             className="text-[12px] font-medium text-[#0099ff] hover:underline"
           >
-            Bảng giá & Gói dịch vụ
+            Dùng thử 14 ngày
           </a>
         </div>
 
@@ -257,7 +244,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               : activeTab === "login"
               ? "Đăng Nhập Không Gian Làm Việc"
               : activeTab === "guest"
-              ? "Dùng Thử Nhanh 1-Click"
+              ? "Dùng Thử Miễn Phí 14 Ngày"
               : pairTitle(environment, "code")}
           </h1>
           <p className="mt-1 text-[13px] text-ink-secondary leading-snug max-w-[360px]">
@@ -266,7 +253,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               : activeTab === "login"
               ? "Nhập email của bạn để vào không gian điều phối AI."
               : activeTab === "guest"
-              ? "Trải nghiệm ngay lập tức trên nền tảng Cloud mà không cần cấu hình."
+              ? "Xác minh email một lần để mở workspace riêng trong 14 ngày."
               : "Kết nối thiết bị hoặc quản trị viên với mã bảo mật."}
           </p>
         </div>
@@ -344,7 +331,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                     : "text-ink-secondary hover:text-ink"
                 }`}
               >
-                1-Click
+                14 Ngày
               </button>
               <button
                 type="button"
@@ -396,11 +383,12 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                   <label className="block text-[12px] font-medium text-ink-secondary mb-1.5">
                     Gói dịch vụ muốn đăng ký
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
                       { id: "trial", label: "Dùng thử", tag: "14 ngày Free" },
-                      { id: "starter", label: "Starter", tag: "1.500.000đ" },
-                      { id: "pro", label: "Pro", tag: "3.500.000đ" },
+                      { id: "starter", label: "Starter", tag: "299.000đ/tháng" },
+                      { id: "pro", label: "Pro", tag: "799.000đ/tháng" },
+                      { id: "team", label: "Team", tag: "1.990.000đ/tháng" },
                     ].map((plan) => (
                       <button
                         key={plan.id}
@@ -508,16 +496,15 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
               </form>
             )}
 
-            {/* TAB 3: DÙNG THỬ NHANH 1-CLICK */}
             {activeTab === "guest" && (
               <div className="space-y-4 py-2 text-center">
                 <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[#0099ff]/10 text-2xl">
                   ⚡
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-bold text-ink">Bản Cloud Dùng Thử Ngay Lập Tức</h3>
+                  <h3 className="text-[16px] font-bold text-ink">Dùng Thử RAI² Trong 14 Ngày</h3>
                   <p className="mt-1.5 text-[13px] text-ink-secondary leading-relaxed">
-                    Bạn không cần điền email hay thông tin cá nhân. Hệ thống sẽ tự động tạo một phiên làm việc riêng tư trên đám mây để bạn tương tác trực tiếp với các AI Agent.
+                    Xác minh email tại app.rai2.si để nhận workspace riêng. Không cần thanh toán trước.
                   </p>
                 </div>
 
@@ -528,13 +515,10 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                     disabled={busy}
                     className={buttonPrimary}
                   >
-                    {busy ? "Đang khởi tạo không gian làm việc..." : "🚀 Vào Bản Cloud Dùng Thử Ngay"}
+                    Bắt Đầu Dùng Thử
                   </button>
                 </div>
 
-                <p className="text-[11px] text-ink-secondary pt-1">
-                  * Dữ liệu phiên sẽ được lưu tạm thời trên trình duyệt của bạn.
-                </p>
               </div>
             )}
 
@@ -558,9 +542,6 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
                     spellCheck={false}
                     className={`${input} font-mono text-[14px] tracking-[0.08em]`}
                   />
-                  <p className="mt-1 text-[11px] text-ink-secondary">
-                    * Quản trị viên: Nhập mã <strong className="text-ink font-semibold">RAI2-ADMIN</strong> để đăng nhập với toàn quyền Owner/Admin.
-                  </p>
                 </div>
 
                 <div>
@@ -599,7 +580,7 @@ export function PairPage({ initialCode, initialEmail = null, reason }: { initial
 
                 {ownServer ? (
                   <p className="text-center text-[11px] text-ink-secondary">
-                    {t("pair.noCode")} <code className="select-all rounded bg-inset px-1.5 py-0.5 text-[11px] text-ink">pnpm pair</code>
+                    {t("pair.noCode")} <code className="select-all rounded bg-inset px-1.5 py-0.5 text-[11px] text-ink">npx openmausbot pair</code>
                   </p>
                 ) : null}
               </form>

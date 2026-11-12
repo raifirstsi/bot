@@ -134,6 +134,8 @@ export type ExchangeResult =
   | ({ ok: false; status: 400 | 401 | 403 | 429 } & UserError);
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
+const unsafeRai2Session = (session: SessionRecord): boolean =>
+  session.userId === "admin:owner" || session.userId?.startsWith("guest:") === true || session.userId?.startsWith("rai2:") === true;
 /** The English fallback's clock; a client words `until` in its own time zone. */
 const utcClock = (at: number) => `${new Date(at).toISOString().slice(11, 16)} UTC`;
 
@@ -268,7 +270,8 @@ export class SessionRegistry {
       return;
     }
     const parsed = fileSchema.safeParse(raw);
-    if (parsed.success) this.sessions = parsed.data.sessions.filter(session => restoreAccounts || (session.email === undefined && session.userId === undefined));
+    if (parsed.success) this.sessions = parsed.data.sessions.filter(session =>
+      !unsafeRai2Session(session) && (restoreAccounts || (session.email === undefined && session.userId === undefined)));
   }
 
   private syncDirectory(): void {

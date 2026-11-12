@@ -1236,24 +1236,62 @@
 }
 
 /* RAI² Adaptive Brand Logo */
-:is([data-skin="daylight"], [data-skin="linen"], [data-skin="meadow"], [data-skin="chalk"], [data-skin="porcelain"], [data-skin="sage"], [data-skin="sand"], [data-skin="paper"]) .rai-logo-light {
+/* 1. Dark theme default: show white logo, hide black logo */
+html.dark .rai-logo-dark,
+[data-theme="dark"] .rai-logo-dark,
+[data-skin="midnight"] .rai-logo-dark,
+[data-skin="foundry"] .rai-logo-dark,
+[data-skin="graphite"] .rai-logo-dark,
+[data-skin="dusk"] .rai-logo-dark,
+[data-skin="halloween"] .rai-logo-dark,
+[data-skin="diwali"] .rai-logo-dark,
+[data-skin="aurora"] .rai-logo-dark {
   display: block !important;
 }
-:is([data-skin="daylight"], [data-skin="linen"], [data-skin="meadow"], [data-skin="chalk"], [data-skin="porcelain"], [data-skin="sage"], [data-skin="sand"], [data-skin="paper"]) .rai-logo-dark {
+
+html.dark .rai-logo-light,
+[data-theme="dark"] .rai-logo-light,
+[data-skin="midnight"] .rai-logo-light,
+[data-skin="foundry"] .rai-logo-light,
+[data-skin="graphite"] .rai-logo-light,
+[data-skin="dusk"] .rai-logo-light,
+[data-skin="halloween"] .rai-logo-light,
+[data-skin="diwali"] .rai-logo-light,
+[data-skin="aurora"] .rai-logo-light {
   display: none !important;
 }
 
-:is(html.dark:not([data-skin="daylight"]):not([data-skin="linen"]):not([data-skin="meadow"]):not([data-skin="chalk"]):not([data-skin="porcelain"]):not([data-skin="sage"]):not([data-skin="sand"]):not([data-skin="paper"]), [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-dark {
+/* 2. Light / Daylight theme OVERRIDE: ALWAYS show black logo, hide white logo */
+html:not(.dark) .rai-logo-light,
+[data-theme="light"] .rai-logo-light,
+[data-skin="daylight"] .rai-logo-light,
+[data-skin="linen"] .rai-logo-light,
+[data-skin="meadow"] .rai-logo-light,
+[data-skin="chalk"] .rai-logo-light,
+[data-skin="porcelain"] .rai-logo-light,
+[data-skin="sage"] .rai-logo-light,
+[data-skin="sand"] .rai-logo-light,
+[data-skin="paper"] .rai-logo-light,
+[data-skin="atelier"] .rai-logo-light,
+[data-skin="lagoon"] .rai-logo-light,
+[data-skin="pop"] .rai-logo-light {
   display: block !important;
 }
-:is(html.dark:not([data-skin="daylight"]):not([data-skin="linen"]):not([data-skin="meadow"]):not([data-skin="chalk"]):not([data-skin="porcelain"]):not([data-skin="sage"]):not([data-skin="sand"]):not([data-skin="paper"]), [data-theme="dark"], [data-skin="midnight"], [data-skin="foundry"], [data-skin="graphite"], [data-skin="dusk"], [data-skin="halloween"], [data-skin="diwali"], [data-skin="aurora"]) .rai-logo-light {
+
+html:not(.dark) .rai-logo-dark,
+[data-theme="light"] .rai-logo-dark,
+[data-skin="daylight"] .rai-logo-dark,
+[data-skin="linen"] .rai-logo-dark,
+[data-skin="meadow"] .rai-logo-dark,
+[data-skin="chalk"] .rai-logo-dark,
+[data-skin="porcelain"] .rai-logo-dark,
+[data-skin="sage"] .rai-logo-dark,
+[data-skin="sand"] .rai-logo-dark,
+[data-skin="paper"] .rai-logo-dark,
+[data-skin="atelier"] .rai-logo-dark,
+[data-skin="lagoon"] .rai-logo-dark,
+[data-skin="pop"] .rai-logo-dark {
   display: none !important;
-}
-:is(html:not(.dark):not([data-theme="dark"]):not([data-skin="midnight"]):not([data-skin="foundry"]):not([data-skin="graphite"]):not([data-skin="dusk"]):not([data-skin="halloween"]):not([data-skin="diwali"]):not([data-skin="aurora"])) .rai-logo-dark {
-  display: none !important;
-}
-:is(html:not(.dark):not([data-theme="dark"]):not([data-skin="midnight"]):not([data-skin="foundry"]):not([data-skin="graphite"]):not([data-skin="dusk"]):not([data-skin="halloween"]):not([data-skin="diwali"]):not([data-skin="aurora"])) .rai-logo-light {
-  display: block !important;
 }
 
 /* A primary action that belongs to one bot wears that bot's flat bubble tone in every skin. Unlayered, like the
@@ -2050,6 +2088,56 @@ body {
    red does not vanish while the user is fixing it. */
 :is(input, textarea, select):focus-visible:not([aria-invalid="true"]) {
   border-color: var(--color-focus);
+}
+
+.toc-range {
+  --toc-range-progress: 0%;
+  width: 100%;
+  height: 18px;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.toc-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 1px solid color-mix(in srgb, var(--color-hairline) 72%, transparent);
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-accent) 22%, var(--color-control)) 0%,
+    color-mix(in srgb, var(--color-accent) 22%, var(--color-control)) var(--toc-range-progress),
+    var(--color-control) var(--toc-range-progress),
+    var(--color-control) 100%
+  );
+}
+.toc-range::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  appearance: none;
+  border: 2px solid var(--color-card);
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-border);
+}
+.toc-range::-moz-range-track {
+  height: 4px;
+  border: 1px solid color-mix(in srgb, var(--color-hairline) 72%, transparent);
+  border-radius: 999px;
+  background: var(--color-control);
+}
+.toc-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent) 22%, var(--color-control));
+}
+.toc-range::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-card);
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-border);
 }
 
 ::selection {

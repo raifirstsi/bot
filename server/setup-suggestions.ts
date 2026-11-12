@@ -70,11 +70,11 @@ export function setupSuggestionPrompt(facts: SuggestionFacts): string {
     `Write every option in ${language}, even if the facts below are in another language. Keep app names as they are.`,
   ];
   return [
-    "You write the answer options for the first message of a new bot in OpenMausBot, an app where people get everyday help from AI helpers called bots.",
+    "You write the answer options for the first message of a new RAI in RAI², an operating system where people get everyday help from AI agents called RAIs.",
     "",
-    'The person has just made the bot described below. Its first message asks "What should I help you with first?" and lists your 5 options. Tapping one makes the bot set itself up for that job straight away, so each option is a job the person hands to the bot, in their own words.',
+    'The person has just made the RAI described below. Its first message asks "What should I help you with first?" and lists your 5 options. Tapping one makes the RAI set itself up for that job straight away, so each option is a job the person hands to the RAI, in their own words.',
     "",
-    "What a bot can do:",
+    "What a RAI can do:",
     "- Research: look things up on the web and sum up what it finds",
     "- Keep watch: check on something on a schedule, then report or remind",
     "- Email, calendar and messages: sort, draft, reply and plan",
@@ -90,7 +90,7 @@ export function setupSuggestionPrompt(facts: SuggestionFacts): string {
     ...named,
     `Connected apps: ${apps.length ? apps.join(", ") : "none"}`,
     ...(about ? [`About the person: ${about}`] : []),
-    ...(jobs.length ? [`Jobs the person's other bots already do: ${jobs.join("; ")}`] : []),
+    ...(jobs.length ? [`Jobs the person's other RAIs already do: ${jobs.join("; ")}`] : []),
     "[/FACTS]",
     "",
     `Reply with only a JSON array of 5 short strings (3 to 5 words each) written in ${language}, on one line. Do not wrap it in \`\`\` marks: start with [ and end with ].`,

@@ -54,7 +54,7 @@ export function eventBlock(trigger: Pick<AppTrigger, "appName" | "eventName" | "
   let text: string;
   try { text = JSON.stringify(event.data, null, 2) ?? "{}"; } catch { text = String(event.data); }
   const room = MAX_EVENT_CHARS - 400;
-  if (text.length > room) text = `${text.slice(0, room)}\n\n[Event truncated by OpenMausBot]`;
+  if (text.length > room) text = `${text.slice(0, room)}\n\n[Event truncated by RAI²]`;
   const header = [
     `App: ${trigger.appName}${trigger.accountLabel ? ` (${trigger.accountLabel})` : ""}`,
     `Event: ${trigger.eventName}`,

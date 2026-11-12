@@ -611,7 +611,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
               isDark ? "text-white" : "text-[#111111]"
             )}
           >
-            Nếu hôm nay Bạn{" "}
+            Nếu hôm nay Tôi{" "}
             <span className="inline-flex items-center align-middle mx-1 sm:mx-2.5">
               <img
                 src="/assets/headline-badge-circle.png?v=6"
@@ -619,7 +619,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                 className="size-8 sm:size-12 md:size-14 lg:size-16 rounded-full object-cover shadow-lg border-2 border-white/20 inline-block align-middle transform -translate-y-0.5 sm:-translate-y-1 hover:scale-105 transition-transform duration-200"
               />
             </span>{" "}
-            xây lại doanh nghiệp từ đầu, Bạn có tổ chức bộ máy theo cách cũ?
+            xây lại doanh nghiệp từ đầu, với năng lực AI đang có, Tôi có thiết kế bộ máy công ty theo cách cũ hay không?
           </h1>
 
           {/* Subhead Dan Kennedy style */}
@@ -907,7 +907,7 @@ export function RaiLandingPage({ onAdminSignIn: _onAdminSignIn }: { onAdminSignI
                   : "bg-[#ffffff] border-[#e2e8f0] hover:border-[#0099ff]/50 shadow-xs"
               )}
             >
-              <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center text-[#ff8833] mb-6", isDark ? "bg-[#000000] border-[#242424]" : "bg-[#fff7ed] border-[#fed7aa]")}>
+              <div className={cn("w-10 h-10 rounded-full border flex items-center justify-center text-[#f59e0b] mb-6", isDark ? "bg-[#000000] border-[#242424]" : "bg-[#fffbeb] border-[#fde68a]")}>
                 <Zap className="w-5 h-5" />
               </div>
               <h3 className={cn("text-xl font-medium mb-3 tracking-[-0.02em]", isDark ? "text-white" : "text-[#111111]")}>

@@ -1,0 +1,45 @@
+# Include these server blocks after obtaining a certificate for app.rai2.si
+# and *.rai2.si. Keep Nginx as the public TLS edge; Caddy and every tenant
+# remain loopback-only.
+map $http_upgrade $rai2_connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name app.rai2.si *.rai2.si;
+
+    ssl_certificate /etc/letsencrypt/live/app.rai2.si/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.rai2.si/privkey.pem;
+    include /etc/nginx/snippets/rai2-cloudflare-realip.conf;
+
+    location ~ ^/assets/rai-(backend-favicon\.png|favicon(?:\.svg|-32\.png|\.ico)|touch-180\.png)$ {
+        root /opt/rai2/current/saas/public;
+        add_header Cache-Control "public, max-age=86400";
+        try_files $uri =404;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header CF-Connecting-IP "";
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $rai2_connection_upgrade;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name app.rai2.si *.rai2.si;
+    return 301 https://$host$request_uri;
+}

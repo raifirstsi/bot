@@ -94,6 +94,10 @@ export interface CliOptions {
   /** `fleet init|create|list|users|suspend|resume|delete|upgrade|agent` */
   fleetAction?: FleetInput["action"] | "agent";
   operator?: string;
+  internalEdge?: boolean;
+  controlPlanePort?: number;
+  fleetNode?: string;
+  fleetScript?: string;
   socket?: string;
   group?: string;
   slug?: string;
@@ -104,6 +108,8 @@ export interface CliOptions {
   cap?: number;
   licenseKey?: string;
   memory?: string;
+  releaseFile?: string;
+  releaseSha256?: string;
   dryRun?: boolean;
   yes?: boolean;
   keepData?: boolean;
@@ -187,6 +193,10 @@ export function parseArgs(argv: string[], env: NodeJS.ProcessEnv = process.env):
       else if (options.command === "fleet" && !options.fleetAction && ["init", "create", "list", "users", "suspend", "resume", "delete", "upgrade", "agent"].includes(arg)) options.fleetAction = arg as FleetInput["action"] | "agent";
       else if (options.command === "fleet" && options.fleetAction && !["init", "list", "upgrade", "agent"].includes(options.fleetAction) && !options.slug && !arg.startsWith("--")) options.slug = arg;
       else if (options.command === "fleet" && arg === "--operator") options.operator = value();
+      else if (options.command === "fleet" && arg === "--internal-edge") options.internalEdge = true;
+      else if (options.command === "fleet" && arg === "--control-plane-port") options.controlPlanePort = Number(value());
+      else if (options.command === "fleet" && arg === "--node") options.fleetNode = value();
+      else if (options.command === "fleet" && arg === "--script") options.fleetScript = value();
       else if (options.command === "fleet" && arg === "--socket") options.socket = value();
       else if (options.command === "fleet" && arg === "--group") options.group = value();
       else if (options.command === "fleet" && options.fleetAction === "users" && options.slug && !options.fleetUserAction && (arg === "add" || arg === "remove")) { options.fleetUserAction = arg; options.email = value(); }
@@ -197,6 +207,8 @@ export function parseArgs(argv: string[], env: NodeJS.ProcessEnv = process.env):
       else if (options.command === "fleet" && arg === "--cap") options.cap = Number(value());
       else if (options.command === "fleet" && arg === "--license-key") options.licenseKey = value();
       else if (options.command === "fleet" && arg === "--memory") options.memory = value();
+      else if (options.command === "fleet" && arg === "--release-file") options.releaseFile = resolve(value());
+      else if (options.command === "fleet" && arg === "--sha256") options.releaseSha256 = value().toLowerCase();
       else if (options.command === "fleet" && arg === "--dry-run") options.dryRun = true;
       else if (options.command === "fleet" && arg === "--yes") options.yes = true;
       else if (options.command === "fleet" && arg === "--keep-data") options.keepData = true;
@@ -220,6 +232,7 @@ export function parseArgs(argv: string[], env: NodeJS.ProcessEnv = process.env):
     if (["create", "users", "suspend", "resume", "delete"].includes(options.fleetAction) && !options.slug) return { error: `fleet ${options.fleetAction} needs a workspace name` };
     if (options.fleetAction === "users" && !options.fleetUserAction) return { error: "fleet users needs: NAME add|remove EMAIL [--chat-only]" };
     if (options.cap !== undefined && (!Number.isFinite(options.cap) || options.cap < 0)) return { error: "--cap must be a dollar amount of 0 or more" };
+    if ((options.internalEdge || options.controlPlanePort !== undefined || options.fleetNode || options.fleetScript) && options.fleetAction !== "init") return { error: "--internal-edge, --control-plane-port, --node and --script belong to fleet init" };
   }
   return options;
 }
@@ -1032,6 +1045,10 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         slug: options.slug,
         domain: options.domain,
         operator: options.operator ?? process.env.SUDO_USER,
+        internalEdge: options.internalEdge,
+        controlPlanePort: options.controlPlanePort,
+        node: options.fleetNode ?? process.execPath,
+        script: options.fleetScript ?? process.argv[1] ?? "",
         admins: options.admins ?? [],
         members: options.members ?? [],
         brandFile: options.brandFile,
@@ -1039,14 +1056,14 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         cap: options.cap,
         licenseKey: options.licenseKey ?? process.env.OMB_LICENSE_KEY,
         memory: options.memory,
+        releaseFile: options.releaseFile,
+        releaseSha256: options.releaseSha256,
         dryRun: options.dryRun ?? false,
         yes: options.yes ?? false,
         keepData: options.keepData ?? false,
         userAction: options.fleetUserAction,
         email: options.email,
         chatOnly: options.chatOnly,
-        node: process.execPath,
-        script: process.argv[1] ?? "",
       }, { log: (line) => console.log(line), error: (line) => console.error(line) });
     case "logout":
       return runLogout(options);

@@ -494,7 +494,7 @@ openmausbot fleet create acme --admin owner@acme.test --member @acme.test \
 openmausbot fleet users acme add bob@acme.test --chat-only
 openmausbot fleet list
 openmausbot fleet suspend acme      # 503 page, service stopped; resume undoes it
-openmausbot fleet upgrade           # new release, then every running workspace restarted in turn
+openmausbot fleet upgrade --release-file /opt/releases/reviewed-runtime.tgz --sha256 <verified-digest>
 openmausbot fleet delete acme --yes # add --keep-data to keep the home folder
 ```
 

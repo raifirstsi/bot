@@ -63,7 +63,7 @@ export function brandFile(): string {
 /** Never throws. */
 export function loadBrand(options: { file?: string; isEntitled?: (feature: string) => boolean } = {}): BrandStatus {
   const file = options.file ?? brandFile();
-  void (options.isEntitled ?? entitled);
+  const isEntitled = options.isEntitled ?? entitled;
   const fallback = (notice?: string): BrandStatus =>
     notice ? { brand: DEFAULT_BRAND, source: "default", file, notice } : { brand: DEFAULT_BRAND, source: "default", file };
   if (!existsSync(file)) return fallback();
@@ -78,6 +78,9 @@ export function loadBrand(options: { file?: string; isEntitled?: (feature: strin
     const issue = parsed.error.issues[0];
     const where = issue?.path.length ? `${issue.path.join(".")}: ` : "";
     return fallback(`${file}: ${where}${issue?.message ?? "invalid"}; using the default brand`);
+  }
+  if (!isEntitled("whitelabel")) {
+    return fallback(`${file} found but this server is not licensed for whitelabel; using the default brand`);
   }
   return { brand: parsed.data, source: "file", file };
 }

@@ -1,0 +1,15 @@
+[Unit]
+Description=RAI2 encrypted backup
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/bash /opt/rai2/deploy/backup-daily.sh
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/backups/rai2
+TimeoutStartSec=1h

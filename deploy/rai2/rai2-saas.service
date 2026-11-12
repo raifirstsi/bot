@@ -1,0 +1,26 @@
+[Unit]
+Description=RAI2 SaaS control plane
+After=network-online.target openmausbot-fleet.service
+Wants=network-online.target
+Requires=openmausbot-fleet.service
+
+[Service]
+Type=simple
+User=rai2
+Group=rai2
+WorkingDirectory=/opt/rai2/current/saas
+EnvironmentFile=/etc/rai2/saas.env
+ExecStart=/opt/rai2/node/bin/node /opt/rai2/current/saas/main.mjs
+Restart=always
+RestartSec=5
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/rai2/saas
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target
