@@ -154,7 +154,7 @@ try {
     await waitFor("document.querySelector('#signin')?.hidden === false");
     await waitFor("document.documentElement.dataset.theme === 'light'");
     await waitFor("document.querySelector('.brand-light')?.naturalWidth > 0");
-    assert.equal(await evaluate("getComputedStyle(document.body).backgroundColor"), "rgb(248, 249, 250)");
+    assert.equal(await evaluate("getComputedStyle(document.body).backgroundColor"), "rgb(248, 250, 253)");
     const handoff = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     writeFileSync(join(output, "theme-handoff-light.png"), Buffer.from(handoff.data, "base64"));
     await evaluate("document.querySelector('#theme-toggle').click()");
