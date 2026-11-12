@@ -139,7 +139,8 @@ img { display: block; }
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 0;
+  appearance: none;
+  border: none;
   background: transparent;
   color: var(--ink);
   transition: color 0.15s ease;
